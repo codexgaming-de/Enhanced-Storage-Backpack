@@ -2,13 +2,23 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.4 – Kleines Lagerregal und Sprachwahl (Testversion)
+## 0.0.5 – Fehlerkorrektur in Prüfung
 
-- Einstellungen und Kategorien vollständig auf Deutsch oder Englisch, gemäß der
-  Sprachwahl. Die Sprachoptionen selbst heißen Deutsch und English.
+**Der sichtbare Sprachwechsel im Mod Manager ist noch nicht behoben.**
+Für die gezielte Untersuchung der Anzeige benötigen wir die installierte
+`ModManager&PhoneApp.dll` (2.2.4). Die Sprachwerte und Metadaten ändern sich bereits;
+die Anzeige blieb beim Nutzer dennoch deutsch. Nicht als fertige Korrektur freigegeben.
+
+Neu: Beschreibungstexte für sämtliche Einstellungen in beiden Sprachen, korrigierte
+Slot-Registrierung und Entfernung, keine Skalierung mit vor dem Öffnen erfassten
+Zellgrößen. Details und verbleibende Unsicherheiten: [Fehleranalyse](docs/BUGS-0.0.4.md).
+
+## Funktionsumfang in Prüfung
+
+- Metadaten für Einstellungen, Kategorien und Beschreibungen auf Deutsch und
+  Englisch. Der sichtbare Sprachwechsel ist noch offen.
 - Nach einem Sprachwechsel die Einstellungsansicht im Mod Manager neu öffnen,
-  falls die bereits erzeugten Bedienelemente noch die vorherigen Texte zeigen.
-  Kein Spielneustart erforderlich. Die Oberfläche des fremden Mod Managers und
+  zur Kontrolle. Das allein hat den gemeldeten Sprachfehler bisher nicht nachweislich behoben. Die Oberfläche des fremden Mod Managers und
   dessen eigene Schaltflächen werden nicht vom Plugin übersetzt.
 - Small Storage Rack / Kleines Lagerregal: 1–128 Plätze, eigene Reihenanzahl.
   0 verwendet jeweils die ursprüngliche Spielvorgabe.
@@ -99,6 +109,9 @@ Gegenstandsbewegungen, Größenänderungen oder die Save-Taste des Mod Managers.
 - 0.0.4: Release-Build gegen die bereitgestellten DLLs: 0 Warnungen, 0 Fehler.
   16.395 Prüfungen der reinen Größen-/Reihenregeln bestanden (einschließlich aller
   Kombinationen aus Zielkapazität 1–128 und einem geschützten Platz).
+  Der anschließende Nutzertest zeigte die in der Fehleranalyse beschriebenen Laufzeitfehler.
+- 0.0.5: Release-Build mit 0 Warnungen/Fehlern und bisherige Größenregeltests bestanden.
+  Die Korrekturen wurden noch nicht im Spiel geprüft.
   Das sind keine Unity-Laufzeittests. Native Methoden liegen hier nur als
   IL2CPP-Interop-Schnittstellen vor. UI, Gegenstandsbewegungen und Speicherverhalten
   müssen mit obigem Testplan im tatsächlichen Spiel geprüft werden.

@@ -55,9 +55,8 @@ internal sealed class SmallRackStorage : IDisposable
         var placeable = entity.GetComponentInParent<PlaceableStorageEntity>();
         var definition = placeable?.ItemInstance?.Definition;
         // Prefer immutable item identity over a player-editable storage label.
-        bool match = definition != null
-            ? Normalize(definition.ID) == "smallstoragerack" || Normalize(definition.Name) == "smallstoragerack"
-            : Normalize(entity.StorageEntityName) == "smallstoragerack";
+        // Placement previews have no item definition and must not be resized.
+        bool match = definition != null && Normalize(definition.ID) == "smallstoragerack";
         if (!match) return null;
         var rack = new Rack(entity);
         racks.Add(entity.Pointer, rack);
@@ -97,14 +96,18 @@ internal sealed class SmallRackStorage : IDisposable
         while (slots.Count < size)
         {
             var slot = new ItemSlot(entity.SlotsAreFilterable);
+            int countBefore = slots.Count;
             slot.SetSlotOwner(owner);
-            if (slots.Count > 0)
+            // Native SetSlotOwner can register the slot itself. Never append it twice.
+            if (slots.Count == countBefore) slots.Add(slot);
+            if (slots.Count != countBefore + 1 || slots[slots.Count - 1].Pointer != slot.Pointer)
+                throw new InvalidOperationException("Unexpected native slot registration.");
+            if (countBefore > 0)
             {
                 var filters = slots[0].HardFilters;
                 for (int i = 0; i < filters.Count; i++) slot.AddFilter(filters[i]);
             }
             slot.onItemDataChanged += contentsChanged;
-            slots.Add(slot);
         }
         entity.SlotCount = slots.Count;
     }
@@ -118,7 +121,7 @@ internal sealed class SmallRackStorage : IDisposable
         int target = StorageRules.TargetSlots(settings.SmallRackSlots.Value, rack.OriginalSlots);
         int size = StorageRules.SafeSize(target, before, i =>
             slots[i].ItemInstance != null || slots[i].IsLocked || slots[i].IsRemovalLocked ||
-            slots[i].IsAddLocked || slots[i].PlayerFilter != null || slots[i].SiblingSet != null);
+            slots[i].IsAddLocked || (slots[i].PlayerFilter != null && !slots[i].PlayerFilter.IsDefault()) || slots[i].SiblingSet != null);
         applying = true;
         try
         {
@@ -128,9 +131,11 @@ internal sealed class SmallRackStorage : IDisposable
             Il2CppSystem.Action contentsChanged = (Il2CppSystem.Action)entity.ContentsChanged;
             for (int i = slots.Count - 1; i >= size; i--)
             {
-                slots[i].onItemDataChanged -= contentsChanged;
-                slots[i].SetSlotOwner(null!);
+                var slot = slots[i];
+                slot.onItemDataChanged -= contentsChanged;
                 slots.RemoveAt(i);
+                // SetSlotOwner dereferences its owner argument; null is not supported.
+                slot._SlotOwner_k__BackingField = null!;
             }
             entity.SlotCount = slots.Count;
             if (before != slots.Count) entity.ContentsChanged();

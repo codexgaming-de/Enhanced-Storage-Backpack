@@ -76,9 +76,32 @@ internal sealed class Settings : IDisposable
         var entry = category.CreateEntry(id, initial, german,
             validator: min.HasValue && max.HasValue ? new ValueRange<int>(min.Value, max.Value) : null);
         labels.Add((value => entry.DisplayName = value, german, english));
+        var (descriptionGerman, descriptionEnglish) = Describe(category.Identifier, id);
+        labels.Add((value => entry.Description = value, descriptionGerman, descriptionEnglish));
         LemonAction<object, object> handler = (oldValue, newValue) => OnChanged(entry, oldValue, newValue);
         subscriptions.Add((entry, handler));
         return entry;
+    }
+
+    private static (string German, string English) Describe(string category, string id)
+    {
+        if (id == "Language") return ("Wählt die Sprache der Einstellungen dieses Plugins.", "Selects the language of this plugin's settings.");
+        if (id == "DebugLogging") return ("Schreibt Diagnosemeldungen nach UserData/Enhanced-Storage-Backpack-Debug.log.", "Writes diagnostics to UserData/Enhanced-Storage-Backpack-Debug.log.");
+        if (id == "Hotkey") return ("Taste für den Rucksack. Die Rucksackfunktion folgt in einem späteren Entwicklungsschritt.", "Key for opening the backpack. Backpack functionality will follow in a later development step.");
+        if (category.EndsWith("_Backpack")) return ("Gewünschte Rucksackgröße von 1 bis 128 Plätzen. Die Rucksackfunktion ist noch nicht aktiv.", "Requested backpack capacity from 1 to 128 slots. Backpack functionality is not active yet.");
+        bool implemented = category.EndsWith("_SmallStorageRack");
+        string german = id == "Slots"
+            ? "Anzahl der Plätze: 1 bis 128. 0 verwendet die Spielvorgabe. Belegte Plätze bleiben beim Verkleinern erhalten."
+            : "Anzahl der angezeigten Reihen. 0 verwendet die Spielvorgabe. Höchstens so viele Reihen wie Plätze.";
+        string english = id == "Slots"
+            ? "Number of slots: 1 to 128. 0 uses the game default. Occupied slots are retained when reducing capacity."
+            : "Number of displayed rows. 0 uses the game default. Cannot exceed the number of slots.";
+        if (!implemented)
+        {
+            german += " Für diesen Lagertyp noch ohne Wirkung.";
+            english += " Not active for this storage type yet.";
+        }
+        return (german, english);
     }
 
     public string Text(string german, string english) => Language.Value == ModLanguage.English ? english : german;
@@ -92,6 +115,7 @@ internal sealed class Settings : IDisposable
     private void ApplyLanguage()
     {
         foreach (var (set, german, english) in labels) set(Text(german, english));
+        Trace($"ESB_LANGUAGE_APPLIED | language={Language.Value} | label={Language.DisplayName} | description={Language.Description}");
     }
 
     private void OnChanged(MelonPreferences_Entry entry, object oldValue, object newValue)
@@ -107,7 +131,7 @@ internal sealed class Settings : IDisposable
     private void WriteDiagnosticSnapshot()
     {
         if (!DebugLogging.Value) return;
-        Trace("ESB_SETTINGS_SNAPSHOT | 0.0.4");
+        Trace("ESB_SETTINGS_SNAPSHOT | 0.0.5");
         foreach (var (entry, _) in subscriptions)
             Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }

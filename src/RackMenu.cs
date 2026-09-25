@@ -11,8 +11,6 @@ internal sealed class RackMenu
 {
     private readonly Settings settings;
     private StorageMenu? menu;
-    private Vector2 cellSize;
-    private Vector2 spacing;
     private GridLayoutGroup.Constraint constraint;
     private int constraintCount;
     private bool customized;
@@ -27,8 +25,6 @@ internal sealed class RackMenu
         if (menu == null || menu.Pointer != current.Pointer)
         {
             menu = current;
-            cellSize = menu.SlotGridLayout.cellSize;
-            spacing = menu.SlotGridLayout.spacing;
             constraint = menu.SlotGridLayout.constraint;
             constraintCount = menu.SlotGridLayout.constraintCount;
             customized = false;
@@ -73,11 +69,9 @@ internal sealed class RackMenu
         // No global canvas update or immediate recursive layout rebuild.
         grid.constraint = GridLayoutGroup.Constraint.FixedRowCount;
         grid.constraintCount = rows;
-        float availableWidth = Math.Max(1, current.SlotContainer.rect.width - grid.padding.horizontal);
-        float availableHeight = Math.Max(1, current.SlotContainer.rect.height - grid.padding.vertical);
-        float scale = Math.Min(1, Math.Min(availableWidth / (columns * cellSize.x + spacing.x * (columns - 1)), availableHeight / (rows * cellSize.y + spacing.y * (rows - 1))));
-        grid.cellSize = cellSize * Math.Max(0.001f, scale);
-        grid.spacing = spacing * Math.Max(0.001f, scale);
+        // Native Open initializes cell dimensions. Do not replace them with the
+        // pre-open grid size, which may be zero while the menu is still inactive.
+        settings.Trace($"ESB_RACK_LAYOUT | cell={grid.cellSize.x}x{grid.cellSize.y} | container={current.SlotContainer.rect.width}x{current.SlotContainer.rect.height}");
         LayoutRebuilder.MarkLayoutForRebuild(current.SlotContainer);
         customized = true;
         if (ItemUIManager.InstanceExists) ItemUIManager.Instance.EnableQuickMove(entity.ItemSlots);
@@ -87,8 +81,6 @@ internal sealed class RackMenu
     public void Restore()
     {
         if (menu == null || !customized) return;
-        menu.SlotGridLayout.cellSize = cellSize;
-        menu.SlotGridLayout.spacing = spacing;
         menu.SlotGridLayout.constraint = constraint;
         menu.SlotGridLayout.constraintCount = constraintCount;
         customized = false;
