@@ -2,7 +2,7 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de. Entwicklung mit KI-Unterstützung.
 
-## Stand: 0.0.2 – Einstellungen testen
+## Stand: 0.0.3 – Einstellungen testen
 
 Registriert 22 MelonPreferences-Einstellungen in 11 Kategorien für Mod Manager &
 Phone App: Sprache, Debug-Logging, Backpack-Slots und Hotkey sowie Slots und Reihen
@@ -36,9 +36,9 @@ Für abweichende Referenzordner können `MelonLoaderDirectory` (MelonLoader/net6
 `GameAssembliesDirectory` (MelonLoader/Il2CppAssemblies) einzeln übergeben werden.
 Keine anderen MelonLoader-DLLs in den Mods-Ordner kopieren.
 
-## Testablauf 0.0.2
+## Testablauf 0.0.3
 
-1. Spiel starten: `ESB_SETTINGS_READY | 0.0.2` muss im Log erscheinen.
+1. Spiel starten: `ESB_SETTINGS_READY | 0.0.3` muss im Log erscheinen.
 2. Im Hauptmenü im Mod Manager nach **Enhanced Storage + Backpack** filtern.
    Es müssen Allgemein, Rucksack und die neun Lagertypen angezeigt werden.
 3. Dasselbe in einem Singleplayer-Spielstand in der Phone App prüfen.
@@ -58,7 +58,7 @@ Keine anderen MelonLoader-DLLs in den Mods-Ordner kopieren.
 8. Debug deaktivieren: weitere Änderungen dürfen das eigene Diagnose-Log nicht
    mehr erweitern. Alte Zeilen werden dabei nicht gelöscht.
 
-Eigener Diagnosepfad: `UserData/EnhancedStorageBackpack-Debug.log`.
+Eigener Diagnosepfad: `UserData/Enhanced-Storage-Backpack-Debug.log`.
 Bei 1 MiB wird die bisherige Datei als `.previous` aufbewahrt; höchstens ein Vorgänger.
 Das normale MelonLoader-Log protokolliert in dieser Testversion Einstellungsänderungen
 auch bei ausgeschaltetem Diagnose-Log. Keine zyklischen Logausgaben.
@@ -92,3 +92,22 @@ Die Kategorien folgen dem Namensschema aus der [offiziellen Integrationsanleitun
 Wir verwenden MelonLoaders eigene Änderungsereignisse, keine Mod-Manager-API-Aufrufe
 und keine Referenz auf dessen DLL. Die Anzeige und Übernahme werden mit der
 installierten Version gemeinsam geprüft.
+
+
+## Log-Korrektur 0.0.3
+
+Das eigene Diagnose-Log heißt jetzt exakt `Enhanced-Storage-Backpack-Debug.log`.
+Bei aktiviertem Debug-Logging enthält es beim Start sowie beim Einschalten des
+Loggings eine Momentaufnahme aller aktuellen Einstellungen (`ESB_SETTING_CURRENT`).
+Wertänderungen stehen darin als `ESB_SETTING_CHANGED`. Für diese Tests bitte dieses
+Log senden. `Latest.log` wird nur ergänzend benötigt, wenn das Plugin nicht lädt
+oder Fehler außerhalb des eigenen Loggings untersucht werden müssen.
+Die alte Datei ohne Bindestriche bleibt unberührt und wird nicht weitergeschrieben.
+
+Die Nutzerlogs vom 25.09.2026 bestätigen für 0.0.2: Slots wurden um 14:59:20 von
+40 auf 64 geändert, vor dem Spielneustart. Beim nächsten Start wurde 64 geladen.
+Damit sind Wertübernahme während der Sitzung und Persistenz dieses Wertes belegt.
+Die Logs allein belegen nicht, ob jede Eingabe schon vor dem Save-Klick übernommen
+wird. Ein Neustart ist für die Einstellungsübernahme nicht erforderlich; er war
+nur Teil der Persistenzprüfung. Eine neue DLL erfordert dagegen einen Spielneustart.
+Die spätere Auswirkung auf Inventare ist weiterhin noch nicht implementiert.

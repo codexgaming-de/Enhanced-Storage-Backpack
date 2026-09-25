@@ -65,7 +65,7 @@ internal sealed class Settings : IDisposable
             // Startup values make persistence checkable after restarting the game.
             logger.Msg($"ESB_SETTING_LOADED | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
         }
-        diagnostics.Write(DebugLogging.Value, "Settings initialized (0.0.2).");
+        WriteDiagnosticSnapshot();
     }
 
     private static MelonPreferences_Category Category(string suffix, string label)
@@ -77,6 +77,16 @@ internal sealed class Settings : IDisposable
         var message = $"ESB_SETTING_CHANGED | {entry.Category.Identifier}/{entry.Identifier}: {oldValue} -> {newValue}";
         logger.Msg(message);
         diagnostics.Write(DebugLogging.Value, message);
+        if (ReferenceEquals(entry, DebugLogging) && DebugLogging.Value)
+            WriteDiagnosticSnapshot();
+    }
+
+    private void WriteDiagnosticSnapshot()
+    {
+        if (!DebugLogging.Value) return;
+        diagnostics.Write(true, "ESB_SETTINGS_SNAPSHOT | 0.0.3");
+        foreach (var (entry, _) in subscriptions)
+            diagnostics.Write(true, $"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }
 
     public void Dispose()

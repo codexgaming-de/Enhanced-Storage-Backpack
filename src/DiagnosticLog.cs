@@ -18,7 +18,7 @@ internal sealed class DiagnosticLog
         {
             var directory = MelonEnvironment.UserDataDirectory;
             Directory.CreateDirectory(directory);
-            var path = Path.Combine(directory, "EnhancedStorageBackpack-Debug.log");
+            var path = Path.Combine(directory, "Enhanced-Storage-Backpack-Debug.log");
             if (File.Exists(path) && new FileInfo(path).Length >= MaxBytes)
                 File.Move(path, path + ".previous", overwrite: true);
             File.AppendAllText(path, $"{DateTimeOffset.Now:O} | {message}{Environment.NewLine}");

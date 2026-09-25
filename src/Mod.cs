@@ -1,6 +1,6 @@
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.2", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.3", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -12,7 +12,7 @@ public sealed class Mod : MelonMod
     public override void OnInitializeMelon()
     {
         settings = new Settings(LoggerInstance);
-        LoggerInstance.Msg("ESB_SETTINGS_READY | 0.0.2 | 22 Einstellungen registriert; Funktionstest der Einstellungen.");
+        LoggerInstance.Msg("ESB_SETTINGS_READY | 0.0.3 | 22 Einstellungen registriert; Funktionstest der Einstellungen.");
     }
 
     public override void OnDeinitializeMelon()
