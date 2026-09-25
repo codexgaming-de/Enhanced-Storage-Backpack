@@ -1,7 +1,8 @@
 # Vereinbarter Funktionsumfang
 
 Die folgende Liste beschreibt Ziele, keine bereits implementierten Funktionen.
-Aktueller Schritt: 0.0.1 kompilieren und Laden mit MelonLoader im Spiel bestaetigen.
+0.0.1: Build und Laden im Spiel bestätigt.
+Aktueller Schritt: 0.0.2 Einstellungen und Änderungsereignisse im Mod Manager testen.
 
 ## Backpack
 
@@ -17,7 +18,7 @@ Aktueller Schritt: 0.0.1 kompilieren und Laden mit MelonLoader im Spiel bestaeti
 
 ## Storage
 
-Slots und Reihen pro Lagertyp separat konfigurierbar:
+Slots (maximal 128) und Reihen pro Lagertyp separat konfigurierbar:
 
 - Small / Medium / Large Storage Rack.
 - Small / Medium / Large / Huge Storage Closet.
@@ -34,4 +35,30 @@ Lokaler Ordner des Nutzers: `/home/codex/Enhanced-Storage-Backpack/`.
 GitHub-Zugriff auf dem Nutzer-PC per vorhandenem SSH-Schluessel.
 Keine automatische Uebernahme des alten Implementierungsstands.
 Nach jedem abgegrenzten Schritt Build pruefen und gemeinsam im Spiel testen.
-Multiplayer-Verhalten vor dessen Implementierung konkret abstimmen.
+Ausschließlich Singleplayer; Multiplayer ist nicht Teil des Projekts.
+Ressourcenschonend: ereignisbasierte Änderungen, keine dauernden vollständigen
+Lagersuchen, keine unnötigen UI-Neuaufbauten oder Dateioperationen.
+Angegebener Spielordner: `/home/codex/Schreibtisch/Schedulue 1 Plugins/`.
+
+
+## Verbindlicher Speichervertrag für den späteren Backpack
+
+- Gegenstandsbewegungen ändern nur den laufenden Zustand im Arbeitsspeicher.
+- Dauerhaft speichern nur zusammen mit dem zugehörigen Spielstand, einschließlich
+  eines regulären Spiel-Autosaves. Kein eigener Rucksack-Autosave.
+- Mod-Manager-Speichern und Größenänderungen dürfen keine Gegenstände speichern.
+- Beenden ohne Spielstandspeicherung verwirft die Änderungen seit dem letzten Save.
+- Laden muss Inventar und Rucksack aus demselben Speicherzeitpunkt herstellen.
+- Fehlgeschlagene oder unterbrochene Speicherung darf keinen neueren Rucksack mit
+  einem älteren Inventar kombinieren. Das tatsächliche Save-Verfahren des Spiels
+  muss vor der Implementierung untersucht werden; ein nachträglich geschriebener
+  separater Inhalt allein garantiert diese Konsistenz nicht.
+- Pflichtfälle: Hotbar → Backpack und Backpack → Hotbar, jeweils mit Speichern,
+  ohne Speichern, nach Neustart, bei Save-Fehler/Abbruch und Spielstandwechsel.
+
+## Noch vorläufig
+
+Startwerte: Backpack 40, Lager 0 = Original. Storage-Reihen haben im
+Einstellungstest die technische Grenze 128. Die endgültigen Layoutregeln werden
+beim Storage-Schritt geprüft. Kein UI- oder Speicherverhalten gilt durch die
+reine Registrierung einer Einstellung als fertig.

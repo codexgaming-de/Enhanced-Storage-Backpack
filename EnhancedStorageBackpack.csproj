@@ -4,9 +4,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>EnhancedStorageBackpack</AssemblyName>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <MelonLoaderDirectory Condition="'$(MelonLoaderDirectory)' == ''">$(GameDirectory)/MelonLoader/net6</MelonLoaderDirectory>
+    <GameAssembliesDirectory Condition="'$(GameAssembliesDirectory)' == ''">$(GameDirectory)/MelonLoader/Il2CppAssemblies</GameAssembliesDirectory>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="src/**/*.cs" />
@@ -14,8 +15,13 @@
       <HintPath>$(MelonLoaderDirectory)/MelonLoader.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(GameAssembliesDirectory)/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
   <Target Name="CheckMelonLoaderReference" BeforeTargets="ResolveAssemblyReferences">
     <Error Condition="!Exists('$(MelonLoaderDirectory)/MelonLoader.dll')" Text="MelonLoader.dll fehlt. Bitte -p:GameDirectory=&quot;/vollstaendiger/Pfad/Schedule I&quot; angeben." />
+    <Error Condition="!Exists('$(GameAssembliesDirectory)/UnityEngine.CoreModule.dll')" Text="UnityEngine.CoreModule.dll fehlt in MelonLoader/Il2CppAssemblies. Bitte den Spielpfad pruefen und MelonLoader einmal starten." />
   </Target>
 </Project>
