@@ -8,9 +8,9 @@ public enum ModLanguage { Deutsch, English }
 
 internal sealed class Settings : IDisposable
 {
-    // Mod Manager matches the MelonInfo name with spaces removed.
     private const string Prefix = "EnhancedStorage+Backpack";
     private readonly List<(MelonPreferences_Entry Entry, LemonAction<object, object> Handler)> subscriptions = new();
+    private readonly List<(Action<string> Set, string German, string English)> labels = new();
     private readonly MelonLogger.Instance logger;
     private readonly DiagnosticLog diagnostics;
 
@@ -18,81 +18,105 @@ internal sealed class Settings : IDisposable
     public MelonPreferences_Entry<bool> DebugLogging { get; }
     public MelonPreferences_Entry<int> BackpackSlots { get; }
     public MelonPreferences_Entry<KeyCode> BackpackHotkey { get; }
+    public MelonPreferences_Entry<int> SmallRackSlots { get; private set; } = null!;
+    public MelonPreferences_Entry<int> SmallRackRows { get; private set; } = null!;
+    public event Action? SmallRackChanged;
+    public event Action? LanguageChanged;
 
     public Settings(MelonLogger.Instance logger)
     {
         this.logger = logger;
         diagnostics = new DiagnosticLog(logger);
-        var general = Category("01_General", "Allgemein / General");
-        Language = general.CreateEntry("Language", ModLanguage.Deutsch, "Sprache / Language");
-        DebugLogging = general.CreateEntry("DebugLogging", false, "Diagnose-Log / Debug logging");
-        var backpack = Category("02_Backpack", "Rucksack / Backpack");
-        BackpackSlots = backpack.CreateEntry("Slots", 40, "Slots (1–128)",
-            "Rucksackgröße / Backpack size", validator: new ValueRange<int>(1, 128));
-        BackpackHotkey = backpack.CreateEntry("Hotkey", KeyCode.B, "Öffnen / Open backpack");
+        var general = Category("01_General", "Allgemein", "General");
+        Language = Entry(general, "Language", ModLanguage.Deutsch, "Sprache", "Language");
+        DebugLogging = Entry(general, "DebugLogging", false, "Diagnoseprotokoll", "Debug logging");
+        var backpack = Category("02_Backpack", "Rucksack", "Backpack");
+        BackpackSlots = Entry(backpack, "Slots", 40, "Plätze (1–128)", "Slots (1–128)", 1, 128);
+        BackpackHotkey = Entry(backpack, "Hotkey", KeyCode.B, "Taste zum Öffnen", "Open key");
 
-        var storageNames = new[]
+        var types = new[]
         {
-            ("SmallStorageRack", "Small Storage Rack"),
-            ("MediumStorageRack", "Medium Storage Rack"),
-            ("LargeStorageRack", "Large Storage Rack"),
-            ("SmallStorageCloset", "Small Storage Closet"),
-            ("MediumStorageCloset", "Medium Storage Closet"),
-            ("LargeStorageCloset", "Large Storage Closet"),
-            ("HugeStorageCloset", "Huge Storage Closet"),
-            ("Safe", "Safe"),
-            ("FilingCabinet", "Filing Cabinet")
+            ("SmallStorageRack", "Kleines Lagerregal", "Small Storage Rack"),
+            ("MediumStorageRack", "Mittleres Lagerregal", "Medium Storage Rack"),
+            ("LargeStorageRack", "Großes Lagerregal", "Large Storage Rack"),
+            ("SmallStorageCloset", "Kleiner Lagerschrank", "Small Storage Closet"),
+            ("MediumStorageCloset", "Mittlerer Lagerschrank", "Medium Storage Closet"),
+            ("LargeStorageCloset", "Großer Lagerschrank", "Large Storage Closet"),
+            ("HugeStorageCloset", "Riesiger Lagerschrank", "Huge Storage Closet"),
+            ("Safe", "Tresor", "Safe"),
+            ("FilingCabinet", "Aktenschrank", "Filing Cabinet")
         };
-
-        // Register and load every entry before subscribing, so callbacks see complete settings.
-        var entries = new List<MelonPreferences_Entry> { Language, DebugLogging, BackpackSlots, BackpackHotkey };
-        for (int i = 0; i < storageNames.Length; i++)
+        for (int index = 0; index < types.Length; index++)
         {
-            var (id, name) = storageNames[i];
-            var category = Category($"{i + 3:00}_{id}", name);
-            entries.Add(category.CreateEntry("Slots", 0, "Slots (0 = Original, 1–128)",
-                "0 behält die Spielvorgabe / 0 keeps the game's default", validator: new ValueRange<int>(0, 128)));
-            entries.Add(category.CreateEntry("Rows", 0, "Reihen / Rows (0 = Original, 1–128)",
-                "Vorläufige technische Grenze; Darstellung wird im Storage-Schritt geprüft. / Provisional bound; layout validation follows in the storage step.",
-                validator: new ValueRange<int>(0, 128)));
+            var (id, german, english) = types[index];
+            var category = Category($"{index + 3:00}_{id}", german, english);
+            var slots = Entry(category, "Slots", 0, "Plätze (0 = Spielvorgabe, 1–128)", "Slots (0 = default, 1–128)", 0, 128);
+            var rows = Entry(category, "Rows", 0, "Reihen (0 = Spielvorgabe)", "Rows (0 = default)", 0, 128);
+            if (index == 0) { SmallRackSlots = slots; SmallRackRows = rows; }
         }
-
-        foreach (var entry in entries)
+        ApplyLanguage();
+        foreach (var (entry, handler) in subscriptions)
         {
-            LemonAction<object, object> handler = (oldValue, newValue) => OnChanged(entry, oldValue, newValue);
             entry.OnEntryValueChangedUntyped.Subscribe(handler);
-            subscriptions.Add((entry, handler));
-            // Startup values make persistence checkable after restarting the game.
             logger.Msg($"ESB_SETTING_LOADED | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
         }
         WriteDiagnosticSnapshot();
     }
 
-    private static MelonPreferences_Category Category(string suffix, string label)
-        => MelonPreferences.CreateCategory($"{Prefix}_{suffix}", label);
+    private MelonPreferences_Category Category(string suffix, string german, string english)
+    {
+        var category = MelonPreferences.CreateCategory($"{Prefix}_{suffix}", german);
+        labels.Add((value => category.DisplayName = value, german, english));
+        return category;
+    }
+
+    private MelonPreferences_Entry<T> Entry<T>(MelonPreferences_Category category, string id, T initial,
+        string german, string english, int? min = null, int? max = null)
+    {
+        var entry = category.CreateEntry(id, initial, german,
+            validator: min.HasValue && max.HasValue ? new ValueRange<int>(min.Value, max.Value) : null);
+        labels.Add((value => entry.DisplayName = value, german, english));
+        LemonAction<object, object> handler = (oldValue, newValue) => OnChanged(entry, oldValue, newValue);
+        subscriptions.Add((entry, handler));
+        return entry;
+    }
+
+    public string Text(string german, string english) => Language.Value == ModLanguage.English ? english : german;
+    public void Trace(string message) => diagnostics.Write(DebugLogging.Value, message);
+    public void Error(string context, Exception exception)
+    {
+        logger.Error($"{context}: {exception.Message}");
+        Trace($"ERROR | {context} | {exception}");
+    }
+
+    private void ApplyLanguage()
+    {
+        foreach (var (set, german, english) in labels) set(Text(german, english));
+    }
 
     private void OnChanged(MelonPreferences_Entry entry, object oldValue, object newValue)
     {
-        // No game-save operation belongs here: preferences and inventory contents are separate.
         var message = $"ESB_SETTING_CHANGED | {entry.Category.Identifier}/{entry.Identifier}: {oldValue} -> {newValue}";
         logger.Msg(message);
-        diagnostics.Write(DebugLogging.Value, message);
-        if (ReferenceEquals(entry, DebugLogging) && DebugLogging.Value)
-            WriteDiagnosticSnapshot();
+        Trace(message);
+        if (ReferenceEquals(entry, Language)) { ApplyLanguage(); LanguageChanged?.Invoke(); }
+        if (ReferenceEquals(entry, SmallRackSlots) || ReferenceEquals(entry, SmallRackRows)) SmallRackChanged?.Invoke();
+        if (ReferenceEquals(entry, DebugLogging) && DebugLogging.Value) WriteDiagnosticSnapshot();
     }
 
     private void WriteDiagnosticSnapshot()
     {
         if (!DebugLogging.Value) return;
-        diagnostics.Write(true, "ESB_SETTINGS_SNAPSHOT | 0.0.3");
+        Trace("ESB_SETTINGS_SNAPSHOT | 0.0.4");
         foreach (var (entry, _) in subscriptions)
-            diagnostics.Write(true, $"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
+            Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }
 
     public void Dispose()
     {
-        foreach (var (entry, handler) in subscriptions)
-            entry.OnEntryValueChangedUntyped.Unsubscribe(handler);
+        foreach (var (entry, handler) in subscriptions) entry.OnEntryValueChangedUntyped.Unsubscribe(handler);
         subscriptions.Clear();
+        SmallRackChanged = null;
+        LanguageChanged = null;
     }
 }

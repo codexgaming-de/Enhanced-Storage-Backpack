@@ -2,7 +2,8 @@
 
 Die folgende Liste beschreibt Ziele, keine bereits implementierten Funktionen.
 0.0.1: Build und Laden im Spiel bestätigt.
-Aktueller Schritt: 0.0.2 Einstellungen und Änderungsereignisse im Mod Manager testen.
+0.0.2/0.0.3: Einstellungsänderungen, Persistenz und eigenes Debug-Log durch Nutzerlogs bestätigt.
+Aktueller Schritt: 0.0.4 Sprachwahl und Small Storage Rack im Spiel testen.
 
 ## Backpack
 
@@ -59,6 +60,11 @@ Angegebener Spielordner: `/home/codex/Schreibtisch/Schedulue 1 Plugins/`.
 ## Noch vorläufig
 
 Startwerte: Backpack 40, Lager 0 = Original. Storage-Reihen haben im
-Einstellungstest die technische Grenze 128. Die endgültigen Layoutregeln werden
-beim Storage-Schritt geprüft. Kein UI- oder Speicherverhalten gilt durch die
+Einstellungstest die technische Grenze 128. Beim kleinen Lagerregal werden die tatsächlich angezeigten Reihen auf die
+vorhandenen Plätze begrenzt. Hohe Reihenwerte aus den Nutzerlogs waren reine Tests. Kein UI- oder Speicherverhalten gilt durch die
 reine Registrierung einer Einstellung als fertig.
+
+
+Die Beschriftungen unserer Einstellungen und Kategorien müssen vollständig der
+gewählten Sprache entsprechen, keine gemischten deutschen/englischen Beschriftungen.
+Fremde Mod-Manager-Schaltflächen behalten dessen eigene Sprache.

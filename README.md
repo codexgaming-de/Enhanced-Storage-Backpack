@@ -1,113 +1,112 @@
 # Enhanced Storage + Backpack
 
-Singleplayer-Mod für Schedule I von codexgaming-de. Entwicklung mit KI-Unterstützung.
+Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## Stand: 0.0.3 – Einstellungen testen
+## 0.0.4 – Kleines Lagerregal und Sprachwahl (Testversion)
 
-Registriert 22 MelonPreferences-Einstellungen in 11 Kategorien für Mod Manager &
-Phone App: Sprache, Debug-Logging, Backpack-Slots und Hotkey sowie Slots und Reihen
-für neun Lagertypen. Werteänderungen werden über MelonPreferences-Ereignisse sofort
-im Log erfasst, sobald der Manager den Wert übernimmt. Kein Update-Polling.
+- Einstellungen und Kategorien vollständig auf Deutsch oder Englisch, gemäß der
+  Sprachwahl. Die Sprachoptionen selbst heißen Deutsch und English.
+- Nach einem Sprachwechsel die Einstellungsansicht im Mod Manager neu öffnen,
+  falls die bereits erzeugten Bedienelemente noch die vorherigen Texte zeigen.
+  Kein Spielneustart erforderlich. Die Oberfläche des fremden Mod Managers und
+  dessen eigene Schaltflächen werden nicht vom Plugin übersetzt.
+- Small Storage Rack / Kleines Lagerregal: 1–128 Plätze, eigene Reihenanzahl.
+  0 verwendet jeweils die ursprüngliche Spielvorgabe.
+- Reihen werden für die Darstellung auf die tatsächliche Zahl der Plätze begrenzt.
+- Einstellungsänderungen werden bei der nächsten Spielaktualisierung verarbeitet.
+  Während eines Drag-and-drop-Vorgangs wird bis zum Ablegen gewartet; während
+  Speichern/Laden werden angeforderte Größenänderungen ebenfalls zurückgestellt.
+- Beim Verkleinern bleiben belegte, gesperrte, gefilterte oder anderweitig gebundene
+  Plätze erhalten. Leere Plätze am Ende können entfernt werden. Nach Entleerung
+  wird die angeforderte Größe erneut geprüft; spätestens beim nächsten Öffnen.
+- Zusätzliche UI-Plätze werden bei Bedarf einmal erzeugt und wiederverwendet.
+- Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
 
-**Storage- und Backpack-Spielmechanik ist noch nicht implementiert.** Diese Version
-verändert keine Inventare, öffnet keinen Rucksack und speichert keine Gegenstände.
-Die Sprachwahl ist vorbereitet; die Einstellungsbeschriftungen sind vorerst zweisprachig.
-Kein Nexus-Release.
+**Andere Lagertypen und der Backpack haben weiterhin nur Einstellungen.**
+Die Regal-Funktionen sind gebaut, aber noch nicht im Spiel bestätigt. Keine
+Veröffentlichung als fertige Nexus-Version.
 
-## Bauen auf Nobara
+## Aktualisieren und bauen
 
-Voraussetzungen: .NET SDK 8 und Schedule I IL2CPP mit MelonLoader.
-Spiele- und Loader-DLLs werden lokal referenziert und nicht mitgeliefert.
+Spiel beenden. Voraussetzungen: .NET SDK 8, Schedule I IL2CPP und MelonLoader.
 
 ```bash
 cd /home/codex/Enhanced-Storage-Backpack
-git pull --ff-only origin main
-dotnet build -c Release -p:GameDirectory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
-```
-
-Nach erfolgreichem Build und bei beendetem Spiel:
-
-```bash
+git pull --ff-only origin main &&
+dotnet build -c Release -p:GameDirectory="/home/codex/Schreibtisch/Schedulue 1 Plugins/" &&
 cp "bin/Release/net6.0/EnhancedStorageBackpack.dll" \
    "/home/codex/Schreibtisch/Schedulue 1 Plugins/Mods/"
 ```
 
-Für abweichende Referenzordner können `MelonLoaderDirectory` (MelonLoader/net6) und
-`GameAssembliesDirectory` (MelonLoader/Il2CppAssemblies) einzeln übergeben werden.
-Keine anderen MelonLoader-DLLs in den Mods-Ordner kopieren.
+Spiele- und Loader-DLLs werden nur lokal referenziert. Alternativ sind die
+MSBuild-Parameter `MelonLoaderDirectory` und `GameAssembliesDirectory` verfügbar.
 
-## Testablauf 0.0.3
+## Gemeinsamer Test – zunächst mit einer Kopie des Spielstands
 
-1. Spiel starten: `ESB_SETTINGS_READY | 0.0.3` muss im Log erscheinen.
-2. Im Hauptmenü im Mod Manager nach **Enhanced Storage + Backpack** filtern.
-   Es müssen Allgemein, Rucksack und die neun Lagertypen angezeigt werden.
-3. Dasselbe in einem Singleplayer-Spielstand in der Phone App prüfen.
-4. Diagnose-Log einschalten, Rucksack-Slots von 40 auf 64 stellen, Hotkey auf N
-   und Sprache auf English ändern. Small Storage Rack testweise auf 32 Slots und
-   4 Reihen stellen. Änderungen gegebenenfalls mit Eingabe/Save im Manager übernehmen.
-5. Ohne Spielneustart muss für jede tatsächliche Wertänderung eine passende
-   `ESB_SETTING_CHANGED`-Zeile erscheinen. Das prüft die Einstellungen, noch keine
-   Änderung am Lager oder Rucksack. Falls die Meldung erst nach Save erscheint,
-   dies melden; die Übernahme hängt vom verwendeten Manager-Bedienelement ab.
-6. Grenzen testen: Rucksack-Slots 0 werden auf 1 begrenzt, 129 auf 128.
-   Storage-Slots -1 werden auf 0 begrenzt, 129 auf 128. Eine unveränderte effektive
-   Einstellung löst keine neue Meldung aus. Ansicht erneut öffnen, falls die
-   Eingabebox einen korrigierten Wert nicht direkt wiedergibt.
-7. Einstellungen im Mod Manager speichern, Spiel neu starten und die Werte im
-   Manager sowie anhand der `ESB_SETTING_LOADED`-Zeilen vergleichen.
-8. Debug deaktivieren: weitere Änderungen dürfen das eigene Diagnose-Log nicht
-   mehr erweitern. Alte Zeilen werden dabei nicht gelöscht.
+1. Diagnoseprotokoll einschalten. Sprache Deutsch wählen, Einstellungsansicht neu
+   öffnen: Kategorien und Einträge müssen deutsch sein. Dasselbe mit English prüfen.
+2. Für das **kleine Lagerregal** 16 Plätze und 4 Reihen einstellen und ein leeres
+   kleines Lagerregal öffnen. Anzahl und Darstellung prüfen.
+3. Während derselben Sitzung auf 24 Plätze und 4 Reihen ändern. Bestehende und neu
+   aufgestellte kleine Lagerregale prüfen. Andere Lagertypen dürfen sich nicht ändern.
+4. Einen Gegenstand auf Platz 24 legen. Auf 8 Plätze / 2 Reihen reduzieren:
+   Platz 24 muss mit Inhalt erhalten bleiben. Gegenstand entnehmen: Danach darf
+   das Regal auf 8 Plätze schrumpfen. Drag-and-drop und Schnellverschieben prüfen.
+5. Auf 128 Plätze / 8 Reihen erweitern und die letzten Plätze prüfen. Danach
+   5 Plätze / 10 Reihen mit leerem Regal testen: höchstens 5 angezeigte Reihen.
+6. Gegenstände in erweiterten Plätzen ablegen, **Spielstand speichern**, neu laden.
+   Inhalte und Mengen müssen identisch sein. Ebenso Beenden ohne Speicherung
+   prüfen: Es muss der Inhalt des letzten Spielstands wiederhergestellt werden.
+7. Nach dem Speichern mit belegtem erweiterten Platz die konfigurierte Größe im
+   Hauptmenü verkleinern und erst dann laden: Der belegte Platz muss erhalten bleiben.
+8. Einstellungen Slots/Rows auf 0 zurücksetzen; soweit Plätze leer sind, müssen
+   ursprüngliche Größe und Reihenanzahl wiederhergestellt werden.
 
-Eigener Diagnosepfad: `UserData/Enhanced-Storage-Backpack-Debug.log`.
-Bei 1 MiB wird die bisherige Datei als `.previous` aufbewahrt; höchstens ein Vorgänger.
-Das normale MelonLoader-Log protokolliert in dieser Testversion Einstellungsänderungen
-auch bei ausgeschaltetem Diagnose-Log. Keine zyklischen Logausgaben.
+Bis diese Tests abgeschlossen sind, kein verlässlich geprüfter Ersatz für die
+bisherige Lagerverwaltung. Bei Auffälligkeiten den Test stoppen und das Debug-Log
+mit Beschreibung bzw. Screenshot senden; nicht über den einzigen Originalstand speichern.
 
-**Einstellungen speichern ist nicht Spielstand speichern.** Der spätere Rucksackinhalt
-wird ausschließlich mit dem zugehörigen Spielstand gespeichert, niemals durch
-Gegenstandsbewegungen oder die Save-Taste des Mod Managers.
+## Diagnose
 
-## Vorläufige Vorgaben
+`UserData/Enhanced-Storage-Backpack-Debug.log`, optional im Mod Manager einschaltbar.
+Begrenzt auf ungefähr 1 MiB plus eine Vorgängerdatei. Kein zyklisches Logging.
 
-- Backpack: 40 Slots, Hotkey B; zulässige Slotzahl 1–128.
-- Lager: Slots/Rows jeweils 0 = Spielvorgabe; Slots bis 128.
-- Reihen: vorläufig 0–128 als technische Eingabegrenze. Endgültige Layoutregeln
-  folgen beim Storage-Schritt; diese Grenze ist kein bestätigtes UI-Layout.
-- Sprache Deutsch; optionales Diagnose-Log aus.
+- `ESB_SETTING_CURRENT` / `ESB_SETTING_CHANGED`: geladene/geänderte Einstellungen.
+- `ESB_RACK_FOUND`: erkanntes kleines Lagerregal mit ursprünglicher Kapazität.
+- `ESB_RACK_APPLIED`: angeforderte und tatsächliche Kapazität, angewandte Reihen.
+- `ESB_RACK_SHRINK_DEFERRED`: geschützte Plätze verhindern vollständiges Verkleinern.
+- `ESB_RACK_LOAD`: Kapazität vor Wiederherstellung durch den nativen Loader.
+- `ESB_STORAGE_OPEN` / `ESB_RACK_MENU`: Diagnose der Erkennung und Anzeige.
 
-## Validierung und Zusammenarbeit
+## Speichervertrag
 
-0.0.1: Build lokal beim Nutzer erfolgreich und Laden durch das bereitgestellte Log
-vom 25.09.2026 bestätigt (Schedule I 0.4.6f13, MelonLoader 0.7.3, Wine/Proton 11.0).
-Mod Manager & Phone App 2.2.4 ist in diesem Log geladen.
+Regalinhalte bleiben in der nativen Speicherverwaltung des Spiels. Vor dem Laden
+wird genügend Platz für die eingehenden gespeicherten Slots bereitgestellt;
+Verkleinerung erst nach der Wiederherstellung. Es gibt keine zusätzliche Datei
+für Regalinhalte und keinen eigenen Inventar-Autosave.
 
-0.0.2: Release-Build mit .NET SDK 8.0.425 gegen die bereitgestellten Referenzen
-erfolgreich: 0 Warnungen, 0 Fehler. Der Test im Mod Manager
-und in der Phone App steht aus. Ein erfolgreicher Build ersetzt keinen Laufzeittest.
+Für den späteren Backpack gilt der vereinbarte Vertrag in [docs/ROADMAP.md](docs/ROADMAP.md):
+Inhalte ausschließlich zusammen mit dem Spielstand speichern; niemals durch
+Gegenstandsbewegungen, Größenänderungen oder die Save-Taste des Mod Managers.
 
-Kleine Commits, Prüfung und gemeinsamer Test pro Schritt. Vor Änderungen Git-Status
-prüfen und aktuellen Stand abrufen. Die Anforderungen stehen in [docs/ROADMAP.md](docs/ROADMAP.md).
+## Validierung
 
-Die Kategorien folgen dem Namensschema aus der [offiziellen Integrationsanleitung](https://github.com/Prowiler/schedule1-mod-manager-wiki/wiki/Integration-Guide).
-Wir verwenden MelonLoaders eigene Änderungsereignisse, keine Mod-Manager-API-Aufrufe
-und keine Referenz auf dessen DLL. Die Anzeige und Übernahme werden mit der
-installierten Version gemeinsam geprüft.
+- 0.0.1: Build und Laden beim Nutzer bestätigt: Spiel 0.4.6f13, MelonLoader 0.7.3,
+  Wine/Proton 11.0. Mod Manager & Phone App 2.2.4 geladen.
+- 0.0.2/0.0.3: Nutzerlogs belegen Wertänderungen während der Sitzung, Persistenz
+  nach Neustart und Ausgabe des eigenen Debug-Logs. Die hohen Reihenwerte im Log
+  waren ausschließlich Testeingaben, keine gewünschten Vorgaben.
+- 0.0.4: Release-Build gegen die bereitgestellten DLLs: 0 Warnungen, 0 Fehler.
+  16.395 Prüfungen der reinen Größen-/Reihenregeln bestanden (einschließlich aller
+  Kombinationen aus Zielkapazität 1–128 und einem geschützten Platz).
+  Das sind keine Unity-Laufzeittests. Native Methoden liegen hier nur als
+  IL2CPP-Interop-Schnittstellen vor. UI, Gegenstandsbewegungen und Speicherverhalten
+  müssen mit obigem Testplan im tatsächlichen Spiel geprüft werden.
 
+```bash
+dotnet run --project tests/StorageRulesTests.csproj -c Release
+```
 
-## Log-Korrektur 0.0.3
-
-Das eigene Diagnose-Log heißt jetzt exakt `Enhanced-Storage-Backpack-Debug.log`.
-Bei aktiviertem Debug-Logging enthält es beim Start sowie beim Einschalten des
-Loggings eine Momentaufnahme aller aktuellen Einstellungen (`ESB_SETTING_CURRENT`).
-Wertänderungen stehen darin als `ESB_SETTING_CHANGED`. Für diese Tests bitte dieses
-Log senden. `Latest.log` wird nur ergänzend benötigt, wenn das Plugin nicht lädt
-oder Fehler außerhalb des eigenen Loggings untersucht werden müssen.
-Die alte Datei ohne Bindestriche bleibt unberührt und wird nicht weitergeschrieben.
-
-Die Nutzerlogs vom 25.09.2026 bestätigen für 0.0.2: Slots wurden um 14:59:20 von
-40 auf 64 geändert, vor dem Spielneustart. Beim nächsten Start wurde 64 geladen.
-Damit sind Wertübernahme während der Sitzung und Persistenz dieses Wertes belegt.
-Die Logs allein belegen nicht, ob jede Eingabe schon vor dem Save-Klick übernommen
-wird. Ein Neustart ist für die Einstellungsübernahme nicht erforderlich; er war
-nur Teil der Persistenzprüfung. Eine neue DLL erfordert dagegen einen Spielneustart.
-Die spätere Auswirkung auf Inventare ist weiterhin noch nicht implementiert.
+Die Kategoriekennungen bleiben stabil, damit gespeicherte Einstellungen und die
+[Mod-Manager-Erkennung](https://github.com/Prowiler/schedule1-mod-manager-wiki/wiki/Integration-Guide)
+bei einem Sprachwechsel erhalten bleiben. Keine Referenz auf die Mod-Manager-DLL.

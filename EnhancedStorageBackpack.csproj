@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>EnhancedStorageBackpack</AssemblyName>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <MelonLoaderDirectory Condition="'$(MelonLoaderDirectory)' == ''">$(GameDirectory)/MelonLoader/net6</MelonLoaderDirectory>
     <GameAssembliesDirectory Condition="'$(GameAssembliesDirectory)' == ''">$(GameDirectory)/MelonLoader/Il2CppAssemblies</GameAssembliesDirectory>
@@ -15,9 +15,12 @@
       <HintPath>$(MelonLoaderDirectory)/MelonLoader.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(GameAssembliesDirectory)/UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="$(GameAssembliesDirectory)/*.dll"><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>$(MelonLoaderDirectory)/Il2CppInterop.Runtime.dll</HintPath><Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(MelonLoaderDirectory)/0Harmony.dll</HintPath><Private>false</Private>
     </Reference>
   </ItemGroup>
   <Target Name="CheckMelonLoaderReference" BeforeTargets="ResolveAssemblyReferences">
