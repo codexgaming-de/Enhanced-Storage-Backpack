@@ -1,0 +1,9 @@
+bin/
+obj/
+references/
+*.dll
+*.pdb
+*.zip
+*.log
+.vs/
+.idea/

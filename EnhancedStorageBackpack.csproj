@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>EnhancedStorageBackpack</AssemblyName>
+    <Version>0.0.1</Version>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <MelonLoaderDirectory Condition="'$(MelonLoaderDirectory)' == ''">$(GameDirectory)/MelonLoader/net6</MelonLoaderDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src/**/*.cs" />
+    <Reference Include="MelonLoader">
+      <HintPath>$(MelonLoaderDirectory)/MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="CheckMelonLoaderReference" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(MelonLoaderDirectory)/MelonLoader.dll')" Text="MelonLoader.dll fehlt. Bitte -p:GameDirectory=&quot;/vollstaendiger/Pfad/Schedule I&quot; angeben." />
+  </Target>
+</Project>
