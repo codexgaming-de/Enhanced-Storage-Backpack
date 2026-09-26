@@ -112,6 +112,20 @@ internal sealed class SmallRackStorage : IDisposable
         entity.SlotCount = slots.Count;
     }
 
+    private static bool CanReorder(ItemSlot slot) =>
+        !slot.IsLocked && !slot.IsRemovalLocked && !slot.IsAddLocked &&
+        slot.SiblingSet == null && (slot.PlayerFilter == null || slot.PlayerFilter.IsDefault());
+
+    private static bool SameHardFilters(ItemSlot left, ItemSlot right)
+    {
+        var a = left.HardFilters;
+        var b = right.HardFilters;
+        if (a.Count != b.Count) return false;
+        for (int i = 0; i < a.Count; i++)
+            if (a[i]?.Pointer != b[i]?.Pointer) return false;
+        return true;
+    }
+
     private void Apply(Rack rack)
     {
         var entity = rack.Entity;
@@ -119,12 +133,33 @@ internal sealed class SmallRackStorage : IDisposable
         var slots = entity.ItemSlots;
         int before = slots.Count;
         int target = StorageRules.TargetSlots(settings.SmallRackSlots.Value, rack.OriginalSlots);
-        int size = StorageRules.SafeSize(target, before, i =>
-            slots[i].ItemInstance != null || slots[i].IsLocked || slots[i].IsRemovalLocked ||
-            slots[i].IsAddLocked || (slots[i].PlayerFilter != null && !slots[i].PlayerFilter.IsDefault()) || slots[i].SiblingSet != null);
         applying = true;
         try
         {
+            if (before > target)
+            {
+                if (menu.IsShowing(entity)) menu.ClearBindings();
+                // Reorder existing slots within the same owner. Item instances,
+                // quantities and their event subscriptions remain untouched.
+                for (int sourceIndex = target; sourceIndex < slots.Count; sourceIndex++)
+                {
+                    var source = slots[sourceIndex];
+                    if (source.ItemInstance == null || !CanReorder(source)) continue;
+                    for (int destinationIndex = 0; destinationIndex < target; destinationIndex++)
+                    {
+                        var destination = slots[destinationIndex];
+                        if (destination.ItemInstance != null || !CanReorder(destination) ||
+                            !SameHardFilters(source, destination)) continue;
+                        slots[destinationIndex] = source;
+                        slots[sourceIndex] = destination;
+                        entity.ContentsChanged();
+                        settings.Trace($"ESB_RACK_COMPACT | from={sourceIndex + 1} | to={destinationIndex + 1}");
+                        break;
+                    }
+                }
+            }
+            int size = StorageRules.SafeSize(target, slots.Count, i =>
+                slots[i].ItemInstance != null || !CanReorder(slots[i]));
             // Clear displayed bindings before releasing an empty tail of slots.
             if (size < before && menu.IsShowing(entity)) menu.ClearBindings();
             Grow(entity, size);

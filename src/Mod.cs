@@ -7,7 +7,7 @@ using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.UI;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.5", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.6", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -36,8 +36,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.0.5 | Kleines Lagerregal aktiviert.", "ESB_READY | 0.0.5 | Small storage rack enabled."));
-            settings.Trace("ESB_READY | 0.0.5");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.0.6 | Kleines Lagerregal aktiviert.", "ESB_READY | 0.0.6 | Small storage rack enabled."));
+            settings.Trace("ESB_READY | 0.0.6");
         }
         catch (Exception ex)
         {

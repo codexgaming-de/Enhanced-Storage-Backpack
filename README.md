@@ -2,22 +2,23 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.5 – Fehlerkorrektur in Prüfung
+## 0.0.6 – automatisches Umräumen und Sitzungslogs in Prüfung
 
-Die bereitgestellte Manager-DLL wurde untersucht. Nach Sprachänderungen fordert
-unser Plugin jetzt über die öffentliche TriggerUIRefresh-API eine Aktualisierung an.
-Diese Ergänzung ist noch nicht gebaut oder im Spiel bestätigt: Die lokalen
-.NET-Buildwerkzeuge scheitern momentan bereits beim Zugriff auf Prozessinformationen.
-Nicht als fertige Korrektur freigegeben.
+Beim Verkleinern werden belegte Slots außerhalb der Zielgröße mit freien Slots
+innerhalb der Zielgröße getauscht, beginnend beim ersten passenden freien Platz.
+Keine Kopien, kein Zusammenführen von Stapeln. Sperren, individuelle Filter und
+Slot-Verknüpfungen verhindern das automatische Umräumen. Unterschiedliche harte
+Filter werden nicht vertauscht. Reicht der Platz nicht, bleiben zusätzliche Slots
+geschützt. Bewegung nur außerhalb von Drag-and-drop und Speichern/Laden.
 
-Neu: Beschreibungstexte für sämtliche Einstellungen in beiden Sprachen, korrigierte
-Slot-Registrierung und Entfernung, keine Skalierung mit vor dem Öffnen erfassten
-Zellgrößen. Details und verbleibende Unsicherheiten: [Fehleranalyse](docs/BUGS-0.0.4.md).
+Sprachwechsel in der Phone App sowie Slots, Reihen, Einlegen/Entnehmen und
+Speichern/Laden wurden in 0.0.5 vom Nutzer bestätigt. Die neuen Änderungen in
+0.0.6 benötigen noch den regulären .NET-6-Build und einen Spieltest.
 
 ## Funktionsumfang in Prüfung
 
 - Metadaten für Einstellungen, Kategorien und Beschreibungen auf Deutsch und
-  Englisch. Die sichtbare Aktualisierung muss noch im Spiel bestätigt werden.
+  Englisch. Sprachwechsel in der Phone App vom Nutzer bestätigt.
 - Nach einem Sprachwechsel wird die öffentliche Aktualisierungs-API des Managers
   einmal aufgerufen. Die Oberfläche des fremden Mod Managers und
   dessen eigene Schaltflächen werden nicht vom Plugin übersetzt.
@@ -80,7 +81,12 @@ mit Beschreibung bzw. Screenshot senden; nicht über den einzigen Originalstand 
 ## Diagnose
 
 `UserData/Enhanced-Storage-Backpack-Debug.log`, optional im Mod Manager einschaltbar.
-Begrenzt auf ungefähr 1 MiB plus eine Vorgängerdatei. Kein zyklisches Logging.
+Drei protokollierte Spielsitzungen: aktuelle Datei, `.log.1` (vorherige Sitzung)
+und `.log.2` (vorvorherige Sitzung). Rotation einmal beim ersten aktivierten
+Logeintrag pro Spielstart. Rein deaktivierte Sitzungen erzeugen keine Datei.
+Pro Sitzung ungefähr 1 MiB; danach endet die Ausgabe mit `ESB_LOG_LIMIT`.
+Beim Umstieg werden die alten, mehrere Sitzungen vermischenden Logs gelöscht.
+Kein zyklisches Logging.
 
 - `ESB_SETTING_CURRENT` / `ESB_SETTING_CHANGED`: geladene/geänderte Einstellungen.
 - `ESB_RACK_FOUND`: erkanntes kleines Lagerregal mit ursprünglicher Kapazität.

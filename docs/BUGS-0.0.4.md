@@ -116,3 +116,26 @@ berechnen. 26 geschützte Slots bei Ziel 10/1 ergeben 3 Reihen. Nach Entnahme ge
 10/1. Keine Gegenstandsverschiebung, keine Änderung des Speicherverhaltens.
 Build und Spieltest dieser Ergänzung ausstehend. Extrem breite reguläre Layouts
 (z.B. explizit 128 Slots/1 Reihe) sind damit noch nicht allgemein gelöst.
+
+## 0.0.6: gewünschtes automatisches Umräumen
+
+Log (6) und Nutzerbericht bestätigen das Zurückstellen auf 26 Slots und die
+Verkleinerung auf 10 nach manueller Entnahme/Verschiebung. Neue Anforderung:
+belegte hintere Slots automatisch in freie vordere Slots umordnen. Innerhalb
+desselben StorageEntity werden die vorhandenen ItemSlot-Referenzen vertauscht;
+ItemInstance, Menge und Abonnements bleiben erhalten. Nur ungesperrte Slots ohne
+individuelle Spielerfilter/Verknüpfungen und mit identischen HardFilter-Referenzen.
+Kein Stack-Merging. Danach SafeSize erneut bestimmen. Bei Platzmangel bleibt der
+bestehende Schutz bestehen. Native ContentsChanged aktualisiert die Darstellung.
+
+Debug-Log: maximal drei protokollierte Sitzungen, Rotation einmal pro Instanz beim
+ersten eingeschalteten Logeintrag; Legacy-Mehrfachsitzungslogs werden entfernt.
+Dateigrenze beendet die Ausgabe, statt innerhalb einer Sitzung zu rotieren.
+Regressionstest mit fünf Sitzungen und Logging-Umschaltung erfolgreich ausgeführt.
+Direkte Roslyn-Kompilierung gegen Spiel-DLLs und .NET-8-Referenzen erfolgreich,
+mit erwarteten CS1701-Versionswarnungen. Kein regulärer net6-Release-Build bestätigt.
+
+Manueller Test: 26/4, Gegenstand in Slot 26, Ziel 10/1: Gegenstand nun in Slot 1,
+10 Slots. Bei belegtem Slot 1 nächsten freien Slot nutzen. Sind alle ersten 10
+belegt, Zusatzslot erhalten. Mengen und Gegenstandseigenschaften prüfen; danach
+Spiel speichern/laden und prüfen, dass jeder Gegenstand genau einmal vorkommt.
