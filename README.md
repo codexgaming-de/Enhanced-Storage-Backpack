@@ -2,18 +2,18 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.6 – getesteter Zwischenstand für das kleine Lagerregal
+## 0.0.7 – mittleres Lagerregal in Prüfung
 
-Beim Verkleinern werden belegte Slots außerhalb der Zielgröße mit freien Slots
-innerhalb der Zielgröße getauscht, beginnend beim ersten passenden freien Platz.
-Keine Kopien, kein Zusammenführen von Stapeln. Sperren, individuelle Filter und
-Slot-Verknüpfungen verhindern das automatische Umräumen. Unterschiedliche harte
-Filter werden nicht vertauscht. Reicht der Platz nicht, bleiben zusätzliche Slots
-geschützt. Bewegung nur außerhalb von Drag-and-drop und Speichern/Laden.
+Small Storage Rack und Medium Storage Rack haben getrennte Slot-/Reiheneinstellungen.
+Beide verwenden die in 0.0.6 getestete Größen- und Umräumlogik. Beim Verkleinern
+werden belegte hintere Slots mit freien, passenden vorderen Slots getauscht.
+Keine Kopien, kein Stack-Merging. Sperren, individuelle Filter und Verknüpfungen
+bleiben geschützt; bei Platzmangel bleiben zusätzliche Slots erhalten.
 
-Sprachwechsel in der Phone App sowie Slots, Reihen, Einlegen/Entnehmen und
-Speichern/Laden wurden in 0.0.5 vom Nutzer bestätigt. Automatisches Umräumen und anschließendes Speichern/Laden in 0.0.6 wurden
-anschließend ebenfalls vom Nutzer bestätigt; die Logrotation ist isoliert getestet.
+0.0.6 ist der bestätigte Zwischenstand auf main. 0.0.7 liegt auf
+feature/0.0.7-medium-rack und benötigt noch einen regulären .NET-6-Build und
+Spieltest. Die direkte Compilerprüfung mit .NET-8-Referenzen war erfolgreich
+(mit CS1701-Referenzversionswarnungen); 16.395 Größen-/Reihenprüfungen bestanden.
 
 ## Funktionsumfang in Prüfung
 
@@ -22,7 +22,8 @@ anschließend ebenfalls vom Nutzer bestätigt; die Logrotation ist isoliert gete
 - Nach einem Sprachwechsel wird die öffentliche Aktualisierungs-API des Managers
   einmal aufgerufen. Die Oberfläche des fremden Mod Managers und
   dessen eigene Schaltflächen werden nicht vom Plugin übersetzt.
-- Small Storage Rack / Kleines Lagerregal: 1–128 Plätze, eigene Reihenanzahl.
+- Small Storage Rack / Kleines Lagerregal und Medium Storage Rack / Mittleres
+  Lagerregal: jeweils 1–128 Plätze und eigene Reihenanzahl.
   0 verwendet jeweils die ursprüngliche Spielvorgabe.
 - Reihen werden für die Darstellung auf die tatsächliche Zahl der Plätze begrenzt.
 - Einstellungsänderungen werden bei der nächsten Spielaktualisierung verarbeitet.
@@ -34,7 +35,7 @@ anschließend ebenfalls vom Nutzer bestätigt; die Logrotation ist isoliert gete
 - Zusätzliche UI-Plätze werden bei Bedarf einmal erzeugt und wiederverwendet.
 - Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
 
-**Andere Lagertypen und der Backpack haben weiterhin nur Einstellungen.**
+**Die übrigen sieben Lagertypen und der Backpack haben weiterhin nur Einstellungen.**
 Das kleine Regal ist in den dokumentierten Fällen im Spiel bestätigt. Keine
 Veröffentlichung als fertige Nexus-Version.
 
@@ -131,3 +132,17 @@ dotnet run --project tests/StorageRulesTests.csproj -c Release
 Die Kategoriekennungen bleiben stabil, damit gespeicherte Einstellungen und die
 [Mod-Manager-Erkennung](https://github.com/Prowiler/schedule1-mod-manager-wiki/wiki/Integration-Guide)
 bei einem Sprachwechsel erhalten bleiben. Keine Referenz auf die Mod-Manager-DLL.
+
+## Testplan 0.0.7
+
+1. Ein kleines und ein mittleres Regal platzieren. Für das kleine 10 Slots/1 Reihe,
+   für das mittlere 24 Slots/4 Reihen setzen. Größen müssen getrennt bleiben.
+2. Mittleres Regal auf 16 Slots/2 Reihen ändern: vorhandenes und neu platziertes
+   Regal prüfen, ohne Spielneustart. Einlegen/Entnehmen und Quick Move prüfen.
+3. Im mittleren Regal Gegenstand im letzten Slot ablegen, bei freiem vorderen
+   Platz auf 10 Slots verkleinern: automatisches Umräumen und Mengenerhalt prüfen.
+4. Speichern/Laden: beide Typen behalten ihre Gegenstände und getrennten Größen.
+5. Deutsch/English: mittlere Kategorie und Beschreibungen, Regalüberschrift prüfen.
+
+Wenn das mittlere Regal nicht erkannt wird, enthält ESB_STORAGE_OPEN seinen Namen
+und supportedRack=False. ESB_RACK_FOUND protokolliert die erkannte Item-ID.

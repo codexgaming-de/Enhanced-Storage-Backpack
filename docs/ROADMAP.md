@@ -5,7 +5,7 @@ Die folgende Liste beschreibt Ziele, keine bereits implementierten Funktionen.
 0.0.2/0.0.3: Einstellungsänderungen, Persistenz und eigenes Debug-Log durch Nutzerlogs bestätigt.
 0.0.5/0.0.6: Phone-Sprachwahl, Small Storage Rack, automatisches Umräumen sowie
 Speichern/Laden im beschriebenen Nutzertest bestätigt.
-Nächster Schritt: Medium Storage Rack mit eigenen Einstellungen.
+Aktueller Schritt: 0.0.7 Medium Storage Rack implementiert; Spieltest ausstehend.
 
 ## Backpack
 

@@ -7,7 +7,7 @@ using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.UI;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.6", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.7", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -16,7 +16,7 @@ public sealed class Mod : MelonMod
 {
     private static Mod? instance;
     private Settings? settings;
-    private SmallRackStorage? storage;
+    private RackStorage? storage;
     private bool disabled;
     private bool refreshSettingsUi;
 
@@ -25,7 +25,7 @@ public sealed class Mod : MelonMod
         instance = this;
         settings = new Settings(LoggerInstance);
         settings.LanguageChanged += RequestSettingsRefresh;
-        storage = new SmallRackStorage(settings);
+        storage = new RackStorage(settings);
         try
         {
             Patch(typeof(StorageEntity), "Start", postfix: nameof(StorageStarted));
@@ -36,8 +36,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.0.6 | Kleines Lagerregal aktiviert.", "ESB_READY | 0.0.6 | Small storage rack enabled."));
-            settings.Trace("ESB_READY | 0.0.6");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.0.7 | Kleines und mittleres Lagerregal aktiviert.", "ESB_READY | 0.0.7 | Small and medium storage racks enabled."));
+            settings.Trace("ESB_READY | 0.0.7");
         }
         catch (Exception ex)
         {
@@ -54,7 +54,7 @@ public sealed class Mod : MelonMod
 
     private static bool Active => instance != null && !instance.disabled && !InstanceFinder.IsClientOnly;
 
-    private static void Run(Action<SmallRackStorage> action)
+    private static void Run(Action<RackStorage> action)
     {
         if (!Active) return;
         try { action(instance!.storage!); }

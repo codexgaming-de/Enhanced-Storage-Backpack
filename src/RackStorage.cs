@@ -9,18 +9,20 @@ using UnityEngine;
 
 namespace EnhancedStorageBackpack;
 
-internal sealed class SmallRackStorage : IDisposable
+internal sealed class RackStorage : IDisposable
 {
     private sealed class Rack
     {
         public readonly StorageEntity Entity;
+        public readonly string ItemId;
         public readonly int OriginalSlots;
         public readonly int OriginalRows;
         public bool Failed;
         public int LastBlockedTarget = -1;
-        public Rack(StorageEntity entity)
+        public Rack(StorageEntity entity, string itemId)
         {
             Entity = entity;
+            ItemId = itemId;
             OriginalSlots = entity.SlotCount;
             OriginalRows = entity.DisplayRowCount;
         }
@@ -31,11 +33,11 @@ internal sealed class SmallRackStorage : IDisposable
     private readonly RackMenu menu;
     private bool pending;
     private bool applying;
-    public SmallRackStorage(Settings settings)
+    public RackStorage(Settings settings)
     {
         this.settings = settings;
         menu = new RackMenu(settings);
-        settings.SmallRackChanged += Request;
+        settings.RackChanged += Request;
         settings.LanguageChanged += Request;
     }
 
@@ -56,13 +58,20 @@ internal sealed class SmallRackStorage : IDisposable
         var definition = placeable?.ItemInstance?.Definition;
         // Prefer immutable item identity over a player-editable storage label.
         // Placement previews have no item definition and must not be resized.
-        bool match = definition != null && Normalize(definition.ID) == "smallstoragerack";
+        string itemId = Normalize(definition?.ID);
+        bool match = definition != null && (itemId == "smallstoragerack" || itemId == "mediumstoragerack");
         if (!match) return null;
-        var rack = new Rack(entity);
+        var rack = new Rack(entity, itemId);
         racks.Add(entity.Pointer, rack);
         settings.Trace($"ESB_RACK_FOUND | id={definition?.ID} | name={entity.StorageEntityName} | originalSlots={rack.OriginalSlots} | originalRows={rack.OriginalRows}");
         return rack;
     }
+
+    private int ConfiguredSlots(Rack rack) => rack.ItemId == "mediumstoragerack"
+        ? settings.MediumRackSlots.Value : settings.SmallRackSlots.Value;
+
+    private int ConfiguredRows(Rack rack) => rack.ItemId == "mediumstoragerack"
+        ? settings.MediumRackRows.Value : settings.SmallRackRows.Value;
 
     private static string Normalize(string? value)
         => new string((value ?? "").Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
@@ -73,7 +82,7 @@ internal sealed class SmallRackStorage : IDisposable
     public void ContentsChanged(StorageEntity entity)
     {
         if (applying || !racks.TryGetValue(entity.Pointer, out var rack) || rack.Failed) return;
-        if (entity.ItemSlots.Count != StorageRules.TargetSlots(settings.SmallRackSlots.Value, rack.OriginalSlots)) Request();
+        if (entity.ItemSlots.Count != StorageRules.TargetSlots(ConfiguredSlots(rack), rack.OriginalSlots)) Request();
     }
 
     public void BeforeLoad(StorageEntity entity, Il2CppReferenceArray<ItemInstance> items)
@@ -132,7 +141,7 @@ internal sealed class SmallRackStorage : IDisposable
         if (entity == null || rack.Failed || entity.ItemSlots == null || entity.ItemSlots.Count == 0) return;
         var slots = entity.ItemSlots;
         int before = slots.Count;
-        int target = StorageRules.TargetSlots(settings.SmallRackSlots.Value, rack.OriginalSlots);
+        int target = StorageRules.TargetSlots(ConfiguredSlots(rack), rack.OriginalSlots);
         applying = true;
         try
         {
@@ -153,7 +162,7 @@ internal sealed class SmallRackStorage : IDisposable
                         slots[destinationIndex] = source;
                         slots[sourceIndex] = destination;
                         entity.ContentsChanged();
-                        settings.Trace($"ESB_RACK_COMPACT | from={sourceIndex + 1} | to={destinationIndex + 1}");
+                        settings.Trace($"ESB_RACK_COMPACT | id={rack.ItemId} | from={sourceIndex + 1} | to={destinationIndex + 1}");
                         break;
                     }
                 }
@@ -174,7 +183,7 @@ internal sealed class SmallRackStorage : IDisposable
             }
             entity.SlotCount = slots.Count;
             if (before != slots.Count) entity.ContentsChanged();
-            int rows = StorageRules.Rows(settings.SmallRackRows.Value, rack.OriginalRows, target);
+            int rows = StorageRules.Rows(ConfiguredRows(rack), rack.OriginalRows, target);
             if (slots.Count > target)
             {
                 // Retained slots must not make the requested layout wider.
@@ -185,9 +194,9 @@ internal sealed class SmallRackStorage : IDisposable
             }
             bool changed = before != slots.Count || entity.DisplayRowCount != rows;
             entity.DisplayRowCount = rows;
-            if (changed) settings.Trace($"ESB_RACK_APPLIED | requested={target} | actual={slots.Count} | rows={rows}");
+            if (changed) settings.Trace($"ESB_RACK_APPLIED | id={rack.ItemId} | requested={target} | actual={slots.Count} | rows={rows}");
             if (size > target && rack.LastBlockedTarget != target)
-                settings.Trace($"ESB_RACK_SHRINK_DEFERRED | requested={target} | protectedSize={size}");
+                settings.Trace($"ESB_RACK_SHRINK_DEFERRED | id={rack.ItemId} | requested={target} | protectedSize={size}");
             rack.LastBlockedTarget = size > target ? target : -1;
             if (menu.IsShowing(entity)) menu.Bind(entity);
         }
@@ -209,7 +218,7 @@ internal sealed class SmallRackStorage : IDisposable
     {
         menu.Restore();
         var rack = Track(entity);
-        settings.Trace($"ESB_STORAGE_OPEN | name={entity.StorageEntityName} | smallRack={rack != null} | slots={entity.ItemSlots.Count}");
+        settings.Trace($"ESB_STORAGE_OPEN | name={entity.StorageEntityName} | supportedRack={rack != null} | slots={entity.ItemSlots.Count}");
         if (rack == null || rack.Failed) return;
         if (!SaveOrLoadInProgress && !Dragging) Apply(rack);
         else Request();
@@ -225,7 +234,7 @@ internal sealed class SmallRackStorage : IDisposable
 
     public void Dispose()
     {
-        settings.SmallRackChanged -= Request;
+        settings.RackChanged -= Request;
         settings.LanguageChanged -= Request;
         menu.Restore();
         racks.Clear();

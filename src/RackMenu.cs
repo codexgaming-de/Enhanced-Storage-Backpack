@@ -50,7 +50,7 @@ internal sealed class RackMenu
 
     public void Bind(StorageEntity entity)
     {
-        if (!IsShowing(entity) || SmallRackStorage.Dragging) return;
+        if (!IsShowing(entity) || RackStorage.Dragging) return;
         Prepare(entity.ItemSlots.Count);
         var current = menu!;
         for (int i = 0; i < current.SlotsUIs.Length; i++)
@@ -62,6 +62,8 @@ internal sealed class RackMenu
         }
         if (string.Equals(entity.StorageEntityName, "Small Storage Rack", StringComparison.OrdinalIgnoreCase))
             current.TitleLabel.text = settings.Text("Kleines Lagerregal", "Small Storage Rack");
+        if (string.Equals(entity.StorageEntityName, "Medium Storage Rack", StringComparison.OrdinalIgnoreCase))
+            current.TitleLabel.text = settings.Text("Mittleres Lagerregal", "Medium Storage Rack");
         var grid = current.SlotGridLayout;
         int count = entity.ItemSlots.Count;
         int rows = Math.Clamp(entity.DisplayRowCount, 1, Math.Max(1, count));
