@@ -139,7 +139,15 @@ internal sealed class SmallRackStorage : IDisposable
             }
             entity.SlotCount = slots.Count;
             if (before != slots.Count) entity.ContentsChanged();
-            int rows = StorageRules.Rows(settings.SmallRackRows.Value, rack.OriginalRows, slots.Count);
+            int rows = StorageRules.Rows(settings.SmallRackRows.Value, rack.OriginalRows, target);
+            if (slots.Count > target)
+            {
+                // Retained slots must not make the requested layout wider.
+                // Derive this from the requested size, not the previous layout,
+                // so changing rows before capacity gives the same result.
+                int targetColumns = (target + rows - 1) / rows;
+                rows = Math.Max(rows, (slots.Count + targetColumns - 1) / targetColumns);
+            }
             bool changed = before != slots.Count || entity.DisplayRowCount != rows;
             entity.DisplayRowCount = rows;
             if (changed) settings.Trace($"ESB_RACK_APPLIED | requested={target} | actual={slots.Count} | rows={rows}");

@@ -103,3 +103,16 @@ ruft PopulateModSettings(MelonBase) nur für unsere ausgewählte, aktive Phone-S
 und ohne aktiven JSON-Editor auf. Keine Änderung der Manager-DLL. Hauptmenü nutzt
 weiter die öffentliche API. Reflection-Signatur gegen bereitgestellte DLL geprüft;
 Build und Spieltest dieser Korrektur stehen noch aus.
+
+## Geschützte Slots außerhalb des Bildschirms
+
+Nutzertest: Sprache funktioniert. Speichern/Laden vom Nutzer als erfolgreich
+bestätigt. Reproduktion: 26 Slots/4 Reihen, Gegenstand in Slot 26; anschließend
+10 Slots/1 Reihe. SafeSize erhält 26 Slots, aber die sofort angewandte eine Reihe
+läuft aus dem Bildschirm. Bei Gegenstand in Slot 1 schrumpft die Kapazität normal.
+Korrektur: Bei zurückgestellter Verkleinerung die Spaltenzahl des gewünschten
+Layouts nicht überschreiten; zusätzliche Reihen aus tatsächlicher Kapazität
+berechnen. 26 geschützte Slots bei Ziel 10/1 ergeben 3 Reihen. Nach Entnahme gelten
+10/1. Keine Gegenstandsverschiebung, keine Änderung des Speicherverhaltens.
+Build und Spieltest dieser Ergänzung ausstehend. Extrem breite reguläre Layouts
+(z.B. explizit 128 Slots/1 Reihe) sind damit noch nicht allgemein gelöst.
