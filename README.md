@@ -4,10 +4,11 @@ Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstü
 
 ## 0.0.5 – Fehlerkorrektur in Prüfung
 
-**Der sichtbare Sprachwechsel im Mod Manager ist noch nicht behoben.**
-Für die gezielte Untersuchung der Anzeige benötigen wir die installierte
-`ModManager&PhoneApp.dll` (2.2.4). Die Sprachwerte und Metadaten ändern sich bereits;
-die Anzeige blieb beim Nutzer dennoch deutsch. Nicht als fertige Korrektur freigegeben.
+Die bereitgestellte Manager-DLL wurde untersucht. Nach Sprachänderungen fordert
+unser Plugin jetzt über die öffentliche TriggerUIRefresh-API eine Aktualisierung an.
+Diese Ergänzung ist noch nicht gebaut oder im Spiel bestätigt: Die lokalen
+.NET-Buildwerkzeuge scheitern momentan bereits beim Zugriff auf Prozessinformationen.
+Nicht als fertige Korrektur freigegeben.
 
 Neu: Beschreibungstexte für sämtliche Einstellungen in beiden Sprachen, korrigierte
 Slot-Registrierung und Entfernung, keine Skalierung mit vor dem Öffnen erfassten
@@ -16,9 +17,9 @@ Zellgrößen. Details und verbleibende Unsicherheiten: [Fehleranalyse](docs/BUGS
 ## Funktionsumfang in Prüfung
 
 - Metadaten für Einstellungen, Kategorien und Beschreibungen auf Deutsch und
-  Englisch. Der sichtbare Sprachwechsel ist noch offen.
-- Nach einem Sprachwechsel die Einstellungsansicht im Mod Manager neu öffnen,
-  zur Kontrolle. Das allein hat den gemeldeten Sprachfehler bisher nicht nachweislich behoben. Die Oberfläche des fremden Mod Managers und
+  Englisch. Die sichtbare Aktualisierung muss noch im Spiel bestätigt werden.
+- Nach einem Sprachwechsel wird die öffentliche Aktualisierungs-API des Managers
+  einmal aufgerufen. Die Oberfläche des fremden Mod Managers und
   dessen eigene Schaltflächen werden nicht vom Plugin übersetzt.
 - Small Storage Rack / Kleines Lagerregal: 1–128 Plätze, eigene Reihenanzahl.
   0 verwendet jeweils die ursprüngliche Spielvorgabe.
@@ -110,7 +111,8 @@ Gegenstandsbewegungen, Größenänderungen oder die Save-Taste des Mod Managers.
   16.395 Prüfungen der reinen Größen-/Reihenregeln bestanden (einschließlich aller
   Kombinationen aus Zielkapazität 1–128 und einem geschützten Platz).
   Der anschließende Nutzertest zeigte die in der Fehleranalyse beschriebenen Laufzeitfehler.
-- 0.0.5: Release-Build mit 0 Warnungen/Fehlern und bisherige Größenregeltests bestanden.
+- 0.0.5 vor Ergänzung der Manager-API: Release-Build mit 0 Warnungen/Fehlern und bisherige Größenregeltests bestanden.
+  Die anschließende API-Ergänzung konnte wegen eines lokalen .NET-Werkzeugfehlers noch nicht gebaut werden.
   Die Korrekturen wurden noch nicht im Spiel geprüft.
   Das sind keine Unity-Laufzeittests. Native Methoden liegen hier nur als
   IL2CPP-Interop-Schnittstellen vor. UI, Gegenstandsbewegungen und Speicherverhalten

@@ -55,14 +55,19 @@ selbst wurde also übernommen. Die Metadatenänderung allein genügte nicht für
 beobachtete Oberfläche. Offene Erklärungen: bestehende UI-Texte werden nicht erneut
 eingelesen, oder AutoTranslator übersetzt englische Texte zurück ins Deutsche.
 
-Nächster diskriminierender Schritt: die tatsächlich installierte Manager-DLL
-untersuchen (UI-Erzeugung, Metadatenzugriff, Aktualisierung). Neue Diagnose
-`ESB_LANGUAGE_APPLIED` protokolliert Metadaten der Sprachauswahl direkt nach Änderung.
-Keine globale Textersetzung und kein Eingriff in fremde Mods auf bloßen Verdacht.
+Die bereitgestellte ModManager&PhoneApp(3).dll wurde am 26.09.2026 untersucht.
+Der Manager liest DisplayName und Description beim Erzeugen der Phone-Einstellungen.
+Die öffentliche Instanzmethode TriggerUIRefresh() baut die aktive Einstellungsseite
+im Hauptmenü bzw. Telefon neu auf. Unser Plugin ruft diese API jetzt einmal nach
+Sprachänderung im Update auf, außerhalb des Dropdown-Callbacks. Optionale Reflection
+vermeidet eine feste DLL-Abhängigkeit. Fehler dieser Integration deaktivieren nicht
+unsere Lagerverwaltung. Keine regelmäßige Suche, nur nach Sprachänderungen.
+ESB_MANAGER_REFRESH protokolliert den Aufruf. Ein möglicher zusätzlicher Einfluss
+von AutoTranslator ist noch nicht im Spiel ausgeschlossen.
 
 ## Validierung
 
-0.0.5 kompiliert gegen die bereitgestellten vollständigen Referenzen: 0 Fehler,
+Der Stand vor der Manager-API-Ergänzung kompiliert gegen die bereitgestellten vollständigen Referenzen: 0 Fehler,
 0 Warnungen. Bisherige 16.395 Kapazitäts-/Reihenprüfungen bestanden. Das beweist nicht
 die Korrektheit der nativen Registrierung oder der UI. Originalschritte wiederholen:
 
@@ -73,3 +78,7 @@ die Korrektheit der nativen Registrierung oder der UI. Originalschritte wiederho
 5. Sprache Deutsch → English → Deutsch, geöffnete und neu geöffnete Phone-App
    sowie Hauptmenü prüfen, einschließlich Beschreibungstexte.
 6. Erst danach Speichern/Laden mit Gegenständen in einer Spielstandkopie testen.
+
+Die Manager-API-Ergänzung ist noch nicht kompiliert: dotnet CLI und MSBuild
+scheitern in dieser Umgebung an System.Diagnostics.Process, bevor Projektcode
+gebaut wird. Kein erfolgreicher Build oder Laufzeittest dieser Ergänzung behauptet.

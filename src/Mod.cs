@@ -18,11 +18,13 @@ public sealed class Mod : MelonMod
     private Settings? settings;
     private SmallRackStorage? storage;
     private bool disabled;
+    private bool refreshSettingsUi;
 
     public override void OnInitializeMelon()
     {
         instance = this;
         settings = new Settings(LoggerInstance);
+        settings.LanguageChanged += RequestSettingsRefresh;
         storage = new SmallRackStorage(settings);
         try
         {
@@ -65,9 +67,35 @@ public sealed class Mod : MelonMod
 
     public override void OnUpdate()
     {
+        RefreshSettingsUi();
         if (!Active) return;
         try { storage!.Tick(); }
         catch (Exception ex) { disabled = true; settings!.Error("ESB_UPDATE_DISABLED", ex); }
+    }
+
+    private void RequestSettingsRefresh() => refreshSettingsUi = true;
+
+    private void RefreshSettingsUi()
+    {
+        if (!refreshSettingsUi) return;
+        refreshSettingsUi = false;
+        // Defer until after the dropdown callback; rebuilding it inside its own
+        // value-change callback would destroy controls still handling that event.
+        try
+        {
+            var manager = MelonBase.RegisteredMelons.FirstOrDefault(m =>
+                m.GetType().FullName == "ModManagerPhoneApp.ModSettingsAppCreator");
+            if (manager == null) return;
+            var refresh = manager.GetType().GetMethod("TriggerUIRefresh", Type.EmptyTypes);
+            if (refresh == null)
+            {
+                settings?.Trace("ESB_MANAGER_REFRESH | API unavailable");
+                return;
+            }
+            refresh.Invoke(manager, null);
+            settings?.Trace("ESB_MANAGER_REFRESH | requested");
+        }
+        catch (Exception ex) { settings?.Error("ESB_MANAGER_REFRESH", ex); }
     }
 
     private static void StorageStarted(StorageEntity __instance) => Run(s => s.Started(__instance));
@@ -94,6 +122,7 @@ public sealed class Mod : MelonMod
         disabled = true;
         HarmonyInstance.UnpatchSelf();
         storage?.Dispose();
+        if (settings != null) settings.LanguageChanged -= RequestSettingsRefresh;
         settings?.Dispose();
         instance = null;
     }
