@@ -92,3 +92,14 @@ fehlerfrei zurückkehrenden API-Aufruf. Die API kann wegen interner Szene-/Panel
 Bedingungen ohne UI-Aufbau zurückkehren. Neue Diagnose ESB_MANAGER_STATE erfasst
 diese Bedingungen und die ausgewählte Mod; keine Änderung der Regalverwaltung.
 Diese Diagnose-Ergänzung ist noch nicht gebaut/getestet.
+
+## Ursache der übersprungenen Phone-Aktualisierung
+
+Diagnoselog (4) bestätigt gameScene=True, aktive Phone/App-Panels und unser Plugin
+als Auswahl. Manager 2.2.4 hält JsonEditor_Template als inaktives Kind des
+rightPanelContent vor. TriggerUIRefresh prüft nur StartsWith("JsonEditor_"),
+keinen Aktivitätszustand, und überspringt dadurch den Neuaufbau. Unser Fallback
+ruft PopulateModSettings(MelonBase) nur für unsere ausgewählte, aktive Phone-Seite
+und ohne aktiven JSON-Editor auf. Keine Änderung der Manager-DLL. Hauptmenü nutzt
+weiter die öffentliche API. Reflection-Signatur gegen bereitgestellte DLL geprüft;
+Build und Spieltest dieser Korrektur stehen noch aus.

@@ -104,6 +104,31 @@ public sealed class Mod : MelonMod
             }
             var selected = Read("_currentlySelectedMelon") as MelonBase;
             settings?.Trace($"ESB_MANAGER_STATE | menuScene={Read("_isInMenuScene")} | gameScene={Read("_isInGameScene")} | modsTab={Read("_isMenuModsTabActive")} | selected={selected?.Info?.Name ?? "all/null"} | menu={Panel("_mainMenuModPanelInstance")} | phone={Panel("ModManagerPanel")} | app={Panel("modManagerAppInstance")}");
+            var phone = Read("ModManagerPanel") as UnityEngine.GameObject;
+            var content = Read("rightPanelContent") as UnityEngine.Transform;
+            bool jsonEditorOpen = false;
+            if (content != null)
+                for (int i = 0; i < content.childCount; i++)
+                {
+                    var child = content.GetChild(i);
+                    if (child.name.StartsWith("JsonEditor_", StringComparison.Ordinal) &&
+                        child.gameObject.activeSelf) jsonEditorOpen = true;
+                }
+            // Manager 2.2.4's public refresh mistakes its inactive JSON template
+            // for an open editor. Rebuild only our selected phone settings page.
+            if (ReferenceEquals(selected, this) && phone != null &&
+                phone.activeInHierarchy && content != null && !jsonEditorOpen)
+            {
+                var populate = managerType.GetMethod("PopulateModSettings",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+                    null, new[] { typeof(MelonBase) }, null);
+                if (populate != null)
+                {
+                    populate.Invoke(manager, new object[] { this });
+                    settings?.Trace("ESB_MANAGER_REFRESH | own phone settings rebuilt");
+                    return;
+                }
+            }
             refresh.Invoke(manager, null);
             settings?.Trace("ESB_MANAGER_REFRESH | requested");
         }
