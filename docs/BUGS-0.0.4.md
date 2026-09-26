@@ -139,3 +139,13 @@ Manueller Test: 26/4, Gegenstand in Slot 26, Ziel 10/1: Gegenstand nun in Slot 1
 10 Slots. Bei belegtem Slot 1 nächsten freien Slot nutzen. Sind alle ersten 10
 belegt, Zusatzslot erhalten. Mengen und Gegenstandseigenschaften prüfen; danach
 Spiel speichern/laden und prüfen, dass jeder Gegenstand genau einmal vorkommt.
+
+## Bestätigter Stand 0.0.6 (27.09.2026)
+
+Nutzer bestätigt automatisches Umräumen und anschließendes Speichern/Laden.
+Log (7): ESB_RACK_COMPACT from=26 to=5, anschließend requested=10 actual=10 rows=1,
+keine protokollierten Fehler. Screenshot zeigt Gegenstand in Slot 5. Nutzer
+akzeptiert ersten geeigneten Platz statt zwingend Slot 1. Weshalb 1–4 übersprungen
+wurden, wurde nicht protokolliert. Nicht als für alle Gegenstände/Filter oder
+Extremgrößen vollständig validiert zu verstehen. Drei-Sitzungen-Rotation ist
+isoliert getestet; der Nutzerlog belegt den neuen Sitzungsmarker.

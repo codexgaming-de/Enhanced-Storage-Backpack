@@ -3,7 +3,9 @@
 Die folgende Liste beschreibt Ziele, keine bereits implementierten Funktionen.
 0.0.1: Build und Laden im Spiel bestätigt.
 0.0.2/0.0.3: Einstellungsänderungen, Persistenz und eigenes Debug-Log durch Nutzerlogs bestätigt.
-Aktueller Schritt: 0.0.4 Sprachwahl und Small Storage Rack im Spiel testen.
+0.0.5/0.0.6: Phone-Sprachwahl, Small Storage Rack, automatisches Umräumen sowie
+Speichern/Laden im beschriebenen Nutzertest bestätigt.
+Nächster Schritt: Medium Storage Rack mit eigenen Einstellungen.
 
 ## Backpack
 

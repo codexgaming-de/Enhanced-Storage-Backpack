@@ -2,7 +2,7 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.6 – automatisches Umräumen und Sitzungslogs in Prüfung
+## 0.0.6 – getesteter Zwischenstand für das kleine Lagerregal
 
 Beim Verkleinern werden belegte Slots außerhalb der Zielgröße mit freien Slots
 innerhalb der Zielgröße getauscht, beginnend beim ersten passenden freien Platz.
@@ -12,8 +12,8 @@ Filter werden nicht vertauscht. Reicht der Platz nicht, bleiben zusätzliche Slo
 geschützt. Bewegung nur außerhalb von Drag-and-drop und Speichern/Laden.
 
 Sprachwechsel in der Phone App sowie Slots, Reihen, Einlegen/Entnehmen und
-Speichern/Laden wurden in 0.0.5 vom Nutzer bestätigt. Die neuen Änderungen in
-0.0.6 benötigen noch den regulären .NET-6-Build und einen Spieltest.
+Speichern/Laden wurden in 0.0.5 vom Nutzer bestätigt. Automatisches Umräumen und anschließendes Speichern/Laden in 0.0.6 wurden
+anschließend ebenfalls vom Nutzer bestätigt; die Logrotation ist isoliert getestet.
 
 ## Funktionsumfang in Prüfung
 
@@ -35,7 +35,7 @@ Speichern/Laden wurden in 0.0.5 vom Nutzer bestätigt. Die neuen Änderungen in
 - Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
 
 **Andere Lagertypen und der Backpack haben weiterhin nur Einstellungen.**
-Die Regal-Funktionen sind gebaut, aber noch nicht im Spiel bestätigt. Keine
+Das kleine Regal ist in den dokumentierten Fällen im Spiel bestätigt. Keine
 Veröffentlichung als fertige Nexus-Version.
 
 ## Aktualisieren und bauen
