@@ -92,6 +92,18 @@ public sealed class Mod : MelonMod
                 settings?.Trace("ESB_MANAGER_REFRESH | API unavailable");
                 return;
             }
+            // Record the actual API gates: a successful call can still be a no-op.
+            var managerType = manager.GetType();
+            object? Read(string name) => managerType.GetField(name,
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.NonPublic)?.GetValue(manager);
+            string Panel(string name)
+            {
+                var panel = Read(name) as UnityEngine.GameObject;
+                return panel == null ? "missing" : $"active={panel.activeInHierarchy}";
+            }
+            var selected = Read("_currentlySelectedMelon") as MelonBase;
+            settings?.Trace($"ESB_MANAGER_STATE | menuScene={Read("_isInMenuScene")} | gameScene={Read("_isInGameScene")} | modsTab={Read("_isMenuModsTabActive")} | selected={selected?.Info?.Name ?? "all/null"} | menu={Panel("_mainMenuModPanelInstance")} | phone={Panel("ModManagerPanel")} | app={Panel("modManagerAppInstance")}");
             refresh.Invoke(manager, null);
             settings?.Trace("ESB_MANAGER_REFRESH | requested");
         }

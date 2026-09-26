@@ -82,3 +82,13 @@ die Korrektheit der nativen Registrierung oder der UI. Originalschritte wiederho
 Die Manager-API-Ergänzung ist noch nicht kompiliert: dotnet CLI und MSBuild
 scheitern in dieser Umgebung an System.Diagnostics.Process, bevor Projektcode
 gebaut wird. Kein erfolgreicher Build oder Laufzeittest dieser Ergänzung behauptet.
+
+## Nutzertest 27.09.2026
+
+Nutzerbuild des API-Stands erfolgreich mit 0 Warnungen/Fehlern. Slots, Reihen und
+Einlegen/Entnehmen bestätigt. Sichtbarer Sprachwechsel weiterhin defekt, auch
+nach Deaktivieren von AutoTranslator. Log bestätigt englische Metadaten und
+fehlerfrei zurückkehrenden API-Aufruf. Die API kann wegen interner Szene-/Panel-
+Bedingungen ohne UI-Aufbau zurückkehren. Neue Diagnose ESB_MANAGER_STATE erfasst
+diese Bedingungen und die ausgewählte Mod; keine Änderung der Regalverwaltung.
+Diese Diagnose-Ergänzung ist noch nicht gebaut/getestet.
