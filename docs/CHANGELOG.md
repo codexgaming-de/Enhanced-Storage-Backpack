@@ -1,6 +1,6 @@
 # Enhanced Storage + Backpack
 
-## 0.1.6 — initial public release candidate
+## 0.1.6 — initial public release
 
 - Nine independently configurable storage types and a backpack with 1–128 slots.
 - Native storage menu with page navigation, up to 40 slots per page.
@@ -16,4 +16,5 @@ main menu, full restart, unsaved item moves in both directions without duplicati
 save-slot isolation A → B → A, police searches, and operation on the main save.
 
 No multiplayer support. No performance benchmarks or simulated interrupted-write
-tests. Packaging and final testing of the exact distributed DLL remain release gates.
+tests. The project owner confirmed the packaged DLL passed the final in-game test.
+The release package also includes PERMISSIONS.md; the tested DLL is unchanged.

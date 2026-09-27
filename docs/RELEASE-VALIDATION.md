@@ -3,7 +3,7 @@
 Updated 27 September 2026. Runtime code baseline:
 773316a0c30a31739e97aeb304d94df19e666983.
 
-Status: normal gameplay acceptance tests passed; release package validation pending.
+Status: normal gameplay acceptance tests passed; release package and exact packaged DLL validated.
 No runtime code changed during this documentation and packaging preparation.
 
 | Criterion | Evidence | Status |
@@ -21,7 +21,7 @@ No runtime code changed during this documentation and packaging preparation.
 | Backpack JSON codec | 272 automated checks for 0.1.6 | Passed |
 | Compiler check | Direct Roslyn compile; 12 known CS1701 reference warnings | Passed with environment limitation |
 | Regular net6.0 DLL running in game | User builds and tests 0.1.6 | User confirmed |
-| Exact packaged DLL installation and checksum | Package still to build on user PC | Not run |
+| Exact packaged DLL installation and checksum | Uploaded ZIP checksum, manifest and CRC verified; user confirmed packaged DLL test | Passed |
 | Interrupted writes / internal runtime shutdown | No fault injection in game | Not run |
 | FPS / memory measurement | No benchmark | Not run |
 | Multiplayer | Outside agreed scope | Not applicable |
@@ -52,3 +52,11 @@ DLLs/logs exist in the build output; an existing package is refused and preserve
 These are packaging tests, not a successful game-DLL build. A fresh regular build
 attempt in this environment still exits 134 in System.Diagnostics.Process.GetStat
 before compilation. The actual release ZIP must therefore be built on the user's PC.
+
+## Final package
+
+The project owner confirmed final packaged-DLL testing and availability of screenshots.
+For publication, PERMISSIONS.md and the updated changelog were added to the reviewed
+package and its manifest/checksum regenerated. The DLL bytes remain unchanged:
+`428cf929ea8bfb86b975aa204361c65248b5fa8ba97e6a1136c226eb8a0489b2`.
+No game code was changed or rebuilt for this documentation-only repack.

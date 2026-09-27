@@ -43,6 +43,7 @@ def main():
             'Mods/EnhancedStorageBackpack.dll': dll.read_bytes(),
             'INSTALL-DE-EN.txt': (root / 'docs/INSTALL-DE-EN.txt').read_bytes(),
             'CHANGELOG.md': (root / 'docs/CHANGELOG.md').read_bytes(),
+            'PERMISSIONS.md': (root / 'PERMISSIONS.md').read_bytes(),
         }
         manifest = {'version': version, 'targetFramework': 'net6.0',
                     'files': {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}}

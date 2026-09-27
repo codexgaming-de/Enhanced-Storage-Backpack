@@ -28,6 +28,7 @@ ZIP must contain exactly:
 - Mods/EnhancedStorageBackpack.dll
 - INSTALL-DE-EN.txt
 - CHANGELOG.md
+- PERMISSIONS.md
 - manifest.json
 
 The script refuses to overwrite an existing package. Move an earlier package
@@ -37,11 +38,11 @@ inspection artifacts are distributed. Do not package a compiler-check DLL.
 
 ## Final package test
 
-- [ ] Build exits successfully; ZIP integrity and checksum pass.
-- [ ] With game closed, install the DLL extracted from this exact ZIP.
-- [ ] Startup reports 0.1.6; open backpack and a paginated storage.
-- [ ] Save, complete restart, load: item types and quantities retained.
-- [ ] Keep the tested ZIP unchanged for upload; send ZIP here for independent review.
+- [x] Build exits successfully; ZIP integrity and checksum pass.
+- [x] With game closed, install the DLL extracted from this exact ZIP.
+- [x] Startup reports 0.1.6; open backpack and a paginated storage.
+- [x] Save, complete restart, load: item types and quantities retained.
+- [x] Uploaded ZIP independently checked; documentation-only repack preserves tested DLL bytes.
 
 ## Real screenshots
 
@@ -62,11 +63,10 @@ marketing images. No invented gameplay screenshots or performance claims.
 - Tags: AI-Generated Content; AI Media when using our generated page description.
 - Description: use German/English sections of NEXUS-RELEASE.md.
 - Source link: GitHub repository. No claim that a public repo alone grants reuse rights.
-- [ ] Uploader selects redistribution, modification, asset-use and other permission
-      options. No new software license or permission grant has been selected here.
+- [x] Custom permission rule agreed and documented in PERMISSIONS.md (12 months since last mod release).
 - [ ] Confirm those choices match any existing licenses/third-party permissions.
 - [ ] Recheck current Nexus guidelines at upload time.
 - [ ] Upload tested ZIP and current screenshots, review page, publish.
 
-No Nexus upload, public GitHub release, tag or main-branch merge has been performed
-as part of this preparation. The current working branch remains feature/0.1.0-backpack.
+Nexus upload and publication are performed by the project owner.
+GitHub release/tag publication remains a separate step.
