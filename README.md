@@ -2,6 +2,15 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
+## 0.1.3 – Kompakte letzte Seite
+
+Teilgefüllte letzte Lagerseiten verwenden nur die benötigten Reihen bei der
+Spaltenbreite einer vollen Seite: 128 Slots / 5 Reihen ergibt zuletzt 8 Slots
+in einer Reihe. Die Backpack-Unterzeile mit der Platzanzahl entfällt inklusive
+des reservierten Abstands. Der Nutzer bestätigt Layout und Funktion von 0.1.2;
+diese beiden Darstellungsanpassungen stehen noch zum Spieltest aus.
+Direkte Compilerprüfung mit den bekannten Referenzwarnungen bestanden.
+
 ## 0.1.2 – Layoutfehler behoben, Seiten für alle Lagertypen
 
 Der Nutzer bestätigt die angeforderten Backpack-Tests mit 0.1.0, meldet aber

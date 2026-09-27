@@ -73,7 +73,7 @@ internal sealed class BackpackMenu
             if (i < count) { ui.AssignSlot(owner.ItemSlots[start + i]); visible.Add(owner.ItemSlots[start + i]); }
         }
         menu.TitleLabel.text = settings.Text("Rucksack", "Backpack");
-        menu.SubtitleLabel.text = settings.Text($"{owner.ItemSlots.Count} Plätze", $"{owner.ItemSlots.Count} slots");
+        menu.SubtitleLabel.text = "";
         menu.SlotGridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         menu.SlotGridLayout.constraintCount = Math.Min(8, Math.Max(1, count));
         ItemUIManager.Instance.EnableQuickMove(visible);

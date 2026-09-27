@@ -79,6 +79,8 @@ internal sealed class PagedMenuChrome
         var close = menu.CloseButtonContainer;
         var titleBounds = BoundsOf(canvas, title);
         var subtitleBounds = BoundsOf(canvas, subtitle);
+        bool hasSubtitle = !string.IsNullOrWhiteSpace(menu.SubtitleLabel.text);
+        float subtitleHeight = hasSubtitle ? 8 + subtitleBounds.size.y : 0;
         // SlotContainer itself can have size zero. Measure actual active slot rectangles.
         Bounds slotBounds = default;
         bool found = false;
@@ -93,14 +95,19 @@ internal sealed class PagedMenuChrome
         var closeBounds = BoundsOf(canvas, close);
         float navHeight = navigation != null && navigation.activeSelf
             ? BoundsOf(canvas, navigation.GetComponent<RectTransform>()).size.y + 12 : 0;
-        float height = titleBounds.size.y + 8 + subtitleBounds.size.y + 18 + slotBounds.size.y +
+        float height = titleBounds.size.y + subtitleHeight + 18 + slotBounds.size.y +
             14 + navHeight + 12 + closeBounds.size.y;
         float x = canvas.rect.center.x;
         float top = Math.Min(canvas.rect.yMax - 60, canvas.rect.center.y + height / 2 + 25);
         MoveBoundsTop(canvas, title, titleBounds, x, top);
-        top -= titleBounds.size.y + 8;
-        MoveBoundsTop(canvas, subtitle, subtitleBounds, x, top);
-        top -= subtitleBounds.size.y + 18;
+        top -= titleBounds.size.y;
+        if (hasSubtitle)
+        {
+            top -= 8;
+            MoveBoundsTop(canvas, subtitle, subtitleBounds, x, top);
+            top -= subtitleBounds.size.y;
+        }
+        top -= 18;
         MoveBoundsTop(canvas, slots, slotBounds, x, top);
         top -= slotBounds.size.y + 14;
         if (navigation != null && navigation.activeSelf)

@@ -63,8 +63,17 @@ internal sealed class RackMenu
         pageEntity = paginate ? entity : null;
         int start = page * perPage;
         int count = Math.Min(perPage, entity.ItemSlots.Count - start);
+        if (paginate)
+        {
+            rows = Math.Min(rows, 5);
+            // Keep the full page's width on a partial final page.
+            if (page > 0 && count < perPage)
+            {
+                int pageColumns = (perPage + rows - 1) / rows;
+                rows = (count + pageColumns - 1) / pageColumns;
+            }
+        }
         rows = Math.Min(rows, count);
-        if (paginate) rows = Math.Min(rows, 5);
         var visible = new Il2CppSystem.Collections.Generic.List<Il2CppScheduleOne.ItemFramework.ItemSlot>();
         for (int i = 0; i < current.SlotsUIs.Length; i++)
         {

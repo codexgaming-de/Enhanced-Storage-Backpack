@@ -172,7 +172,7 @@ internal sealed class Settings : IDisposable
     private void WriteDiagnosticSnapshot()
     {
         if (!DebugLogging.Value) return;
-        Trace("ESB_SETTINGS_SNAPSHOT | 0.1.2");
+        Trace("ESB_SETTINGS_SNAPSHOT | 0.1.3");
         foreach (var (entry, _) in subscriptions)
             Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }
