@@ -1,3 +1,9 @@
+> Aktualisierung 27.09.2026: **Veröffentlichung blockiert durch bestätigten
+> Inhaltsverlust nach Speichern/Neustart.** Die früheren Nutzerbestätigungen
+> unten sind kein ausreichender Persistenznachweis. Polizeidurchsuchung inzwischen
+> vom Nutzer bestanden. Aktueller Stand: Diagnoseversion 0.1.5; siehe
+> [Fehleruntersuchung](BUG-BACKPACK-PERSISTENCE.md).
+
 # Release-Prüfung 0.1.4
 
 Stand: 27.09.2026. Ausgangspunkt: Commit

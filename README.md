@@ -3,10 +3,13 @@
 Singleplayer-Mod für **Schedule I (IL2CPP)** von **codexgaming-de**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Stand: 0.1.4, Release-Vorbereitung.** Die Funktionen bis 0.1.3 wurden vom Nutzer
-im Spiel bestätigt. 0.1.4 ergänzt einen Schutz für Backpack-Speichern/Laden nach
-einer internen Laufzeitabschaltung. Diese Fehlerfalländerung und der Polizeitest
-sind im Spiel noch offen. Kein fertiger Nexus-Release.
+**Stand: 0.1.5, Diagnoseversion – nicht zur Veröffentlichung.**
+Der Nutzer meldet verlorenen Backpack-Inhalt nach Speichern und Neustart mit
+0.1.4. Das Log zeigt keine Backpack-Serialisierung und beim Laden keinen Payload.
+Die genaue Unterbrechung im nativen Save-Pfad ist noch ungeklärt. 0.1.5 ergänzt
+gezielte Diagnoseeinträge; sie ist keine bestätigte Reparatur. Bis zur Klärung
+nur mit einer Spielstandkopie und entbehrlichen Testgegenständen verwenden.
+Siehe [Fehleruntersuchung](docs/BUG-BACKPACK-PERSISTENCE.md).
 
 ## Funktionen
 
@@ -46,8 +49,7 @@ wiederhergestellt. Der Codec ist automatisch getestet; ein Stromausfall oder ein
 Abbruch des gesamten Spiel-Speichervorgangs wurde nicht simuliert.
 
 Der Backpack besitzt einen eigenen Slot-Owner außerhalb des Spielerinventars.
-Das gewünschte Ignorieren bei Polizeidurchsuchungen ist **noch im Spiel zu prüfen**;
-es wird bislang nicht als bestätigte Eigenschaft beworben.
+Der Nutzer hat bestätigt, dass Polizeidurchsuchungen den Backpack ignorieren.
 
 ## Bauen und aktualisieren
 

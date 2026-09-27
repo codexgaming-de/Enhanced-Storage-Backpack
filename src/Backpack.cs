@@ -19,6 +19,8 @@ internal sealed class Backpack : IDisposable
     private bool ready, failed, pending = true, wasLoaded;
     private readonly Il2CppSystem.Action changed;
 
+    internal string DiagnosticState => $"ready:{ready},failed:{failed},loadFault:{loadFault},payload:{savedPayload != null},slots:{owner?.ItemSlots.Count ?? 0},occupied:{owner?.GetNonEmptySlotCount() ?? 0}";
+
     public Backpack(Settings settings)
     {
         this.settings = settings;

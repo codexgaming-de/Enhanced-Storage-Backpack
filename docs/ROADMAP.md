@@ -1,3 +1,8 @@
+> Aktuell 0.1.5: Backpack-Inhaltsverlust nach Neustart gemeldet. Fehlerbehebung
+> hat Vorrang vor Release-Arbeiten. Polizeidurchsuchung vom Nutzer bestätigt.
+> Frühere Speicherbestätigungen gelten nicht als abschließende Prüfung.
+> Siehe [Fehleruntersuchung](BUG-BACKPACK-PERSISTENCE.md).
+
 # Projektplan
 
 Singleplayer-Mod Enhanced Storage + Backpack für Schedule I IL2CPP.

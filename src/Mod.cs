@@ -9,7 +9,7 @@ using MelonLoader;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.4", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.5", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -34,6 +34,14 @@ public sealed class Mod : MelonMod
             backpack = new Backpack(settings);
             Patch(typeof(Player), "GetInventoryString", postfix: nameof(InventorySaving));
             Patch(typeof(Player), "LoadInventory", prefix: nameof(InventoryLoading));
+            // Narrow save-path diagnostics: observe boundaries without writing
+            // files, changing native return values or forcing extra saves.
+            Patch(typeof(Player), "WriteData", prefix: nameof(PlayerWriteStarting), postfix: nameof(PlayerWriteFinished));
+            Patch(typeof(PlayerManager), "WriteData", prefix: nameof(ManagerWriteStarting), postfix: nameof(ManagerWriteFinished));
+            Patch(typeof(PlayerManager), "SavePlayer", prefix: nameof(ManagerPlayerSaving));
+            foreach (var save in typeof(SaveManager).GetMethods().Where(m => m.Name == "Save" &&
+                (m.GetParameters().Length == 0 || (m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(string)))))
+                HarmonyInstance.Patch(save, prefix: new HarmonyMethod(typeof(Mod), nameof(SaveRequested)));
             Patch(typeof(LoadManager), "StartGame", prefix: nameof(GameStarting));
             Patch(typeof(StorageEntity), "Start", postfix: nameof(StorageStarted));
             Patch(typeof(StorageEntityVisualizer), "Start", postfix: nameof(VisualizerStarted));
@@ -44,8 +52,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.4 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.4 | Nine storage types and backpack enabled."));
-            settings.Trace("ESB_READY | 0.1.4");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.5 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.5 | Nine storage types and backpack enabled."));
+            settings.Trace("ESB_READY | 0.1.5");
         }
         catch (Exception ex)
         {
@@ -164,8 +172,25 @@ public sealed class Mod : MelonMod
     private static void GameStarting() => instance?.backpack?.Reset();
     private static bool LocalPlayer(Player player) => player.IsLocalPlayer ||
         (Player.Local != null && Player.Local.Pointer == player.Pointer);
+    private static void TraceSaveBoundary(string stage, Player? player = null)
+    {
+        // Diagnostics must never interrupt the game's save pipeline.
+        try
+        {
+            if (instance?.settings == null || !instance.settings.DebugLogging.Value) return;
+            instance.settings.Trace($"ESB_SAVE_PATH | stage={stage} | disabled={instance.disabled} | clientOnly={InstanceFinder.IsClientOnly} | playerPresent={player != null} | local={(player != null && LocalPlayer(player))} | backpack={instance.backpack?.DiagnosticState ?? "missing"}");
+        }
+        catch (Exception) { /* Diagnostic observation only; no persistence action. */ }
+    }
+    private static void SaveRequested() => TraceSaveBoundary("SaveManager.Save");
+    private static void PlayerWriteStarting(Player __instance) => TraceSaveBoundary("Player.WriteData.begin", __instance);
+    private static void PlayerWriteFinished(Player __instance) => TraceSaveBoundary("Player.WriteData.end", __instance);
+    private static void ManagerWriteStarting() => TraceSaveBoundary("PlayerManager.WriteData.begin");
+    private static void ManagerWriteFinished() => TraceSaveBoundary("PlayerManager.WriteData.end");
+    private static void ManagerPlayerSaving(Player __0) => TraceSaveBoundary("PlayerManager.SavePlayer", __0);
     private static void InventorySaving(Player __instance, ref string __result)
     {
+        TraceSaveBoundary("Player.GetInventoryString.return", __instance);
         if (!PersistenceActive || !LocalPlayer(__instance) || instance?.backpack == null) return;
         try { __result = instance.backpack.WriteInventory(__result); }
         catch (Exception ex)
@@ -177,6 +202,7 @@ public sealed class Mod : MelonMod
     }
     private static void InventoryLoading(Player __instance, ref string __0)
     {
+        TraceSaveBoundary("Player.LoadInventory.begin", __instance);
         if (!PersistenceActive || !LocalPlayer(__instance) || instance?.backpack == null) return;
         try { instance.backpack.ReadInventory(ref __0); }
         catch (Exception ex)
