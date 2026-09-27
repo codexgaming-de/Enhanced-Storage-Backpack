@@ -123,7 +123,7 @@ internal sealed class Settings : IDisposable
         string english = id == "Slots"
             ? "Number of slots: 1 to 128. 0 uses the game default. Occupied slots are retained when reducing capacity."
             : "Number of displayed rows. 0 uses the game default. Cannot exceed the number of slots.";
-        if (id == "Rows" && category.EndsWith("StorageRack"))
+        if (id == "Rows" && implemented)
         {
             german += " Pro Seite höchstens 5 Reihen und 40 Plätze; zusätzliche Plätze erscheinen auf weiteren Seiten.";
             english += " Up to 5 rows and 40 slots per page; additional slots appear on further pages.";
@@ -172,7 +172,7 @@ internal sealed class Settings : IDisposable
     private void WriteDiagnosticSnapshot()
     {
         if (!DebugLogging.Value) return;
-        Trace("ESB_SETTINGS_SNAPSHOT | 0.1.1");
+        Trace("ESB_SETTINGS_SNAPSHOT | 0.1.2");
         foreach (var (entry, _) in subscriptions)
             Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }

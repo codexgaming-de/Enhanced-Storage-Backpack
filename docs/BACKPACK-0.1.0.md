@@ -84,3 +84,27 @@ Prüfen: Backpack 128 (Seiten 1–4), Fertig unter Navigation und Abstand zur Ho
 Regale 128 mit 1/3/5 Reihen, letzte Seite und Slot 128; von letzter Seite auf
 10 verkleinern; wiederholt zwischen Backpack, Regal und Schrank wechseln.
 Visuelle Bestätigung dieser Anpassung steht aus.
+
+
+## Nachtrag 0.1.2 – blockierte Lageraktualisierung
+
+Log vom 27.09.2026 03:42:43 bestätigt NotSupportedException / Method unstripping
+failed in RectTransformUtility.CalculateRelativeRectTransformBounds. Die Exception
+lief über RackStorage.Tick zum globalen ESB_UPDATE_DISABLED; spätere Änderungen
+wurden protokolliert, aber nicht mehr angewendet.
+
+Korrektur: Bounds aus RectTransform-Rechtecken und TransformPoint/InverseTransformPoint
+berechnen. Layoutfehler in Storage und Backpack separat protokollieren; sie dürfen
+nicht alle Lageraktualisierungen deaktivieren. Die Layoutanforderung wird vor der
+Berechnung verbraucht, daher kein Fehlerlogging pro Frame.
+
+Nutzer präzisiert: Seitennavigation für alle neun Lagertypen. Deshalb alle Typen
+an denselben paginierten Bind-Pfad angeschlossen. Die MelonPreferences-Werte und
+Inventargrößen werden nicht durch die Seitennavigation geändert. Die Darstellung
+verteilt große Raster auf Seiten (maximal 40 Slots/5 sichtbare Reihen/10 Spalten).
+
+Direkte Compilerprüfung erfolgreich mit zwölf bekannten Referenzwarnungen.
+Spieltest: einen Lagertyp öffnen, schließen, Slots und Reihen im Mod Manager ändern,
+erneut öffnen; auch nach mehreren Öffnungen weiter wirksam. Je ein Regal, Schrank,
+Tresor und Aktenschrank mit 128 Slots, letzte Seite/Entnahme prüfen. Eigenes Log
+muss ohne ESB_UPDATE_DISABLED bleiben. Layout im Screenshot prüfen.

@@ -154,7 +154,8 @@ internal sealed class Backpack : IDisposable
         {
             if (!ready) Restore();
             if (pending && !RackStorage.Dragging) { pending = false; Resize(); }
-            menu.LayoutTick();
+            try { menu.LayoutTick(); }
+            catch (Exception ex) { settings.Error("ESB_BACKPACK_LAYOUT", ex); }
             if (Il2CppScheduleOne.GameInput.IsTyping) return;
             if (!input.Pressed(settings.BackpackHotkey.Value)) return;
             if (RackStorage.Dragging) return;

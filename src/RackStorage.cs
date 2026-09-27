@@ -314,14 +314,15 @@ internal sealed class RackStorage : IDisposable
             // A presentation failure must not disable inventory resizing.
             try { SyncVisualSlots(rack); }
             catch (Exception ex) { settings.Error("ESB_RACK_VISUALS", ex); }
-            if (menu.IsShowing(entity)) menu.Bind(entity, rack.ItemId.EndsWith("storagerack", StringComparison.Ordinal));
+            if (menu.IsShowing(entity)) menu.Bind(entity, true);
         }
         finally { applying = false; }
     }
 
     public void Tick()
     {
-        menu.LayoutTick();
+        try { menu.LayoutTick(); }
+        catch (Exception ex) { settings.Error("ESB_STORAGE_LAYOUT", ex); }
         if (!pending || SaveOrLoadInProgress || Dragging) return;
         pending = false;
         foreach (var rack in racks.Values.ToArray())
@@ -344,7 +345,7 @@ internal sealed class RackStorage : IDisposable
 
     public void AfterOpen(StorageEntity entity)
     {
-        if (racks.TryGetValue(entity.Pointer, out var rack) && !rack.Failed) menu.Bind(entity, rack.ItemId.EndsWith("storagerack", StringComparison.Ordinal));
+        if (racks.TryGetValue(entity.Pointer, out var rack) && !rack.Failed) menu.Bind(entity, true);
     }
 
     public void Closed() { menu.Restore(); Request(); }

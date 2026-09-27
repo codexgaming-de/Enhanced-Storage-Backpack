@@ -41,7 +41,25 @@ internal sealed class PagedMenuChrome
     }
 
     private static Bounds BoundsOf(RectTransform canvas, RectTransform rect)
-        => RectTransformUtility.CalculateRelativeRectTransformBounds(canvas, rect);
+    {
+        // CalculateRelativeRectTransformBounds is stripped in the game's IL2CPP build.
+        // Compute the same local-space bounds from rect geometry and native transforms.
+        Bounds result = default;
+        bool initialized = false;
+        foreach (var child in rect.GetComponentsInChildren<RectTransform>(false))
+        {
+            var r = child.rect;
+            for (int corner = 0; corner < 4; corner++)
+            {
+                var local = new Vector3((corner & 1) == 0 ? r.xMin : r.xMax,
+                    (corner & 2) == 0 ? r.yMin : r.yMax, 0);
+                var point = canvas.InverseTransformPoint(child.TransformPoint(local));
+                if (!initialized) { result = new Bounds(point, Vector3.zero); initialized = true; }
+                else result.Encapsulate(point);
+            }
+        }
+        return result;
+    }
 
     private static void MoveBoundsTop(RectTransform canvas, RectTransform rect, Bounds bounds, float x, float y)
     {
