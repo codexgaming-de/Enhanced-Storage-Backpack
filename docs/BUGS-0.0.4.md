@@ -181,3 +181,29 @@ Direkte Kompilierung erfolgreich mit bekannten net8-Referenzwarnungen. Native
 Gruppenänderungen noch nicht im Spiel geprüft. Test: leeres Medium 6→5→1→10;
 anschließend Gegenstand hinten, Verkleinern mit freiem Ziel, Entnahme, Filter und
 Speichern/Laden. Auch kleines Regal einmal unter seine Originalgröße verkleinern.
+
+
+## 0.0.10 – Zusätzliche Slots fehlen in der Weltansicht
+
+Nutzer bestätigt 0.0.9 einschließlich Verkleinern und Speichern/Laden.
+Neuer Repro: mittleres Regal mit zehn Slots; Gegenstand in Slot 1–6 sichtbar,
+in Slot 7–10 unsichtbar. Zwei Screenshots zeigen das Regal mit/ohne Skateboard.
+Log vom 27.09.2026 bestätigt originalSlots=6 und actual=10 ohne Darstellungsdiagnose.
+
+Statische Evidenz: unser Grow registrierte Slots nur beim StorageEntity.
+StorageEntityVisualizer erbt eine separate itemSlots-Liste und AddSlot(slot,
+update) vom StorageVisualizer. Native Methodenrümpfe sind nicht verfügbar.
+Wahrscheinliche Ursache: fehlende Registrierung zusätzlicher Slots beim Visualizer.
+
+Korrektur: nach Größenanpassung fehlende Slots über natives AddSlot registrieren,
+entfernte leere Slots aus separater Darstellungsliste entfernen, einmal QueueRefresh.
+Start-Postfix fordert eine Aktualisierung nach nativer Initialisierung an.
+Keine neuen Modelle/Grids, keine Veränderung von Iteminstanzen oder Saveformat.
+ESB_RACK_VISUALS protokolliert Inventar-/Darstellungsgröße und footprintCapacity.
+
+Validierung: direkter Roslyn-Compile erfolgreich mit neun CS1701-Warnungen wegen
+.NET-8-Referenzen statt regulärem .NET-6-Build. Unity-Laufzeit hier nicht verfügbar.
+Manuell: einzelnes Item in Slot 1, 6, 7, 10 verschieben; alle zehn Slots mit
+kleinen Items belegen; leeren, verkleinern/vergrößern; Speichern/Laden; bestehendes
+und neu platziertes Regal prüfen. Die physische Stellfläche kann volle Darstellung
+begrenzen. Zehn beliebig große Modelle werden nicht garantiert.

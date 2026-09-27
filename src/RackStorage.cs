@@ -167,6 +167,45 @@ internal sealed class RackStorage : IDisposable
         return true;
     }
 
+    private void SyncVisualSlots(Rack rack)
+    {
+        // Native StorageEntityVisualizer.Start registers only the slots present
+        // at startup. Keep its separate presentation list aligned after resizing.
+        var entity = rack.Entity;
+        var placeable = entity.GetComponentInParent<PlaceableStorageEntity>();
+        if (placeable == null) return;
+        foreach (var visualizer in placeable.GetComponentsInChildren<StorageEntityVisualizer>(true))
+        {
+            if (visualizer.storageEntity == null || visualizer.storageEntity.Pointer != entity.Pointer ||
+                visualizer.itemSlots == null) continue;
+            var visualSlots = visualizer.itemSlots;
+            var owned = new HashSet<IntPtr>();
+            foreach (var slot in entity.ItemSlots) owned.Add(slot.Pointer);
+            int added = 0, removed = 0;
+            // Do not mutate the owner's list if a native version shares it.
+            if (visualSlots.Pointer != entity.ItemSlots.Pointer)
+            {
+                for (int i = visualSlots.Count - 1; i >= 0; i--)
+                    if (visualSlots[i] == null || !owned.Contains(visualSlots[i].Pointer))
+                    { visualSlots.RemoveAt(i); removed++; }
+                var registered = new HashSet<IntPtr>();
+                foreach (var slot in visualSlots) registered.Add(slot.Pointer);
+                foreach (var slot in entity.ItemSlots)
+                    if (registered.Add(slot.Pointer))
+                    {
+                        // Use the native API so item-change events are registered too.
+                        visualizer.AddSlot(slot, false);
+                        added++;
+                    }
+            }
+            if (added != 0 || removed != 0)
+            {
+                visualizer.QueueRefresh();
+                settings.Trace($"ESB_RACK_VISUALS | id={rack.ItemId} | inventory={entity.ItemSlots.Count} | visualSlots={visualSlots.Count} | added={added} | removed={removed} | footprintCapacity={visualizer.totalFootprintCapacity}");
+            }
+        }
+    }
+
     private void Apply(Rack rack)
     {
         var entity = rack.Entity;
@@ -248,6 +287,9 @@ internal sealed class RackStorage : IDisposable
                 }
             }
             rack.LastBlockedTarget = size > target ? target : -1;
+            // A presentation failure must not disable inventory resizing.
+            try { SyncVisualSlots(rack); }
+            catch (Exception ex) { settings.Error("ESB_RACK_VISUALS", ex); }
             if (menu.IsShowing(entity)) menu.Bind(entity);
         }
         finally { applying = false; }

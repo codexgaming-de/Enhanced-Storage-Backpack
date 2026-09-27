@@ -7,7 +7,7 @@ using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.UI;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.9", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.10", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -29,6 +29,7 @@ public sealed class Mod : MelonMod
         try
         {
             Patch(typeof(StorageEntity), "Start", postfix: nameof(StorageStarted));
+            Patch(typeof(StorageEntityVisualizer), "Start", postfix: nameof(VisualizerStarted));
             Patch(typeof(PlaceableStorageEntity), "InitializeGridItem", postfix: nameof(Placed));
             Patch(typeof(StorageEntity), "OnDestroy", prefix: nameof(Destroyed));
             Patch(typeof(StorageEntity), "ContentsChanged", postfix: nameof(ContentsChanged));
@@ -36,8 +37,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.0.9 | Kleines und mittleres Lagerregal aktiviert.", "ESB_READY | 0.0.9 | Small and medium storage racks enabled."));
-            settings.Trace("ESB_READY | 0.0.9");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.0.10 | Kleines und mittleres Lagerregal aktiviert.", "ESB_READY | 0.0.10 | Small and medium storage racks enabled."));
+            settings.Trace("ESB_READY | 0.0.10");
         }
         catch (Exception ex)
         {
@@ -51,6 +52,8 @@ public sealed class Mod : MelonMod
         => HarmonyInstance.Patch(AccessTools.Method(type, method),
             prefix == null ? null : new HarmonyMethod(typeof(Mod), prefix),
             postfix == null ? null : new HarmonyMethod(typeof(Mod), postfix));
+
+    private static void VisualizerStarted() => Run(storage => storage.Request());
 
     private static bool Active => instance != null && !instance.disabled && !InstanceFinder.IsClientOnly;
 

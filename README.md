@@ -2,18 +2,21 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.9 – Verkleinern lokaler Slot-Gruppen in Prüfung
+## 0.0.10 – Darstellung zusätzlicher Regalplätze in Prüfung
 
 Small Storage Rack und Medium Storage Rack haben getrennte Slot-/Reiheneinstellungen.
-Beide verwenden die in 0.0.6 getestete Größen- und Umräumlogik. Beim Verkleinern
-werden belegte hintere Slots mit freien, passenden vorderen Slots getauscht.
-Keine Kopien, kein Stack-Merging. Sperren, individuelle Filter und Verknüpfungen
-bleiben geschützt; bei Platzmangel bleiben zusätzliche Slots erhalten.
+Der Nutzer hat Verkleinern, automatisches Umräumen und Speichern/Laden mit 0.0.9
+im Spiel bestätigt. Bei Platzmangel, Sperren oder individuellen Filtern bleiben
+zusätzliche belegte Plätze geschützt.
 
-0.0.6 ist der bestätigte Zwischenstand auf main. 0.0.7 liegt auf
-feature/0.0.7-medium-rack und benötigt noch einen regulären .NET-6-Build und
-Spieltest. Die direkte Compilerprüfung mit .NET-8-Referenzen war erfolgreich
-(mit CS1701-Referenzversionswarnungen); 16.395 Größen-/Reihenprüfungen bestanden.
+0.0.10 registriert zusätzliche Slots auch beim nativen StorageEntityVisualizer.
+Die physische Stellfläche begrenzt weiterhin die Zahl sichtbarer Modelle;
+zehn Inventarplätze garantieren nicht Platz für zehn beliebig große Gegenstände.
+Der Spieltest dieser Darstellung steht aus. Direkte Compilerprüfung mit
+.NET-8-Referenzen erfolgreich (CS1701-Referenzversionswarnungen); der reguläre
+.NET-6-Build erfolgt auf dem Nutzer-PC.
+
+Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0.6.
 
 ## Funktionsumfang in Prüfung
 
