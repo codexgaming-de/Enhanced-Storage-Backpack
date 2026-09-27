@@ -66,6 +66,14 @@ internal sealed class RackMenu
             current.TitleLabel.text = settings.Text("Mittleres Lagerregal", "Medium Storage Rack");
         if (string.Equals(entity.StorageEntityName, "Large Storage Rack", StringComparison.OrdinalIgnoreCase))
             current.TitleLabel.text = settings.Text("Großes Lagerregal", "Large Storage Rack");
+        if (string.Equals(entity.StorageEntityName, "Small Storage Closet", StringComparison.OrdinalIgnoreCase))
+            current.TitleLabel.text = settings.Text("Kleiner Lagerschrank", "Small Storage Closet");
+        if (string.Equals(entity.StorageEntityName, "Medium Storage Closet", StringComparison.OrdinalIgnoreCase))
+            current.TitleLabel.text = settings.Text("Mittlerer Lagerschrank", "Medium Storage Closet");
+        if (string.Equals(entity.StorageEntityName, "Large Storage Closet", StringComparison.OrdinalIgnoreCase))
+            current.TitleLabel.text = settings.Text("Großer Lagerschrank", "Large Storage Closet");
+        if (string.Equals(entity.StorageEntityName, "Huge Storage Closet", StringComparison.OrdinalIgnoreCase))
+            current.TitleLabel.text = settings.Text("Riesiger Lagerschrank", "Huge Storage Closet");
         var grid = current.SlotGridLayout;
         int count = entity.ItemSlots.Count;
         int rows = Math.Clamp(entity.DisplayRowCount, 1, Math.Max(1, count));

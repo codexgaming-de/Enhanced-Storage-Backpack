@@ -2,19 +2,21 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.11 – Großes Lagerregal in Prüfung
+## 0.0.12 – Vier Lagerschränke in Prüfung
 
-Small, Medium und Large Storage Rack haben getrennte Slot-/Reiheneinstellungen.
-Das große Regal verwendet dieselbe Größen-, Umräum- und Darstellungslogik.
-Die Darstellung zusätzlicher Slots in 0.0.10 wurde vom Nutzer bestätigt;
-Verkleinern sowie Speichern/Laden waren mit 0.0.9 bestätigt.
+Small, Medium, Large und Huge Storage Closet sind jetzt an die gemeinsame
+Lagerlogik angebunden, jeweils mit eigenen Plätzen (1–128), Reihen und
+DE/EN-Beschreibungen. 0 verwendet die Spielvorgabe. Änderungen wirken im
+laufenden Spiel, sobald kein Ziehen eines Items oder Speichern/Laden läuft.
 
-Das große Regal wird anhand der normalisierten Item-ID `largestoragerack`
-erkannt. Diese ID und das Verhalten müssen noch im Spiel bestätigt werden.
-Die physische Stellfläche begrenzt weiterhin die Zahl sichtbarer Modelle.
-Direkte Compilerprüfung mit .NET-8-Referenzen erfolgreich (CS1701-Warnungen);
+Alle drei Lagerregale wurden vom Nutzer getestet; für 0.0.11 wurden auch
+Umräumen, Schutz belegter Plätze und Speichern/Laden bestätigt.
+Die vier Schrank-IDs werden als smallstoragecloset, mediumstoragecloset,
+largestoragecloset und hugestoragecloset erwartet. Erkennung und Verhalten
+stehen für jeden Schrank noch zum Spieltest aus. Keine Änderungen am Saveformat.
+
+Direkte Compilerprüfung mit .NET-8-Referenzen erfolgreich (neun CS1701-Warnungen);
 der reguläre .NET-6-Build und Spieltest erfolgen auf dem Nutzer-PC.
-
 Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0.6.
 
 ## Funktionsumfang in Prüfung
@@ -37,7 +39,7 @@ Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0
 - Zusätzliche UI-Plätze werden bei Bedarf einmal erzeugt und wiederverwendet.
 - Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
 
-**Die übrigen sechs Lagertypen und der Backpack haben weiterhin nur Einstellungen.**
+**Safe, Filing Cabinet und Backpack haben weiterhin nur Einstellungen.**
 Das kleine Regal ist in den dokumentierten Fällen im Spiel bestätigt. Keine
 Veröffentlichung als fertige Nexus-Version.
 
@@ -174,3 +176,19 @@ geschützt. Regulärer net6-Build und Laufzeittest dieser Änderung stehen aus.
 - Bestehendes und neu platziertes Regal; Speichern/Laden; DE/EN-Beschreibungen.
 - Kleine und mittlere Regale behalten ihre eigenen Einstellungen.
 - Debug-Log: ESB_RACK_FOUND muss id=largestoragerack zeigen.
+
+## Testablauf 0.0.12
+
+Jeden der vier Schränke separat prüfen, möglichst bestehend und neu platziert:
+
+1. Unterschiedliche Größen: Small 12/2, Medium 24/3, Large 32/4, Huge 40/4
+   (Plätze/Reihen). Änderungen dürfen die anderen Typen nicht beeinflussen.
+2. Item in den letzten Slot legen; bei freien vorderen Plätzen auf 5/1 verkleinern.
+   Das Item muss in einen passenden vorderen Slot umziehen und entnehmbar bleiben.
+3. Mehr als fünf Plätze belegen, dann auf fünf verkleinern: belegte Plätze bleiben
+   zugänglich. Nach Entleeren passt sich die Größe an.
+4. Speichern/Laden, Sprache DE/EN und vorhandene Regal-Einstellungen prüfen.
+5. Eigenes Debug-Log zur Bestätigung der vier Item-IDs bereitstellen.
+
+Die native Darstellung wird nur angebunden, wenn ein passender Visualizer
+vorhanden ist. Geschlossene Schränke erhalten keine künstliche Außenanzeige.

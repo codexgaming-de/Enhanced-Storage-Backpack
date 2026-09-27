@@ -59,7 +59,8 @@ internal sealed class RackStorage : IDisposable
         // Prefer immutable item identity over a player-editable storage label.
         // Placement previews have no item definition and must not be resized.
         string itemId = Normalize(definition?.ID);
-        bool match = definition != null && (itemId == "smallstoragerack" || itemId == "mediumstoragerack" || itemId == "largestoragerack");
+        bool match = definition != null && (itemId == "smallstoragerack" || itemId == "mediumstoragerack" || itemId == "largestoragerack" ||
+            itemId == "smallstoragecloset" || itemId == "mediumstoragecloset" || itemId == "largestoragecloset" || itemId == "hugestoragecloset");
         if (!match) return null;
         var rack = new Rack(entity, itemId);
         racks.Add(entity.Pointer, rack);
@@ -72,7 +73,11 @@ internal sealed class RackStorage : IDisposable
         "smallstoragerack" => settings.SmallRackSlots.Value,
         "mediumstoragerack" => settings.MediumRackSlots.Value,
         "largestoragerack" => settings.LargeRackSlots.Value,
-        _ => throw new InvalidOperationException("Unsupported rack identity.")
+        "smallstoragecloset" => settings.SmallClosetSlots.Value,
+        "mediumstoragecloset" => settings.MediumClosetSlots.Value,
+        "largestoragecloset" => settings.LargeClosetSlots.Value,
+        "hugestoragecloset" => settings.HugeClosetSlots.Value,
+        _ => throw new InvalidOperationException("Unsupported storage identity.")
     };
 
     private int ConfiguredRows(Rack rack) => rack.ItemId switch
@@ -80,7 +85,11 @@ internal sealed class RackStorage : IDisposable
         "smallstoragerack" => settings.SmallRackRows.Value,
         "mediumstoragerack" => settings.MediumRackRows.Value,
         "largestoragerack" => settings.LargeRackRows.Value,
-        _ => throw new InvalidOperationException("Unsupported rack identity.")
+        "smallstoragecloset" => settings.SmallClosetRows.Value,
+        "mediumstoragecloset" => settings.MediumClosetRows.Value,
+        "largestoragecloset" => settings.LargeClosetRows.Value,
+        "hugestoragecloset" => settings.HugeClosetRows.Value,
+        _ => throw new InvalidOperationException("Unsupported storage identity.")
     };
 
     private static string Normalize(string? value)
