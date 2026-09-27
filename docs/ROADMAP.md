@@ -1,49 +1,23 @@
-> Stand 0.1.6: Speicherpfad-Korrektur implementiert und kompiliert;
-> 272 Codec-Prüfungen bestanden. Echter Save/Reload-Test weiter offen.
-> Details und aktuelle Logbefunde: [Fehleruntersuchung](BUG-BACKPACK-PERSISTENCE.md).
+# Project status — 0.1.6
 
-> Aktuell 0.1.5: Backpack-Inhaltsverlust nach Neustart gemeldet. Fehlerbehebung
-> hat Vorrang vor Release-Arbeiten. Polizeidurchsuchung vom Nutzer bestätigt.
-> Frühere Speicherbestätigungen gelten nicht als abschließende Prüfung.
-> Siehe [Fehleruntersuchung](BUG-BACKPACK-PERSISTENCE.md).
+The agreed singleplayer feature set is implemented and the normal gameplay tests
+are confirmed by the project owner. This includes nine storage types, backpack,
+live settings, DE/EN, native UI pagination, safe shrinking, police-search isolation,
+save/load across restarts, unsaved moves without duplication, and save-slot isolation.
 
-# Projektplan
+Storage contract: only regular game saves (including game autosaves) persist items.
+No independent inventory save on moves, preference changes or menu closing.
+Backpack and hotbar share the saved Inventory JSON.
 
-Singleplayer-Mod Enhanced Storage + Backpack für Schedule I IL2CPP.
+## Release preparation
 
-## Vom Nutzer im Spiel bestätigt
+- Current README, installation/removal instructions and validation report prepared.
+- German/English Nexus description and AI disclosure prepared.
+- Script for a fresh net6.0 Release build, allowlisted ZIP and SHA-256 prepared.
+- Pending: build and inspect real package on the user's PC; test extracted DLL.
+- Pending: current screenshots and uploader's redistribution/permission choices.
+- Pending: final Nexus upload. Nothing published yet.
 
-- Alle neun Lagertypen mit getrennten Slot-/Reihenwerten bis 128 Slots.
-- Live-Einstellungen, Verkleinern mit Umräumen und Erhalt benötigter Zusatzplätze.
-- Gegenstandsdarstellung in zusätzlichen Regalplätzen, soweit Stellfläche reicht.
-- Sprachwechsel Deutsch/English im Mod Manager & Phone App.
-- Backpack mit nativem Menü, Hotkey, 1–128 Slots und Seitennavigation.
-- Speichern/Laden; Rückkehr zum gespeicherten Inhalt nach ungespeicherten Bewegungen.
-- Layout bis 0.1.3, einschließlich kompakter letzter Lagerseite.
-
-## Speichervertrag
-
-Bewegungen verändern den laufenden Zustand. Erst reguläres Speichern des Spiels
-(einschließlich Spiel-Autosave) hält ihn fest. Kein eigener Inhaltssave bei
-Mod-Manager-Speichern, Größenänderung oder Menüschließen. Backpack und Hotbar
-werden im selben Inventar-JSON gespeichert. Codec-Prüfungen ersetzen keine
-Spieltests bei Schreibfehlern oder Abbrüchen des gesamten Speichervorgangs.
-
-## Aktuell: Release-Vorbereitung 0.1.4
-
-- Schutz gegen übersprungene Backpack-Persistenz bei interner Laufzeitabschaltung.
-- Automatische Prüfungen und aktuelle Dokumentation.
-- Offen: Polizeidurchsuchung, expliziter Spielstandwechsel, Fehlerfall-Speicherung,
-  regulärer net6.0-Build und Spielprüfung des neuen Schutzes.
-- Danach Paket und Nexus-Veröffentlichung mit korrekter KI-Kennzeichnung.
-
-Siehe [Prüfbericht](RELEASE-VALIDATION.md) und [Nexus-Entwurf](NEXUS-RELEASE.md).
-Frühere versionsbezogene Dokumente bleiben als historische Entwicklungsnotizen;
-für den aktuellen Status ist der Prüfbericht maßgeblich.
-
-## Grenzen
-
-Kein Multiplayer. Keine gemessene Performance-Zusage. Ereignisbasierte
-Größenänderungen, wiederverwendete UI und optionales begrenztes Logging.
-Maximal 40 Plätze pro Seite, maximal 5 sichtbare Lagerreihen und 10 Spalten.
-Eine dauerhafte Debug-Datei mit höchstens drei protokollierten Spielsitzungen.
+Additional limits: no simulated write failures/interruptions, no performance
+benchmark, no multiplayer support. Historical version notes remain in docs;
+RELEASE-VALIDATION.md is the current acceptance record.

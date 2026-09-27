@@ -1,6 +1,6 @@
-# Nexus-Veröffentlichung – Entwurf für 0.1.4
+# Nexus-Veröffentlichung – Beschreibung für 0.1.6
 
-Noch nicht veröffentlicht. Offene Tests: siehe RELEASE-VALIDATION.md.
+Noch nicht veröffentlicht. Normale Spieltests bestanden; Paketprüfung noch offen.
 Keine Behauptung einer vollständigen Fehlerfreiheit oder garantierten FPS.
 
 ## KI-Kennzeichnung
@@ -36,6 +36,7 @@ die IL2CPP-Version des Spiels.
   Mod Manager & Phone App während des Spiels anpassbar.
 - Rucksackinhalt wird mit dem regulären Spielstand gespeichert. Auch reguläre
   Spiel-Autosaves zählen dazu. Kein gesondertes Speichern bei Gegenstandsbewegungen.
+- Polizeidurchsuchungen ignorieren den Rucksackinhalt.
 - Optionales eigenes Diagnoseprotokoll mit den letzten drei protokollierten Sitzungen.
 
 Referenzumgebung: Schedule I 0.4.6f13, MelonLoader 0.7.3 und
@@ -63,6 +64,7 @@ backpack to Schedule I. Designed for singleplayer and the IL2CPP game version.
   Mod Manager & Phone App.
 - Backpack contents are saved with the regular game save, including game
   autosaves. Moving items does not trigger an independent inventory save.
+- Police searches ignore backpack contents.
 - Optional diagnostic log containing the last three logged sessions.
 
 Reference environment: Schedule I 0.4.6f13, MelonLoader 0.7.3 and
@@ -76,20 +78,28 @@ of the code and this description were generated using AI. Project direction,
 requirements and manual gameplay testing are provided by codexgaming-de.
 Source code and development history are available in the linked GitHub repository.
 
+## Unterstützte Lager / Supported storage
+
+Small Storage Rack, Medium Storage Rack, Large Storage Rack,
+Small Storage Closet, Medium Storage Closet, Large Storage Closet,
+Huge Storage Closet, Safe, Filing Cabinet.
+
+## Links
+
+Quellcode / Source: https://github.com/codexgaming-de/Enhanced-Storage-Backpack
+Mod Manager & Phone App: https://www.nexusmods.com/schedule1/mods/397
+
 ## Release notes
 
-0.1.4: Backpack persistence hooks remain active after an internal shutdown of
-interactive mod updates, preventing that shutdown from silently skipping backpack
-serialization. Release documentation and current validation status added.
+0.1.6: Backpack-Daten werden am nativen Inventory-Schreibaufruf ergänzt.
+Speichern/Laden über Hauptmenü und Neustart, Duplizierungsprüfung und
+Spielstandwechsel vom Projektbetreiber erfolgreich geprüft.
 
-0.1.3: Partial final storage pages use only the necessary rows. Removed the
-backpack slot-count subtitle and its reserved spacing.
+0.1.6: Backpack data is attached at the native Inventory write boundary.
+Main-menu reload, full restart, unsaved moves without duplication and save-slot
+isolation have passed the project owner's gameplay tests.
 
-## Vor Upload abschließen
+## Upload
 
-- Offene Prüfungen aus RELEASE-VALIDATION.md schließen und Beschreibung anpassen.
-- Polizeiverhalten erst nach bestätigtem Spieltest als Funktion ergänzen.
-- Release-DLL aus regulärem net6.0-Build testen; keine lokale Compiler-Test-DLL verwenden.
-- Echte Screenshots, korrekte Version, Abhängigkeiten und Rechteangaben ergänzen.
-- Nur eigene Mod-Dateien verpacken; Tags AI-Generated Content und bei Nutzung
-  dieses Beschreibungstexts AI Media setzen.
+Dateiversion 0.1.6. Nur das geprüfte Paket aus dist/ verwenden.
+Checkliste: RELEASE-CHECKLIST.md. Keine generelle Fehlerfreiheit behaupten.

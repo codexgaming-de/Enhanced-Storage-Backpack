@@ -1,0 +1,83 @@
+Enhanced Storage + Backpack 0.1.6 — codexgaming-de
+
+DEUTSCH
+Voraussetzungen: Schedule I IL2CPP, MelonLoader. Nur Singleplayer.
+Referenzumgebung: Spiel 0.4.6f13, MelonLoader 0.7.3; Einstellungen im Spiel
+mit Mod Manager & Phone App 2.2.4 (separat installieren).
+Andere Versionen sowie Mono/Multiplayer sind nicht bestätigt/unterstützt.
+
+Installation / Update:
+1. Spiel vollständig beenden und Spielstand sichern.
+2. Mods/EnhancedStorageBackpack.dll aus diesem Paket in den Mods-Ordner
+   des Spiels kopieren. Bei Update die bisherige DLL ersetzen, keine zweite
+   Kopie installieren. Andere Storage-/Backpack-Mods sind nicht gemeinsam getestet.
+3. Spiel starten. B öffnet den Rucksack (Taste konfigurierbar).
+4. Einstellungen unter Enhanced Storage + Backpack im Mod Manager ändern.
+   Sprache Deutsch/English wählbar. Einstellungen wirken ohne Spielneustart;
+   während Ziehen, Speichern und Laden werden Größenänderungen zurückgestellt.
+
+Backpack: 1–128 Plätze, Standard 40, bis 40 je Seite.
+Lager: neun getrennte Typen, 1–128 Plätze; 0 = Spielvorgabe.
+Pro Lagerseite maximal 40 Plätze / 5 sichtbare Reihen / 10 Spalten.
+Beim Verkleinern werden Items umgeräumt. Können sie nicht sicher untergebracht
+werden, bleiben die erforderlichen Zusatzplätze erhalten.
+
+Speichern: Regulär im Spiel speichern. Spiel-Autosaves zählen ebenfalls.
+Gegenstände verschieben oder Einstellungen speichern speichert den Inhalt nicht
+separat. Laden ohne zwischenzeitlichen Spiel-Save stellt den alten Stand wieder her.
+Polizeidurchsuchungen ignorieren den Rucksack.
+
+Deinstallation: Rucksack sowie zusätzliche Lagerplätze leeren, Lagergrößen auf
+0 zurückstellen und im Spiel speichern. Spiel beenden, Mod-DLL entfernen.
+Ohne Mod ist der Rucksack nicht zugänglich; Erhalt seiner Daten beim späteren
+Speichern ohne Mod ist nicht zugesichert.
+
+Diagnose: Optionales UserData/Enhanced-Storage-Backpack-Debug.log.
+Eine dauerhafte Datei, letzte drei protokollierte Sitzungen. Bei Fehlern Version,
+Reproduktionsschritte und dieses Log angeben. Vor dem Teilen persönliche Angaben prüfen.
+
+ENGLISH
+Requires Schedule I IL2CPP and MelonLoader. Singleplayer only.
+Reference environment: game 0.4.6f13, MelonLoader 0.7.3; in-game configuration
+with Mod Manager & Phone App 2.2.4 (install separately).
+Other versions are unverified. Mono and multiplayer are unsupported.
+
+Install / update:
+1. Close the game completely and back up your save.
+2. Copy Mods/EnhancedStorageBackpack.dll into the game's Mods directory.
+   Replace the previous DLL when updating; do not keep duplicate copies.
+   Combined use with other storage/backpack mods has not been tested.
+3. Start the game. B opens the backpack (configurable).
+4. Adjust settings under Enhanced Storage + Backpack in Mod Manager.
+   German/English selectable. Settings apply without restarting the game;
+   resizing waits while dragging items, saving or loading.
+
+Backpack: 1–128 slots, default 40, up to 40 per page.
+Storage: nine independent types, 1–128 slots; 0 restores the game default.
+Storage pages show at most 40 slots / 5 rows / 10 columns.
+Shrinking moves items into suitable empty slots. Required extra slots remain
+available when items cannot safely fit into the requested size.
+
+Saving: Use the game's regular save. Game autosaves also count.
+Moving items or saving preferences does not independently save backpack contents.
+Loading without another game save restores the previous saved state.
+Police searches ignore backpack contents.
+
+Uninstall: Empty the backpack and extra storage slots, set storage sizes to 0,
+and save in-game. Close the game and remove the DLL. The backpack is inaccessible
+without this mod; preservation of its data when saving without the mod is not assured.
+
+Diagnostics: Optional UserData/Enhanced-Storage-Backpack-Debug.log.
+One persistent file, last three logged sessions. Include version, reproduction
+steps and this log in bug reports. Check for personal information before sharing.
+
+AI TRANSPARENCY / KI-TRANSPARENZ
+Substantial portions of the code and documentation were generated with OpenAI
+Codex. Requirements, project direction and manual gameplay tests: codexgaming-de.
+Wesentliche Teile von Code und Dokumentation wurden mit OpenAI Codex erzeugt.
+Anforderungen, Projektleitung und manuelle Spieltests: codexgaming-de.
+
+Source / Quellcode:
+https://github.com/codexgaming-de/Enhanced-Storage-Backpack
+Mod Manager & Phone App:
+https://www.nexusmods.com/schedule1/mods/397

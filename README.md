@@ -3,14 +3,11 @@
 Singleplayer-Mod für **Schedule I (IL2CPP)** von **codexgaming-de**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Stand: 0.1.6, Korrektur des Backpack-Speicherpfads – Spieltest offen.**
-Das Diagnose-Log von 0.1.5 zeigt zwei belegte Backpack-Plätze während
-Player.WriteData, aber keinen Aufruf unseres GetInventoryString-Hooks.
-0.1.6 ergänzt den Backpack am Inventory-Unterdatei-Schreibaufruf des Spiels.
-Das Speicherformat bleibt gleich; keine separate Inhaltsdatei und kein
-Speichern bei Gegenstandsbewegungen. Die Veröffentlichung bleibt bis zum
-bestätigten Speichern/Laden-Test blockiert.
-Siehe [Fehleruntersuchung](docs/BUG-BACKPACK-PERSISTENCE.md).
+**Stand: 0.1.6, normale Spieltests bestanden; Release-Paket in Vorbereitung.**
+Bestätigt sind Speichern/Laden über Hauptmenü und vollständigen Neustart,
+ungespeicherte Bewegungen ohne Duplikate, getrennte Spielstände A → B → A
+und Polizeidurchsuchungen. Zusätzlich auf dem Hauptspielstand getestet.
+Die Prüfung des tatsächlich verpackten Builds steht noch aus.
 
 ## Funktionen
 
@@ -102,3 +99,15 @@ dotnet run --project tests/DiagnosticLogTests.csproj -c Release
 [Validierung und offene Release-Prüfungen](docs/RELEASE-VALIDATION.md) ·
 [Nexus-Entwurf und KI-Kennzeichnung](docs/NEXUS-RELEASE.md) ·
 [Projektplan](docs/ROADMAP.md)
+
+## Release-Paket erstellen
+
+```bash
+python3 scripts/package-release.py --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
+```
+
+Erstellt nach erfolgreichem frischem Release-Build ein geprüftes ZIP und eine
+SHA-256-Datei in `dist/`. Enthalten sind ausschließlich Mod-DLL, zweisprachige
+Installationshinweise, Changelog und Hash-Manifest. Bestehende Pakete werden nicht
+überschrieben. Es wird nichts automatisch installiert oder veröffentlicht.
+Siehe [Release-Checkliste](docs/RELEASE-CHECKLIST.md).

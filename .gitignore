@@ -7,3 +7,6 @@ references/
 *.log
 .vs/
 .idea/
+
+dist/
+__pycache__/
