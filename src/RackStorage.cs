@@ -121,9 +121,41 @@ internal sealed class RackStorage : IDisposable
         entity.SlotCount = slots.Count;
     }
 
-    private static bool CanReorder(ItemSlot slot) =>
+    private static bool CanReorder(ItemSlot slot, HashSet<IntPtr> localGroups) =>
         !slot.IsLocked && !slot.IsRemovalLocked && !slot.IsAddLocked &&
-        slot.SiblingSet == null && (slot.PlayerFilter == null || slot.PlayerFilter.IsDefault());
+        (slot.SiblingSet == null || localGroups.Contains(slot.SiblingSet.Pointer)) && (slot.PlayerFilter == null || slot.PlayerFilter.IsDefault());
+
+    private static HashSet<IntPtr> LocalSiblingGroups(StorageEntity entity)
+    {
+        var slots = entity.ItemSlots;
+        var owned = new HashSet<IntPtr>();
+        foreach (var slot in slots) owned.Add(slot.Pointer);
+        var local = new HashSet<IntPtr>();
+        var inspected = new HashSet<IntPtr>();
+        foreach (var slot in slots)
+        {
+            var group = slot.SiblingSet;
+            if (group == null || !inspected.Add(group.Pointer)) continue;
+            var members = group.Slots;
+            // A separate membership list is required for safe removal.
+            if (members == null || members.Pointer == slots.Pointer || members.Count == 0) continue;
+            bool valid = true;
+            var seen = new HashSet<IntPtr>();
+            foreach (var member in members)
+            {
+                if (member == null || !owned.Contains(member.Pointer) || !seen.Add(member.Pointer) ||
+                    member.SiblingSet == null || member.SiblingSet.Pointer != group.Pointer)
+                { valid = false; break; }
+            }
+            // Also reject inconsistent back-references missing from membership.
+            if (valid)
+                foreach (var candidate in slots)
+                    if (candidate.SiblingSet != null && candidate.SiblingSet.Pointer == group.Pointer &&
+                        !seen.Contains(candidate.Pointer)) { valid = false; break; }
+            if (valid) local.Add(group.Pointer);
+        }
+        return local;
+    }
 
     private static bool SameHardFilters(ItemSlot left, ItemSlot right)
     {
@@ -142,6 +174,7 @@ internal sealed class RackStorage : IDisposable
         var slots = entity.ItemSlots;
         int before = slots.Count;
         int target = StorageRules.TargetSlots(ConfiguredSlots(rack), rack.OriginalSlots);
+        var localGroups = LocalSiblingGroups(entity);
         applying = true;
         try
         {
@@ -153,11 +186,11 @@ internal sealed class RackStorage : IDisposable
                 for (int sourceIndex = target; sourceIndex < slots.Count; sourceIndex++)
                 {
                     var source = slots[sourceIndex];
-                    if (source.ItemInstance == null || !CanReorder(source)) continue;
+                    if (source.ItemInstance == null || !CanReorder(source, localGroups)) continue;
                     for (int destinationIndex = 0; destinationIndex < target; destinationIndex++)
                     {
                         var destination = slots[destinationIndex];
-                        if (destination.ItemInstance != null || !CanReorder(destination) ||
+                        if (destination.ItemInstance != null || !CanReorder(destination, localGroups) ||
                             !SameHardFilters(source, destination)) continue;
                         slots[destinationIndex] = source;
                         slots[sourceIndex] = destination;
@@ -168,7 +201,7 @@ internal sealed class RackStorage : IDisposable
                 }
             }
             int size = StorageRules.SafeSize(target, slots.Count, i =>
-                slots[i].ItemInstance != null || !CanReorder(slots[i]));
+                slots[i].ItemInstance != null || !CanReorder(slots[i], localGroups));
             // Clear displayed bindings before releasing an empty tail of slots.
             if (size < before && menu.IsShowing(entity)) menu.ClearBindings();
             Grow(entity, size);
@@ -177,6 +210,15 @@ internal sealed class RackStorage : IDisposable
             {
                 var slot = slots[i];
                 slot.onItemDataChanged -= contentsChanged;
+                var group = slot.SiblingSet;
+                if (group != null)
+                {
+                    if (!localGroups.Contains(group.Pointer))
+                        throw new InvalidOperationException("Refusing to detach an external sibling group.");
+                    for (int memberIndex = group.Slots.Count - 1; memberIndex >= 0; memberIndex--)
+                        if (group.Slots[memberIndex].Pointer == slot.Pointer) group.Slots.RemoveAt(memberIndex);
+                    slot._SiblingSet_k__BackingField = null!;
+                }
                 slots.RemoveAt(i);
                 // SetSlotOwner dereferences its owner argument; null is not supported.
                 slot._SlotOwner_k__BackingField = null!;
@@ -201,7 +243,7 @@ internal sealed class RackStorage : IDisposable
                 for (int i = 0; i < slots.Count; i++)
                 {
                     var slot = slots[i];
-                    if (i >= target || !CanReorder(slot))
+                    if (i >= target || !CanReorder(slot, localGroups))
                         settings.Trace($"ESB_RACK_SLOT_GUARD | id={rack.ItemId} | slot={i + 1} | item={slot.ItemInstance != null} | locked={slot.IsLocked} | removalLocked={slot.IsRemovalLocked} | addLocked={slot.IsAddLocked} | playerFilter={slot.PlayerFilter != null && !slot.PlayerFilter.IsDefault()} | siblingSet={slot.SiblingSet != null} | siblings={slot.SiblingSet?.Slots.Count ?? 0} | hardFilters={slot.HardFilters.Count}");
                 }
             }

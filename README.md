@@ -2,7 +2,7 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.8 – ein Sitzungslog und Diagnose kleiner Zielgrößen
+## 0.0.9 – Verkleinern lokaler Slot-Gruppen in Prüfung
 
 Small Storage Rack und Medium Storage Rack haben getrennte Slot-/Reiheneinstellungen.
 Beide verwenden die in 0.0.6 getestete Größen- und Umräumlogik. Beim Verkleinern
@@ -156,3 +156,8 @@ und SiblingSet-Verknüpfungen bei zurückgestellter Verkleinerung. Keine pauscha
 Vanilla-Mindestgröße eingeführt und kein bestehender Schutz entfernt.
 Direkte Compilerprüfung erfolgreich mit .NET-8-Referenzwarnungen;
 regulärer net6-Build und Spieltest von 0.0.8 ausstehend.
+
+0.0.9 korrigiert die zu strenge Sperre für rein regalinterne SiblingSets.
+Leere Originalslots dürfen entfernt werden, wobei die Mitgliedschaft in ihrer
+Gruppe bereinigt wird. Externe Gruppen und tatsächliche Sperren/Filter bleiben
+geschützt. Regulärer net6-Build und Laufzeittest dieser Änderung stehen aus.

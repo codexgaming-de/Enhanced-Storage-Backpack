@@ -165,3 +165,19 @@ der neuen Sitzung. Migration liest vorhandene nummerierte Dateien und entfernt
 sie erst nach erfolgreichem Schreiben. Test mit fünf Sitzungen, Toggle und
 Migration bestanden. Direkte Kompilierung mit net8-Referenzen erfolgreich mit
 CS1701; regulärer net6-Build und Spieltest noch ausstehend.
+
+## 0.0.9: lokale SiblingSets berücksichtigen
+
+Log (10) bestätigt bei leeren Medium-Originalslots: item=False, alle Sperren=False,
+playerFilter=False, siblingSet=True, siblings=6, hardFilters=0. Unsere pauschale
+SiblingSet-Sperre ist damit der konkrete Blocker. Lokale Gruppen werden nun nur
+freigegeben, wenn alle Mitglieder zur Slotliste dieses Regals gehören, eindeutige
+und vollständige wechselseitige Referenzen haben und die Gruppenliste nicht mit
+der Eigentümerliste identisch ist. Beim Entfernen leerer Slots werden diese auch
+aus der Gruppe entfernt und ihre Gruppenreferenz gelöscht. Fremde/inkonsistente
+Gruppen, Sperren und individuelle Filter bleiben geschützt.
+
+Direkte Kompilierung erfolgreich mit bekannten net8-Referenzwarnungen. Native
+Gruppenänderungen noch nicht im Spiel geprüft. Test: leeres Medium 6→5→1→10;
+anschließend Gegenstand hinten, Verkleinern mit freiem Ziel, Entnahme, Filter und
+Speichern/Laden. Auch kleines Regal einmal unter seine Originalgröße verkleinern.
