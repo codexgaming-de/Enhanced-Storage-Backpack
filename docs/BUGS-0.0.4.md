@@ -149,3 +149,19 @@ akzeptiert ersten geeigneten Platz statt zwingend Slot 1. Weshalb 1–4 überspr
 wurden, wurde nicht protokolliert. Nicht als für alle Gegenstände/Filter oder
 Extremgrößen vollständig validiert zu verstehen. Drei-Sitzungen-Rotation ist
 isoliert getestet; der Nutzerlog belegt den neuen Sitzungsmarker.
+
+## 0.0.8: Diagnose Zielgröße unter Vanilla und ein Log
+
+Nutzerlog (9): Medium-Ziel 5 ergibt zunächst tatsächliche Größe 7 mit Gegenstand,
+nach Entnahme 6. Screenshot bestätigt 7 sichtbare Slots. Kein Beweis für eine
+native Mindestkapazität; unsere CanReorder-Prüfung schützt zusätzlich leere
+verknüpfte/gesperrte/gefilterte Slots. Neue Diagnose ESB_RACK_SLOT_GUARD nennt die
+konkreten Flags einmal bei zurückgestellter Verkleinerung. Schutz noch unverändert.
+Speichern/Laden vom Nutzer erneut als erfolgreich gemeldet.
+
+Korrigierte Anforderung: eine Datei, letzte drei Sitzungen im Inhalt. Umsetzung
+über Sitzungsmarker und Behalten der letzten zwei Abschnitte beim ersten Eintrag
+der neuen Sitzung. Migration liest vorhandene nummerierte Dateien und entfernt
+sie erst nach erfolgreichem Schreiben. Test mit fünf Sitzungen, Toggle und
+Migration bestanden. Direkte Kompilierung mit net8-Referenzen erfolgreich mit
+CS1701; regulärer net6-Build und Spieltest noch ausstehend.

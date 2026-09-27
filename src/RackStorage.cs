@@ -196,7 +196,15 @@ internal sealed class RackStorage : IDisposable
             entity.DisplayRowCount = rows;
             if (changed) settings.Trace($"ESB_RACK_APPLIED | id={rack.ItemId} | requested={target} | actual={slots.Count} | rows={rows}");
             if (size > target && rack.LastBlockedTarget != target)
+            {
                 settings.Trace($"ESB_RACK_SHRINK_DEFERRED | id={rack.ItemId} | requested={target} | protectedSize={size}");
+                for (int i = 0; i < slots.Count; i++)
+                {
+                    var slot = slots[i];
+                    if (i >= target || !CanReorder(slot))
+                        settings.Trace($"ESB_RACK_SLOT_GUARD | id={rack.ItemId} | slot={i + 1} | item={slot.ItemInstance != null} | locked={slot.IsLocked} | removalLocked={slot.IsRemovalLocked} | addLocked={slot.IsAddLocked} | playerFilter={slot.PlayerFilter != null && !slot.PlayerFilter.IsDefault()} | siblingSet={slot.SiblingSet != null} | siblings={slot.SiblingSet?.Slots.Count ?? 0} | hardFilters={slot.HardFilters.Count}");
+                }
+            }
             rack.LastBlockedTarget = size > target ? target : -1;
             if (menu.IsShowing(entity)) menu.Bind(entity);
         }

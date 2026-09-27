@@ -2,7 +2,7 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.7 – mittleres Lagerregal in Prüfung
+## 0.0.8 – ein Sitzungslog und Diagnose kleiner Zielgrößen
 
 Small Storage Rack und Medium Storage Rack haben getrennte Slot-/Reiheneinstellungen.
 Beide verwenden die in 0.0.6 getestete Größen- und Umräumlogik. Beim Verkleinern
@@ -82,11 +82,13 @@ mit Beschreibung bzw. Screenshot senden; nicht über den einzigen Originalstand 
 ## Diagnose
 
 `UserData/Enhanced-Storage-Backpack-Debug.log`, optional im Mod Manager einschaltbar.
-Drei protokollierte Spielsitzungen: aktuelle Datei, `.log.1` (vorherige Sitzung)
-und `.log.2` (vorvorherige Sitzung). Rotation einmal beim ersten aktivierten
-Logeintrag pro Spielstart. Rein deaktivierte Sitzungen erzeugen keine Datei.
-Pro Sitzung ungefähr 1 MiB; danach endet die Ausgabe mit `ESB_LOG_LIMIT`.
-Beim Umstieg werden die alten, mehrere Sitzungen vermischenden Logs gelöscht.
+Eine einzige `Enhanced-Storage-Backpack-Debug.log` mit maximal drei protokollierten
+Spielsitzungen, getrennt durch ESB_SESSION_START. Beim ersten aktivierten Eintrag
+einer neuen Sitzung werden die zwei jüngsten alten Sitzungen behalten. Beim
+Umstieg werden `.log.1` und `.log.2` eingelesen und nach erfolgreicher Übernahme
+entfernt. Rein deaktivierte Sitzungen erzeugen keine Einträge. Ein-/Ausschalten
+innerhalb derselben Spielsitzung zählt nicht als neue Sitzung.
+Ungefähr 1 MiB pro Sitzung; danach endet deren Ausgabe mit ESB_LOG_LIMIT.
 Kein zyklisches Logging.
 
 - `ESB_SETTING_CURRENT` / `ESB_SETTING_CHANGED`: geladene/geänderte Einstellungen.
@@ -146,3 +148,11 @@ bei einem Sprachwechsel erhalten bleiben. Keine Referenz auf die Mod-Manager-DLL
 
 Wenn das mittlere Regal nicht erkannt wird, enthält ESB_STORAGE_OPEN seinen Namen
 und supportedRack=False. ESB_RACK_FOUND protokolliert die erkannte Item-ID.
+
+0.0.8: Ein-Datei-Sitzungsverlauf einschließlich Migration isoliert getestet.
+Nutzer bestätigt 0.0.7 für getrennte Größen und Speichern/Laden. Zielgröße 5 beim
+mittleren Regal noch ungeklärt: ESB_RACK_SLOT_GUARD protokolliert Sperren, Filter
+und SiblingSet-Verknüpfungen bei zurückgestellter Verkleinerung. Keine pauschale
+Vanilla-Mindestgröße eingeführt und kein bestehender Schutz entfernt.
+Direkte Compilerprüfung erfolgreich mit .NET-8-Referenzwarnungen;
+regulärer net6-Build und Spieltest von 0.0.8 ausstehend.
