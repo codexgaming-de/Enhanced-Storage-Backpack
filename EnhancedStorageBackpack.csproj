@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <AssemblyName>EnhancedStorageBackpack</AssemblyName>
     <Version>0.1.6</Version>
+    <Authors>CoDeX-Gaming</Authors>
+    <Company>CoDeX-Gaming</Company>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <MelonLoaderDirectory Condition="'$(MelonLoaderDirectory)' == ''">$(GameDirectory)/MelonLoader/net6</MelonLoaderDirectory>
     <GameAssembliesDirectory Condition="'$(GameAssembliesDirectory)' == ''">$(GameDirectory)/MelonLoader/Il2CppAssemblies</GameAssembliesDirectory>

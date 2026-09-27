@@ -1,3 +1,7 @@
+// Enhanced Storage + Backpack
+// Author / Projektleitung: CoDeX-Gaming
+// Developed with OpenAI Codex assistance; see README.md for disclosure.
+
 using HarmonyLib;
 using Il2CppFishNet;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
@@ -9,7 +13,7 @@ using MelonLoader;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.6", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.6", "CoDeX-Gaming")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;

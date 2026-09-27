@@ -1,6 +1,6 @@
 # Enhanced Storage + Backpack
 
-Singleplayer-Mod für **Schedule I (IL2CPP)** von **codexgaming-de**.
+Singleplayer-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
 **Stand: 0.1.6, normale Spieltests bestanden; Release-Paket in Vorbereitung.**

@@ -1,4 +1,4 @@
-Enhanced Storage + Backpack 0.1.6 — codexgaming-de
+Enhanced Storage + Backpack 0.1.6 — CoDeX-Gaming
 
 DEUTSCH
 Voraussetzungen: Schedule I IL2CPP, MelonLoader. Nur Singleplayer.
@@ -73,9 +73,9 @@ steps and this log in bug reports. Check for personal information before sharing
 
 AI TRANSPARENCY / KI-TRANSPARENZ
 Substantial portions of the code and documentation were generated with OpenAI
-Codex. Requirements, project direction and manual gameplay tests: codexgaming-de.
+Codex. Requirements, project direction and manual gameplay tests: CoDeX-Gaming.
 Wesentliche Teile von Code und Dokumentation wurden mit OpenAI Codex erzeugt.
-Anforderungen, Projektleitung und manuelle Spieltests: codexgaming-de.
+Anforderungen, Projektleitung und manuelle Spieltests: CoDeX-Gaming.
 
 Source / Quellcode:
 https://github.com/codexgaming-de/Enhanced-Storage-Backpack

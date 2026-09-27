@@ -47,7 +47,7 @@ Multiplayer und Mono werden nicht unterstützt.
 
 Transparenz: Dieses Projekt entstand mit OpenAI Codex. Wesentliche Teile des
 Codes sowie dieser Beschreibung wurden mit generativer KI erstellt. Planung,
-Anforderungen und manuelle Spieltests stammen von codexgaming-de. Quellcode und
+Anforderungen und manuelle Spieltests stammen von CoDeX-Gaming. Quellcode und
 Entwicklungsschritte sind im verlinkten GitHub-Repository nachvollziehbar.
 
 ## English description
@@ -75,7 +75,7 @@ Multiplayer and Mono are not supported.
 
 Transparency: This project was developed with OpenAI Codex. Substantial portions
 of the code and this description were generated using AI. Project direction,
-requirements and manual gameplay testing are provided by codexgaming-de.
+requirements and manual gameplay testing are provided by CoDeX-Gaming.
 Source code and development history are available in the linked GitHub repository.
 
 ## Unterstützte Lager / Supported storage
