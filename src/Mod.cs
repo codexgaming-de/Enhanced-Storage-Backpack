@@ -9,7 +9,7 @@ using MelonLoader;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.3", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.4", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -44,8 +44,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.3 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.3 | Nine storage types and backpack enabled."));
-            settings.Trace("ESB_READY | 0.1.3");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.4 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.4 | Nine storage types and backpack enabled."));
+            settings.Trace("ESB_READY | 0.1.4");
         }
         catch (Exception ex)
         {
@@ -63,6 +63,10 @@ public sealed class Mod : MelonMod
     private static void VisualizerStarted() => Run(storage => storage.Request());
 
     private static bool Active => instance != null && !instance.disabled && !InstanceFinder.IsClientOnly;
+
+    // Runtime UI/storage failures must not bypass inventory persistence. Keep
+    // reading/writing the backpack snapshot even when interactive updates stop.
+    private static bool PersistenceActive => instance != null && !InstanceFinder.IsClientOnly;
 
     private static void Run(Action<RackStorage> action)
     {
@@ -162,7 +166,7 @@ public sealed class Mod : MelonMod
         (Player.Local != null && Player.Local.Pointer == player.Pointer);
     private static void InventorySaving(Player __instance, ref string __result)
     {
-        if (!Active || !LocalPlayer(__instance) || instance?.backpack == null) return;
+        if (!PersistenceActive || !LocalPlayer(__instance) || instance?.backpack == null) return;
         try { __result = instance.backpack.WriteInventory(__result); }
         catch (Exception ex)
         {
@@ -173,7 +177,7 @@ public sealed class Mod : MelonMod
     }
     private static void InventoryLoading(Player __instance, ref string __0)
     {
-        if (!Active || !LocalPlayer(__instance) || instance?.backpack == null) return;
+        if (!PersistenceActive || !LocalPlayer(__instance) || instance?.backpack == null) return;
         try { instance.backpack.ReadInventory(ref __0); }
         catch (Exception ex)
         {

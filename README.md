@@ -1,220 +1,101 @@
 # Enhanced Storage + Backpack
 
-Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
+Singleplayer-Mod für **Schedule I (IL2CPP)** von **codexgaming-de**.
+Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-## 0.1.3 – Kompakte letzte Seite
+**Stand: 0.1.4, Release-Vorbereitung.** Die Funktionen bis 0.1.3 wurden vom Nutzer
+im Spiel bestätigt. 0.1.4 ergänzt einen Schutz für Backpack-Speichern/Laden nach
+einer internen Laufzeitabschaltung. Diese Fehlerfalländerung und der Polizeitest
+sind im Spiel noch offen. Kein fertiger Nexus-Release.
 
-Teilgefüllte letzte Lagerseiten verwenden nur die benötigten Reihen bei der
-Spaltenbreite einer vollen Seite: 128 Slots / 5 Reihen ergibt zuletzt 8 Slots
-in einer Reihe. Die Backpack-Unterzeile mit der Platzanzahl entfällt inklusive
-des reservierten Abstands. Der Nutzer bestätigt Layout und Funktion von 0.1.2;
-diese beiden Darstellungsanpassungen stehen noch zum Spieltest aus.
-Direkte Compilerprüfung mit den bekannten Referenzwarnungen bestanden.
+## Funktionen
 
-## 0.1.2 – Layoutfehler behoben, Seiten für alle Lagertypen
+- Backpack: 1–128 Plätze, standardmäßig 40; konfigurierbare Taste (Standard **B**).
+- Natives StorageMenu mit eigener `<` / `>` Navigation, bis zu 40 Plätze pro Seite.
+- Neun Lagertypen mit getrennten Einstellungen für Plätze und Reihen:
+  Small/Medium/Large Storage Rack, Small/Medium/Large/Huge Storage Closet,
+  Safe und Filing Cabinet.
+- Lagerplätze: 1–128; **0** verwendet die ursprüngliche Spielvorgabe.
+- Lagerseiten: maximal 40 Plätze, 5 sichtbare Reihen und 10 Spalten.
+  1–3 Reihen ergeben Seiten mit höchstens 10/20/30 Plätzen. Höhere
+  Reiheneinstellungen bleiben gespeichert, die sichtbare Seite nutzt höchstens 5.
+  Die letzte Seite benötigt nur so viele Reihen wie ihre verbleibenden Plätze.
+- Beim Verkleinern ziehen Gegenstände in geeignete freie vordere Plätze um.
+  Können sie nicht untergebracht werden, bleiben die benötigten Zusatzplätze
+  erhalten. Gegenstände werden nicht einfach abgeschnitten.
+- Deutsch/English für unsere Einstellungen, Beschreibungen und Menütitel.
+  Fremde Schaltflächen des Mod Managers behalten dessen eigene Sprache.
+- MelonPreferences; Einstellungen im Mod Manager & Phone App veränderbar.
+  Änderungen wirken während der Sitzung; während Ziehen, Speichern oder Laden
+  werden Größenänderungen zurückgestellt. Nur DLL-Updates brauchen einen Neustart.
+- Optional eine Debug-Datei mit den letzten drei protokollierten Spielsitzungen.
 
-Der Nutzer bestätigt die angeforderten Backpack-Tests mit 0.1.0, meldet aber
-zu tief liegende Navigation und einen über den Slots liegenden Fertig-Button.
-0.1.2 ordnet Titel, Untertitel, Slots, Navigation und Fertig gemeinsam auf dem
-Canvas an. Native Positionen werden beim Schließen wiederhergestellt.
+Die sichtbare Gegenstandsdarstellung eines Regals ist durch dessen Stellfläche
+begrenzt; 128 Plätze bedeuten nicht 128 gleichzeitig sichtbare Gegenstandsmodelle.
+Multiplayer und die Mono-Version des Spiels werden nicht unterstützt.
 
-Alle neun Lagertypen besitzen jetzt Seitennavigation.
-Pro Seite höchstens 40 Slots, 5 sichtbare Reihen und 10 Spalten. Einstellungen
-mit 1–3 Reihen ergeben entsprechend kleinere Seiten. Die Slotanzahl bleibt
-unverändert; höhere Reihenzahlen werden für die Seitendarstellung auf 5 begrenzt.
-Quick Move arbeitet auf den sichtbaren Slots, Seitenwechsel während Drag-and-drop
-ist gesperrt. Nach Verkleinern wird die Seitenzahl an die verbleibenden Slots angepasst.
+## Speichern und Laden
 
-Die in 0.1.1 nicht verfügbare Unity-Bounds-Hilfsfunktion wurde durch eigene
-Berechnung aus Rechtecken und Transform-Koordinaten ersetzt. Layoutfehler
-schalten die weiteren Slot-/Reihenaktualisierungen nicht mehr ab.
-32.779 Größen-/Seitenprüfungen aus 0.1.1 bestanden. Direkte Compilerprüfung erfolgreich
-mit zwölf CS1701-Warnungen (.NET-8-Referenzen); regulärer .NET-6-Build und visueller
-Spieltest stehen aus. Speichercode gegenüber 0.1.0 unverändert.
-Aktueller Branch: `feature/0.1.0-backpack`.
+Lager verwenden die Speicherverwaltung des Spiels. Der Backpack wird in denselben
+Inventar-JSON-Datensatz eingebettet wie das Spielerinventar. Gegenstandsbewegungen,
+Menüschließen und Mod-Manager-Einstellungen lösen keinen eigenen Inhaltssave aus.
 
-## Funktionsumfang in Prüfung
+Nur ein reguläres Speichern des Spiels (einschließlich Spiel-Autosave) hält den
+aktuellen Inhalt fest. Ohne einen solchen Save wird der letzte gespeicherte Stand
+wiederhergestellt. Der Codec ist automatisch getestet; ein Stromausfall oder ein
+Abbruch des gesamten Spiel-Speichervorgangs wurde nicht simuliert.
 
-- Metadaten für Einstellungen, Kategorien und Beschreibungen auf Deutsch und
-  Englisch. Sprachwechsel in der Phone App vom Nutzer bestätigt.
-- Nach einem Sprachwechsel wird die öffentliche Aktualisierungs-API des Managers
-  einmal aufgerufen. Die Oberfläche des fremden Mod Managers und
-  dessen eigene Schaltflächen werden nicht vom Plugin übersetzt.
-- Small Storage Rack / Kleines Lagerregal und Medium Storage Rack / Mittleres
-  Lagerregal sowie Large Storage Rack / Großes Lagerregal: jeweils 1–128 Plätze und eigene Reihenanzahl.
-  0 verwendet jeweils die ursprüngliche Spielvorgabe.
-- Reihen werden für die Darstellung auf die tatsächliche Zahl der Plätze begrenzt.
-- Einstellungsänderungen werden bei der nächsten Spielaktualisierung verarbeitet.
-  Während eines Drag-and-drop-Vorgangs wird bis zum Ablegen gewartet; während
-  Speichern/Laden werden angeforderte Größenänderungen ebenfalls zurückgestellt.
-- Beim Verkleinern bleiben belegte, gesperrte, gefilterte oder anderweitig gebundene
-  Plätze erhalten. Leere Plätze am Ende können entfernt werden. Nach Entleerung
-  wird die angeforderte Größe erneut geprüft; spätestens beim nächsten Öffnen.
-- Zusätzliche UI-Plätze werden bei Bedarf einmal erzeugt und wiederverwendet.
-- Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
+Der Backpack besitzt einen eigenen Slot-Owner außerhalb des Spielerinventars.
+Das gewünschte Ignorieren bei Polizeidurchsuchungen ist **noch im Spiel zu prüfen**;
+es wird bislang nicht als bestätigte Eigenschaft beworben.
 
-**Der Backpack befindet sich im ersten Spieltest.**
-Das kleine Regal ist in den dokumentierten Fällen im Spiel bestätigt. Keine
-Veröffentlichung als fertige Nexus-Version.
+## Bauen und aktualisieren
 
-## Aktualisieren und bauen
-
-Spiel beenden. Voraussetzungen: .NET SDK 8, Schedule I IL2CPP und MelonLoader.
+Referenzumgebung aus den bisherigen Tests: Spiel 0.4.6f13, MelonLoader 0.7.3,
+Mod Manager & Phone App 2.2.4; Nutzertests unter Nobara/Wine/Proton.
+Das ist keine Zusage für andere Spiel- oder Manager-Versionen.
+Zum Bauen: .NET SDK 8 mit Wiederherstellung der net6.0-Referenzen.
+Spiel zuerst beenden, dann auf dem bisherigen Projektbranch:
 
 ```bash
-cd /home/codex/Enhanced-Storage-Backpack
-git fetch origin &&
-git switch feature/0.1.0-backpack &&
+cd /home/codex/Enhanced-Storage-Backpack &&
 git pull --ff-only origin feature/0.1.0-backpack &&
 dotnet build -c Release -p:GameDirectory="/home/codex/Schreibtisch/Schedulue 1 Plugins/" &&
-cp "bin/Release/net6.0/EnhancedStorageBackpack.dll" \
+cp bin/Release/net6.0/EnhancedStorageBackpack.dll \
    "/home/codex/Schreibtisch/Schedulue 1 Plugins/Mods/"
 ```
 
-Spiele- und Loader-DLLs werden nur lokal referenziert. Alternativ sind die
-MSBuild-Parameter `MelonLoaderDirectory` und `GameAssembliesDirectory` verfügbar.
+Bei einem neuen Checkout zuerst den Branch `feature/0.1.0-backpack` auswählen.
+Spiele- und Loader-DLLs werden nur lokal referenziert und nicht mitgeliefert.
+Alternative Buildparameter: `MelonLoaderDirectory`, `GameAssembliesDirectory`.
+Eine einzige Version der Mod-DLL im Ordner `Mods` verwenden.
+Der Mod Manager ist für seine Einstellungsoberfläche erforderlich, aber keine
+fest eingebundene DLL-Abhängigkeit dieser Mod.
 
-## Gemeinsamer Test – zunächst mit einer Kopie des Spielstands
+## Deinstallation
 
-1. Diagnoseprotokoll einschalten. Sprache Deutsch wählen, Einstellungsansicht neu
-   öffnen: Kategorien und Einträge müssen deutsch sein. Dasselbe mit English prüfen.
-2. Für das **kleine Lagerregal** 16 Plätze und 4 Reihen einstellen und ein leeres
-   kleines Lagerregal öffnen. Anzahl und Darstellung prüfen.
-3. Während derselben Sitzung auf 24 Plätze und 4 Reihen ändern. Bestehende und neu
-   aufgestellte kleine Lagerregale prüfen. Andere Lagertypen dürfen sich nicht ändern.
-4. Einen Gegenstand auf Platz 24 legen. Auf 8 Plätze / 2 Reihen reduzieren:
-   Platz 24 muss mit Inhalt erhalten bleiben. Gegenstand entnehmen: Danach darf
-   das Regal auf 8 Plätze schrumpfen. Drag-and-drop und Schnellverschieben prüfen.
-5. Auf 128 Plätze / 8 Reihen erweitern und die letzten Plätze prüfen. Danach
-   5 Plätze / 10 Reihen mit leerem Regal testen: höchstens 5 angezeigte Reihen.
-6. Gegenstände in erweiterten Plätzen ablegen, **Spielstand speichern**, neu laden.
-   Inhalte und Mengen müssen identisch sein. Ebenso Beenden ohne Speicherung
-   prüfen: Es muss der Inhalt des letzten Spielstands wiederhergestellt werden.
-7. Nach dem Speichern mit belegtem erweiterten Platz die konfigurierte Größe im
-   Hauptmenü verkleinern und erst dann laden: Der belegte Platz muss erhalten bleiben.
-8. Einstellungen Slots/Rows auf 0 zurücksetzen; soweit Plätze leer sind, müssen
-   ursprüngliche Größe und Reihenanzahl wiederhergestellt werden.
+Vor dem Entfernen der DLL den Backpack leeren und zusätzliche Lagerplätze
+leeren; Lagergrößen auf Original zurückstellen. Anschließend im Spiel speichern.
+Danach das Spiel beenden und `Mods/EnhancedStorageBackpack.dll` entfernen.
+Eine Sicherung des Mod-Spielstands behalten. Ohne Mod ist der Backpack nicht
+zugänglich; Erhalt seiner Zusatzdaten bei späterem Speichern ohne Mod ist nicht
+zugesichert.
 
-Bis diese Tests abgeschlossen sind, kein verlässlich geprüfter Ersatz für die
-bisherige Lagerverwaltung. Bei Auffälligkeiten den Test stoppen und das Debug-Log
-mit Beschreibung bzw. Screenshot senden; nicht über den einzigen Originalstand speichern.
+## Diagnose und Tests
 
-## Diagnose
-
-`UserData/Enhanced-Storage-Backpack-Debug.log`, optional im Mod Manager einschaltbar.
-Eine einzige `Enhanced-Storage-Backpack-Debug.log` mit maximal drei protokollierten
-Spielsitzungen, getrennt durch ESB_SESSION_START. Beim ersten aktivierten Eintrag
-einer neuen Sitzung werden die zwei jüngsten alten Sitzungen behalten. Beim
-Umstieg werden `.log.1` und `.log.2` eingelesen und nach erfolgreicher Übernahme
-entfernt. Rein deaktivierte Sitzungen erzeugen keine Einträge. Ein-/Ausschalten
-innerhalb derselben Spielsitzung zählt nicht als neue Sitzung.
-Ungefähr 1 MiB pro Sitzung; danach endet deren Ausgabe mit ESB_LOG_LIMIT.
-Kein zyklisches Logging.
-
-- `ESB_SETTING_CURRENT` / `ESB_SETTING_CHANGED`: geladene/geänderte Einstellungen.
-- `ESB_RACK_FOUND`: erkanntes kleines Lagerregal mit ursprünglicher Kapazität.
-- `ESB_RACK_APPLIED`: angeforderte und tatsächliche Kapazität, angewandte Reihen.
-- `ESB_RACK_SHRINK_DEFERRED`: geschützte Plätze verhindern vollständiges Verkleinern.
-- `ESB_RACK_LOAD`: Kapazität vor Wiederherstellung durch den nativen Loader.
-- `ESB_STORAGE_OPEN` / `ESB_RACK_MENU`: Diagnose der Erkennung und Anzeige.
-
-## Speichervertrag
-
-Regalinhalte bleiben in der nativen Speicherverwaltung des Spiels. Vor dem Laden
-wird genügend Platz für die eingehenden gespeicherten Slots bereitgestellt;
-Verkleinerung erst nach der Wiederherstellung. Es gibt keine zusätzliche Datei
-für Regalinhalte und keinen eigenen Inventar-Autosave.
-
-Für den späteren Backpack gilt der vereinbarte Vertrag in [docs/ROADMAP.md](docs/ROADMAP.md):
-Inhalte ausschließlich zusammen mit dem Spielstand speichern; niemals durch
-Gegenstandsbewegungen, Größenänderungen oder die Save-Taste des Mod Managers.
-
-## Validierung
-
-- 0.0.1: Build und Laden beim Nutzer bestätigt: Spiel 0.4.6f13, MelonLoader 0.7.3,
-  Wine/Proton 11.0. Mod Manager & Phone App 2.2.4 geladen.
-- 0.0.2/0.0.3: Nutzerlogs belegen Wertänderungen während der Sitzung, Persistenz
-  nach Neustart und Ausgabe des eigenen Debug-Logs. Die hohen Reihenwerte im Log
-  waren ausschließlich Testeingaben, keine gewünschten Vorgaben.
-- 0.0.4: Release-Build gegen die bereitgestellten DLLs: 0 Warnungen, 0 Fehler.
-  16.395 Prüfungen der reinen Größen-/Reihenregeln bestanden (einschließlich aller
-  Kombinationen aus Zielkapazität 1–128 und einem geschützten Platz).
-  Der anschließende Nutzertest zeigte die in der Fehleranalyse beschriebenen Laufzeitfehler.
-- 0.0.5 vor Ergänzung der Manager-API: Release-Build mit 0 Warnungen/Fehlern und bisherige Größenregeltests bestanden.
-  Die anschließende API-Ergänzung konnte wegen eines lokalen .NET-Werkzeugfehlers noch nicht gebaut werden.
-  Die Korrekturen wurden noch nicht im Spiel geprüft.
-  Das sind keine Unity-Laufzeittests. Native Methoden liegen hier nur als
-  IL2CPP-Interop-Schnittstellen vor. UI, Gegenstandsbewegungen und Speicherverhalten
-  müssen mit obigem Testplan im tatsächlichen Spiel geprüft werden.
+Optional: `UserData/Enhanced-Storage-Backpack-Debug.log`.
+Genau eine dauerhafte Logdatei, höchstens drei protokollierte Sitzungen,
+unterschieden durch `ESB_SESSION_START`; ungefähr 1 MiB pro Sitzung.
+Deaktivierte Sitzungen erzeugen keine Einträge. Ein-/Ausschalten innerhalb einer
+Sitzung beginnt keine neue Sitzung. Alte nummerierte Logs werden beim Umstieg
+übernommen und danach entfernt. Kein zyklisches Datei-Logging.
 
 ```bash
 dotnet run --project tests/StorageRulesTests.csproj -c Release
+dotnet run --project tests/BackpackSaveTests.csproj -c Release
+dotnet run --project tests/DiagnosticLogTests.csproj -c Release
 ```
 
-Die Kategoriekennungen bleiben stabil, damit gespeicherte Einstellungen und die
-[Mod-Manager-Erkennung](https://github.com/Prowiler/schedule1-mod-manager-wiki/wiki/Integration-Guide)
-bei einem Sprachwechsel erhalten bleiben. Keine Referenz auf die Mod-Manager-DLL.
-
-## Testplan 0.0.7
-
-1. Ein kleines und ein mittleres Regal platzieren. Für das kleine 10 Slots/1 Reihe,
-   für das mittlere 24 Slots/4 Reihen setzen. Größen müssen getrennt bleiben.
-2. Mittleres Regal auf 16 Slots/2 Reihen ändern: vorhandenes und neu platziertes
-   Regal prüfen, ohne Spielneustart. Einlegen/Entnehmen und Quick Move prüfen.
-3. Im mittleren Regal Gegenstand im letzten Slot ablegen, bei freiem vorderen
-   Platz auf 10 Slots verkleinern: automatisches Umräumen und Mengenerhalt prüfen.
-4. Speichern/Laden: beide Typen behalten ihre Gegenstände und getrennten Größen.
-5. Deutsch/English: mittlere Kategorie und Beschreibungen, Regalüberschrift prüfen.
-
-Wenn das mittlere Regal nicht erkannt wird, enthält ESB_STORAGE_OPEN seinen Namen
-und supportedRack=False. ESB_RACK_FOUND protokolliert die erkannte Item-ID.
-
-0.0.8: Ein-Datei-Sitzungsverlauf einschließlich Migration isoliert getestet.
-Nutzer bestätigt 0.0.7 für getrennte Größen und Speichern/Laden. Zielgröße 5 beim
-mittleren Regal noch ungeklärt: ESB_RACK_SLOT_GUARD protokolliert Sperren, Filter
-und SiblingSet-Verknüpfungen bei zurückgestellter Verkleinerung. Keine pauschale
-Vanilla-Mindestgröße eingeführt und kein bestehender Schutz entfernt.
-Direkte Compilerprüfung erfolgreich mit .NET-8-Referenzwarnungen;
-regulärer net6-Build und Spieltest von 0.0.8 ausstehend.
-
-0.0.9 korrigiert die zu strenge Sperre für rein regalinterne SiblingSets.
-Leere Originalslots dürfen entfernt werden, wobei die Mitgliedschaft in ihrer
-Gruppe bereinigt wird. Externe Gruppen und tatsächliche Sperren/Filter bleiben
-geschützt. Regulärer net6-Build und Laufzeittest dieser Änderung stehen aus.
-
-## Testablauf 0.0.11
-
-- Großes Regal: 30 Plätze / 3 Reihen, danach 10 Plätze / 2 Reihen.
-- Ein Item in Slot 30 ablegen und bei freien vorderen Plätzen verkleinern:
-  Item muss erreichbar bleiben und in einen passenden vorderen Platz umziehen.
-- Bei mehr als zehn belegten Plätzen darf Verkleinern nichts abschneiden.
-- Gegenstände auch aus zusätzlichen Slots im Regal sichtbar, soweit Stellfläche reicht.
-- Bestehendes und neu platziertes Regal; Speichern/Laden; DE/EN-Beschreibungen.
-- Kleine und mittlere Regale behalten ihre eigenen Einstellungen.
-- Debug-Log: ESB_RACK_FOUND muss id=largestoragerack zeigen.
-
-## Testablauf 0.0.12
-
-Jeden der vier Schränke separat prüfen, möglichst bestehend und neu platziert:
-
-1. Unterschiedliche Größen: Small 12/2, Medium 24/3, Large 32/4, Huge 40/4
-   (Plätze/Reihen). Änderungen dürfen die anderen Typen nicht beeinflussen.
-2. Item in den letzten Slot legen; bei freien vorderen Plätzen auf 5/1 verkleinern.
-   Das Item muss in einen passenden vorderen Slot umziehen und entnehmbar bleiben.
-3. Mehr als fünf Plätze belegen, dann auf fünf verkleinern: belegte Plätze bleiben
-   zugänglich. Nach Entleeren passt sich die Größe an.
-4. Speichern/Laden, Sprache DE/EN und vorhandene Regal-Einstellungen prüfen.
-5. Eigenes Debug-Log zur Bestätigung der vier Item-IDs bereitstellen.
-
-Die native Darstellung wird nur angebunden, wenn ein passender Visualizer
-vorhanden ist. Geschlossene Schränke erhalten keine künstliche Außenanzeige.
-
-## Testablauf 0.0.13
-
-- Tresor: 16 Plätze / 2 Reihen. Aktenschrank: 24 Plätze / 3 Reihen.
-- Jeweils ein Item im letzten Slot ablegen, bei freien vorderen Plätzen auf
-  5 Plätze / 1 Reihe verkleinern, anschließend Item entnehmen.
-- Bei mehr als fünf belegten Plätzen muss der Überhang erreichbar bleiben.
-- Bestehende und neu platzierte Objekte, Speichern/Laden und DE/EN prüfen.
-- Andere Lagertypen behalten ihre jeweiligen Einstellungen.
-- Eigenes Debug-Log zur Bestätigung von safe und filingcabinet bereitstellen.
+[Validierung und offene Release-Prüfungen](docs/RELEASE-VALIDATION.md) ·
+[Nexus-Entwurf und KI-Kennzeichnung](docs/NEXUS-RELEASE.md) ·
+[Projektplan](docs/ROADMAP.md)

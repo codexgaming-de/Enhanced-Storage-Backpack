@@ -1,82 +1,40 @@
-# Vereinbarter Funktionsumfang
+# Projektplan
 
-Die folgende Liste beschreibt Ziele, keine bereits implementierten Funktionen.
-0.0.1: Build und Laden im Spiel bestätigt.
-0.0.2/0.0.3: Einstellungsänderungen, Persistenz und eigenes Debug-Log durch Nutzerlogs bestätigt.
-0.0.5/0.0.6: Phone-Sprachwahl, Small Storage Rack, automatisches Umräumen sowie
-Speichern/Laden im beschriebenen Nutzertest bestätigt.
-Aktueller Schritt: 0.0.7 Medium Storage Rack implementiert; Spieltest ausstehend.
+Singleplayer-Mod Enhanced Storage + Backpack für Schedule I IL2CPP.
 
-## Backpack
+## Vom Nutzer im Spiel bestätigt
 
-- 1 bis 128 konfigurierbare Slots.
-- Integration in das native StorageMenu.
-- 40 Slots pro Seite mit eigener Navigation `<` und `>`.
-- Konfigurierbarer Hotkey, Vorgabe B.
-- Deutsch und Englisch.
-- MelonPreferences, kompatibel mit Mod Manager & Phone App.
-- Sicheres Verkleinern: belegte Slots nicht abschneiden.
-- Polizeidurchsuchungen ignorieren den Rucksackinhalt.
-- Optionales Debug-Logging mit eigenem Diagnose-Log.
+- Alle neun Lagertypen mit getrennten Slot-/Reihenwerten bis 128 Slots.
+- Live-Einstellungen, Verkleinern mit Umräumen und Erhalt benötigter Zusatzplätze.
+- Gegenstandsdarstellung in zusätzlichen Regalplätzen, soweit Stellfläche reicht.
+- Sprachwechsel Deutsch/English im Mod Manager & Phone App.
+- Backpack mit nativem Menü, Hotkey, 1–128 Slots und Seitennavigation.
+- Speichern/Laden; Rückkehr zum gespeicherten Inhalt nach ungespeicherten Bewegungen.
+- Layout bis 0.1.3, einschließlich kompakter letzter Lagerseite.
 
-## Storage
+## Speichervertrag
 
-Slots (maximal 128) und Reihen pro Lagertyp separat konfigurierbar:
+Bewegungen verändern den laufenden Zustand. Erst reguläres Speichern des Spiels
+(einschließlich Spiel-Autosave) hält ihn fest. Kein eigener Inhaltssave bei
+Mod-Manager-Speichern, Größenänderung oder Menüschließen. Backpack und Hotbar
+werden im selben Inventar-JSON gespeichert. Codec-Prüfungen ersetzen keine
+Spieltests bei Schreibfehlern oder Abbrüchen des gesamten Speichervorgangs.
 
-- Small / Medium / Large Storage Rack.
-- Small / Medium / Large / Huge Storage Closet.
-- Safe.
-- Filing Cabinet.
+## Aktuell: Release-Vorbereitung 0.1.4
 
-Alle Einstellungen ueber den Mod Manager im Spiel; Aenderungen sofort ohne
-Spielneustart wirksam. Belegte Slots bei Groessenaenderungen schuetzen.
+- Schutz gegen übersprungene Backpack-Persistenz bei interner Laufzeitabschaltung.
+- Automatische Prüfungen und aktuelle Dokumentation.
+- Offen: Polizeidurchsuchung, expliziter Spielstandwechsel, Fehlerfall-Speicherung,
+  regulärer net6.0-Build und Spielprüfung des neuen Schutzes.
+- Danach Paket und Nexus-Veröffentlichung mit korrekter KI-Kennzeichnung.
 
-## Entwicklung
+Siehe [Prüfbericht](RELEASE-VALIDATION.md) und [Nexus-Entwurf](NEXUS-RELEASE.md).
+Frühere versionsbezogene Dokumente bleiben als historische Entwicklungsnotizen;
+für den aktuellen Status ist der Prüfbericht maßgeblich.
 
-Neuer Code im Repository `codexgaming-de/Enhanced-Storage-Backpack`.
-Lokaler Ordner des Nutzers: `/home/codex/Enhanced-Storage-Backpack/`.
-GitHub-Zugriff auf dem Nutzer-PC per vorhandenem SSH-Schluessel.
-Keine automatische Uebernahme des alten Implementierungsstands.
-Nach jedem abgegrenzten Schritt Build pruefen und gemeinsam im Spiel testen.
-Ausschließlich Singleplayer; Multiplayer ist nicht Teil des Projekts.
-Ressourcenschonend: ereignisbasierte Änderungen, keine dauernden vollständigen
-Lagersuchen, keine unnötigen UI-Neuaufbauten oder Dateioperationen.
-Angegebener Spielordner: `/home/codex/Schreibtisch/Schedulue 1 Plugins/`.
+## Grenzen
 
-
-## Verbindlicher Speichervertrag für den späteren Backpack
-
-- Gegenstandsbewegungen ändern nur den laufenden Zustand im Arbeitsspeicher.
-- Dauerhaft speichern nur zusammen mit dem zugehörigen Spielstand, einschließlich
-  eines regulären Spiel-Autosaves. Kein eigener Rucksack-Autosave.
-- Mod-Manager-Speichern und Größenänderungen dürfen keine Gegenstände speichern.
-- Beenden ohne Spielstandspeicherung verwirft die Änderungen seit dem letzten Save.
-- Laden muss Inventar und Rucksack aus demselben Speicherzeitpunkt herstellen.
-- Fehlgeschlagene oder unterbrochene Speicherung darf keinen neueren Rucksack mit
-  einem älteren Inventar kombinieren. Das tatsächliche Save-Verfahren des Spiels
-  muss vor der Implementierung untersucht werden; ein nachträglich geschriebener
-  separater Inhalt allein garantiert diese Konsistenz nicht.
-- Pflichtfälle: Hotbar → Backpack und Backpack → Hotbar, jeweils mit Speichern,
-  ohne Speichern, nach Neustart, bei Save-Fehler/Abbruch und Spielstandwechsel.
-
-## Noch vorläufig
-
-Startwerte: Backpack 40, Lager 0 = Original. Storage-Reihen haben im
-Einstellungstest die technische Grenze 128. Beim kleinen Lagerregal werden die tatsächlich angezeigten Reihen auf die
-vorhandenen Plätze begrenzt. Hohe Reihenwerte aus den Nutzerlogs waren reine Tests. Kein UI- oder Speicherverhalten gilt durch die
-reine Registrierung einer Einstellung als fertig.
-
-
-Die Beschriftungen unserer Einstellungen und Kategorien müssen vollständig der
-gewählten Sprache entsprechen, keine gemischten deutschen/englischen Beschriftungen.
-Fremde Mod-Manager-Schaltflächen behalten dessen eigene Sprache.
-
-
-## Stand 0.1.0 (27.09.2026)
-
-Alle neun Storage-Typen in den Nutzertests bestätigt, inklusive Speichern/Laden.
-Backpack auf Branch feature/0.1.0-backpack implementiert und lokal kompiliert;
-268 reine Persistenzprüfungen bestanden. Nativer Spieltest noch offen.
-Der Speichervertrag wird durch Einbettung in denselben Inventar-JSON-Datensatz
-umgesetzt, nicht durch eine separat fortgeschriebene Datei.
-Siehe BACKPACK-0.1.0.md für Grenzen und verbindliche Testfälle.
+Kein Multiplayer. Keine gemessene Performance-Zusage. Ereignisbasierte
+Größenänderungen, wiederverwendete UI und optionales begrenztes Logging.
+Maximal 40 Plätze pro Seite, maximal 5 sichtbare Lagerreihen und 10 Spalten.
+Eine dauerhafte Debug-Datei mit höchstens drei protokollierten Spielsitzungen.
