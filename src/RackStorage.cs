@@ -59,7 +59,7 @@ internal sealed class RackStorage : IDisposable
         // Prefer immutable item identity over a player-editable storage label.
         // Placement previews have no item definition and must not be resized.
         string itemId = Normalize(definition?.ID);
-        bool match = definition != null && (itemId == "smallstoragerack" || itemId == "mediumstoragerack");
+        bool match = definition != null && (itemId == "smallstoragerack" || itemId == "mediumstoragerack" || itemId == "largestoragerack");
         if (!match) return null;
         var rack = new Rack(entity, itemId);
         racks.Add(entity.Pointer, rack);
@@ -67,11 +67,21 @@ internal sealed class RackStorage : IDisposable
         return rack;
     }
 
-    private int ConfiguredSlots(Rack rack) => rack.ItemId == "mediumstoragerack"
-        ? settings.MediumRackSlots.Value : settings.SmallRackSlots.Value;
+    private int ConfiguredSlots(Rack rack) => rack.ItemId switch
+    {
+        "smallstoragerack" => settings.SmallRackSlots.Value,
+        "mediumstoragerack" => settings.MediumRackSlots.Value,
+        "largestoragerack" => settings.LargeRackSlots.Value,
+        _ => throw new InvalidOperationException("Unsupported rack identity.")
+    };
 
-    private int ConfiguredRows(Rack rack) => rack.ItemId == "mediumstoragerack"
-        ? settings.MediumRackRows.Value : settings.SmallRackRows.Value;
+    private int ConfiguredRows(Rack rack) => rack.ItemId switch
+    {
+        "smallstoragerack" => settings.SmallRackRows.Value,
+        "mediumstoragerack" => settings.MediumRackRows.Value,
+        "largestoragerack" => settings.LargeRackRows.Value,
+        _ => throw new InvalidOperationException("Unsupported rack identity.")
+    };
 
     private static string Normalize(string? value)
         => new string((value ?? "").Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();

@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>EnhancedStorageBackpack</AssemblyName>
-    <Version>0.0.10</Version>
+    <Version>0.0.11</Version>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <MelonLoaderDirectory Condition="'$(MelonLoaderDirectory)' == ''">$(GameDirectory)/MelonLoader/net6</MelonLoaderDirectory>
     <GameAssembliesDirectory Condition="'$(GameAssembliesDirectory)' == ''">$(GameDirectory)/MelonLoader/Il2CppAssemblies</GameAssembliesDirectory>

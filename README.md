@@ -2,19 +2,18 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.10 – Darstellung zusätzlicher Regalplätze in Prüfung
+## 0.0.11 – Großes Lagerregal in Prüfung
 
-Small Storage Rack und Medium Storage Rack haben getrennte Slot-/Reiheneinstellungen.
-Der Nutzer hat Verkleinern, automatisches Umräumen und Speichern/Laden mit 0.0.9
-im Spiel bestätigt. Bei Platzmangel, Sperren oder individuellen Filtern bleiben
-zusätzliche belegte Plätze geschützt.
+Small, Medium und Large Storage Rack haben getrennte Slot-/Reiheneinstellungen.
+Das große Regal verwendet dieselbe Größen-, Umräum- und Darstellungslogik.
+Die Darstellung zusätzlicher Slots in 0.0.10 wurde vom Nutzer bestätigt;
+Verkleinern sowie Speichern/Laden waren mit 0.0.9 bestätigt.
 
-0.0.10 registriert zusätzliche Slots auch beim nativen StorageEntityVisualizer.
-Die physische Stellfläche begrenzt weiterhin die Zahl sichtbarer Modelle;
-zehn Inventarplätze garantieren nicht Platz für zehn beliebig große Gegenstände.
-Der Spieltest dieser Darstellung steht aus. Direkte Compilerprüfung mit
-.NET-8-Referenzen erfolgreich (CS1701-Referenzversionswarnungen); der reguläre
-.NET-6-Build erfolgt auf dem Nutzer-PC.
+Das große Regal wird anhand der normalisierten Item-ID `largestoragerack`
+erkannt. Diese ID und das Verhalten müssen noch im Spiel bestätigt werden.
+Die physische Stellfläche begrenzt weiterhin die Zahl sichtbarer Modelle.
+Direkte Compilerprüfung mit .NET-8-Referenzen erfolgreich (CS1701-Warnungen);
+der reguläre .NET-6-Build und Spieltest erfolgen auf dem Nutzer-PC.
 
 Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0.6.
 
@@ -26,7 +25,7 @@ Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0
   einmal aufgerufen. Die Oberfläche des fremden Mod Managers und
   dessen eigene Schaltflächen werden nicht vom Plugin übersetzt.
 - Small Storage Rack / Kleines Lagerregal und Medium Storage Rack / Mittleres
-  Lagerregal: jeweils 1–128 Plätze und eigene Reihenanzahl.
+  Lagerregal sowie Large Storage Rack / Großes Lagerregal: jeweils 1–128 Plätze und eigene Reihenanzahl.
   0 verwendet jeweils die ursprüngliche Spielvorgabe.
 - Reihen werden für die Darstellung auf die tatsächliche Zahl der Plätze begrenzt.
 - Einstellungsänderungen werden bei der nächsten Spielaktualisierung verarbeitet.
@@ -38,7 +37,7 @@ Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0
 - Zusätzliche UI-Plätze werden bei Bedarf einmal erzeugt und wiederverwendet.
 - Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
 
-**Die übrigen sieben Lagertypen und der Backpack haben weiterhin nur Einstellungen.**
+**Die übrigen sechs Lagertypen und der Backpack haben weiterhin nur Einstellungen.**
 Das kleine Regal ist in den dokumentierten Fällen im Spiel bestätigt. Keine
 Veröffentlichung als fertige Nexus-Version.
 
@@ -164,3 +163,14 @@ regulärer net6-Build und Spieltest von 0.0.8 ausstehend.
 Leere Originalslots dürfen entfernt werden, wobei die Mitgliedschaft in ihrer
 Gruppe bereinigt wird. Externe Gruppen und tatsächliche Sperren/Filter bleiben
 geschützt. Regulärer net6-Build und Laufzeittest dieser Änderung stehen aus.
+
+## Testablauf 0.0.11
+
+- Großes Regal: 30 Plätze / 3 Reihen, danach 10 Plätze / 2 Reihen.
+- Ein Item in Slot 30 ablegen und bei freien vorderen Plätzen verkleinern:
+  Item muss erreichbar bleiben und in einen passenden vorderen Platz umziehen.
+- Bei mehr als zehn belegten Plätzen darf Verkleinern nichts abschneiden.
+- Gegenstände auch aus zusätzlichen Slots im Regal sichtbar, soweit Stellfläche reicht.
+- Bestehendes und neu platziertes Regal; Speichern/Laden; DE/EN-Beschreibungen.
+- Kleine und mittlere Regale behalten ihre eigenen Einstellungen.
+- Debug-Log: ESB_RACK_FOUND muss id=largestoragerack zeigen.
