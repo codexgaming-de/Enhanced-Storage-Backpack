@@ -1,3 +1,7 @@
+> Stand 0.1.6: Speicherpfad-Korrektur implementiert und kompiliert;
+> 272 Codec-Prüfungen bestanden. Echter Save/Reload-Test weiter offen.
+> Details und aktuelle Logbefunde: [Fehleruntersuchung](BUG-BACKPACK-PERSISTENCE.md).
+
 > Aktuell 0.1.5: Backpack-Inhaltsverlust nach Neustart gemeldet. Fehlerbehebung
 > hat Vorrang vor Release-Arbeiten. Polizeidurchsuchung vom Nutzer bestätigt.
 > Frühere Speicherbestätigungen gelten nicht als abschließende Prüfung.

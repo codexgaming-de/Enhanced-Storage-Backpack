@@ -1,3 +1,7 @@
+> Stand 0.1.6: Speicherpfad-Korrektur implementiert und kompiliert;
+> 272 Codec-Prüfungen bestanden. Echter Save/Reload-Test weiter offen.
+> Details und aktuelle Logbefunde: [Fehleruntersuchung](BUG-BACKPACK-PERSISTENCE.md).
+
 > Aktualisierung 27.09.2026: **Veröffentlichung blockiert durch bestätigten
 > Inhaltsverlust nach Speichern/Neustart.** Die früheren Nutzerbestätigungen
 > unten sind kein ausreichender Persistenznachweis. Polizeidurchsuchung inzwischen

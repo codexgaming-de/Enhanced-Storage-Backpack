@@ -67,3 +67,48 @@ Anhand der Save-Grenzen die erste Abweichung bestimmen und erst dann den
 betroffenen Hook/Filter korrigieren. Danach denselben Neustartfall sowie beide
 Bewegungsrichtungen ohne Save und Spielstandwechsel prüfen. Keine automatische
 Speicherung bei Bewegungen als Ersatz einführen.
+
+## Befund und Korrektur 0.1.6
+
+Neues Nutzerlog Enhanced-Storage-Backpack-Debug(20260927-104630).log:
+- 12:44:55 SaveManager.Save, PlayerManager.WriteData und Player.WriteData erreicht.
+- Player.WriteData: local=True, disabled=False, clientOnly=False,
+  ready=True, slots=128, occupied=2.
+- Kein Player.GetInventoryString.return und kein BACKPACK_SERIALIZE.
+- Nach Rückkehr zum Hauptmenü erneutes Laden 12:45:17: present=False,
+  danach occupied=0. Vollständiger Prozessneustart ist nicht erforderlich.
+
+Damit ist das Umgehen des bisherigen Hooks im beobachteten Schreibpfad belegt.
+Ein bloßer LocalPlayer-Filterfehler erklärt das fehlende VOR dem Filter
+protokollierte GetInventoryString-Ereignis nicht. Ob natives Inlining oder eine
+andere native Aufrufvariante dahintersteckt, ist nicht separat bestätigt.
+
+Die lokale IL2CPP-Referenz enthält ISaveable.WriteSubfile(parentPath,
+localPath_NoExtensions, contents). Ein zusätzlich eingesehener dekompilierter
+Spielcode-Stand zeigt Player.WriteData mit Übergabe von Inventory an diese API.
+Er ist nur eine strukturelle Referenz, kein Nachweis derselben Spielversion:
+https://github.com/michael-sobczak/Schedule1_AutomatedReup/blob/8f4325432440b80c6fca364f727e07d24e2450db/Schedule1Decompilation/src/ScheduleOne/PlayerScripts/Player.cs
+https://github.com/michael-sobczak/Schedule1_AutomatedReup/blob/8f4325432440b80c6fca364f727e07d24e2450db/Schedule1Decompilation/src/ScheduleOne/Persistence/ISaveable.cs
+Kein fremder Spielcode wird in diesem Repository übernommen oder verteilt.
+
+0.1.6 ergänzt einen Prefix auf WriteSubfile. Nur für die Unterdatei Inventory,
+mit tatsächlichem Player-Owner und lokaler Spielerzuordnung, wird contents vor
+dem nativen Schreibvorgang um den bestehenden Backpack-Payload ergänzt.
+Alle anderen Saveables/Unterdateien bleiben unberührt. Der bisherige Getter-Hook
+bleibt für andere Aufrufwege erhalten. Zweifaches Ergänzen ersetzt denselben
+JSON-Schlüssel und vervielfacht keine Gegenstände. Fehler werden dem SaveManager
+gemeldet und weitergegeben. Das tatsächliche Schreiben übernimmt weiterhin das
+Spiel. Weder zusätzliche Saves noch eine eigene Backpack-Inhaltsdatei entstehen.
+
+Validierung: direkte Compilerprüfung bestanden, zwölf bekannte CS1701-Warnungen;
+272 reine Persistenzprüfungen bestanden. Vier neue Prüfungen decken zweifache
+Ergänzung, Erhalt beider Gegenstände, Erhalt der nativen JSON-Daten und Ersetzen
+durch einen leeren Backpack ab. Kein nativer Hook-/Spieltest hier möglich.
+
+Nutzertest auf einer Save-Kopie: zwei entbehrliche Items einlegen, speichern,
+Hauptmenü, denselben Stand laden. Im Log müssen vor Player.WriteData.end
+ESB_BACKPACK_SERIALIZE und stage=Player.Inventory.WriteSubfile auftreten;
+beim Laden present=True und anschließend occupied=2. Danach dieselbe Prüfung
+mit vollständigem Spielneustart; ungespeicherte Bewegung anschließend durch Laden
+verwerfen. Falls der neue Hook nicht erreicht wird, keine automatische
+Datei-Nachbearbeitung als Ersatz einsetzen; Log zur weiteren Eingrenzung nutzen.

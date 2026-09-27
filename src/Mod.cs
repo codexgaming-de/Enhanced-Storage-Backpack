@@ -9,7 +9,7 @@ using MelonLoader;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.5", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.6", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -33,6 +33,7 @@ public sealed class Mod : MelonMod
         {
             backpack = new Backpack(settings);
             Patch(typeof(Player), "GetInventoryString", postfix: nameof(InventorySaving));
+            Patch(typeof(ISaveable), "WriteSubfile", prefix: nameof(InventorySubfileWriting));
             Patch(typeof(Player), "LoadInventory", prefix: nameof(InventoryLoading));
             // Narrow save-path diagnostics: observe boundaries without writing
             // files, changing native return values or forcing extra saves.
@@ -52,8 +53,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.5 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.5 | Nine storage types and backpack enabled."));
-            settings.Trace("ESB_READY | 0.1.5");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.6 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.6 | Nine storage types and backpack enabled."));
+            settings.Trace("ESB_READY | 0.1.6");
         }
         catch (Exception ex)
         {
@@ -198,6 +199,26 @@ public sealed class Mod : MelonMod
             SaveManager.ReportSaveError();
             instance.settings!.Error("ESB_BACKPACK_SAVE", ex);
             throw; // Never silently save only the hotbar after a failed backpack snapshot.
+        }
+    }
+    private static void InventorySubfileWriting(ISaveable __instance, string __1, ref string __2)
+    {
+        // Native Player.WriteData can bypass the GetInventoryString detour.
+        // Attach at the actual writer boundary, before the game's own file write.
+        // Restrict this shared API to the local player's Inventory subfile.
+        if (!PersistenceActive || __1 != "Inventory" || instance?.backpack == null) return;
+        var player = __instance.TryCast<Player>();
+        if (player == null || !LocalPlayer(player)) return;
+        try
+        {
+            __2 = instance.backpack.WriteInventory(__2);
+            TraceSaveBoundary("Player.Inventory.WriteSubfile", player);
+        }
+        catch (Exception ex)
+        {
+            SaveManager.ReportSaveError();
+            instance.settings!.Error("ESB_BACKPACK_SUBFILE_SAVE", ex);
+            throw;
         }
     }
     private static void InventoryLoading(Player __instance, ref string __0)

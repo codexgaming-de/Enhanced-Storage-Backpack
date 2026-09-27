@@ -48,6 +48,18 @@ internal static class BackpackSaveTests
         Reject(() => BackpackSave.Decode(BackpackSave.Encode(new string?[129])));
         Reject(() => BackpackSave.Attach("[]", "{}"));
         Reject(() => BackpackSave.Decode("broken"));
+        // The writer boundary may receive a string already enriched by the
+        // getter hook. Replace the same key; never duplicate or append items.
+        string twoItems = BackpackSave.Encode(new string?[] { "first-item", "second-item" });
+        string once = BackpackSave.Attach(vanilla, twoItems);
+        string twice = BackpackSave.Attach(once, twoItems);
+        Check(JsonNode.DeepEquals(JsonNode.Parse(once), JsonNode.Parse(twice)));
+        copy = twice;
+        Check(BackpackSave.Decode(BackpackSave.Extract(ref copy)!).SequenceEqual(new[] { "first-item", "second-item" }));
+        Check(JsonNode.DeepEquals(JsonNode.Parse(copy), JsonNode.Parse(vanilla)));
+        // A later save with an empty backpack must replace the old snapshot.
+        copy = BackpackSave.Attach(twice, BackpackSave.Encode(new string?[2]));
+        Check(BackpackSave.Decode(BackpackSave.Extract(ref copy)!).All(item => item == null));
         Console.WriteLine($"{checks} backpack persistence checks passed.");
     }
 }

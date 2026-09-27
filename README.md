@@ -3,12 +3,13 @@
 Singleplayer-Mod für **Schedule I (IL2CPP)** von **codexgaming-de**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Stand: 0.1.5, Diagnoseversion – nicht zur Veröffentlichung.**
-Der Nutzer meldet verlorenen Backpack-Inhalt nach Speichern und Neustart mit
-0.1.4. Das Log zeigt keine Backpack-Serialisierung und beim Laden keinen Payload.
-Die genaue Unterbrechung im nativen Save-Pfad ist noch ungeklärt. 0.1.5 ergänzt
-gezielte Diagnoseeinträge; sie ist keine bestätigte Reparatur. Bis zur Klärung
-nur mit einer Spielstandkopie und entbehrlichen Testgegenständen verwenden.
+**Stand: 0.1.6, Korrektur des Backpack-Speicherpfads – Spieltest offen.**
+Das Diagnose-Log von 0.1.5 zeigt zwei belegte Backpack-Plätze während
+Player.WriteData, aber keinen Aufruf unseres GetInventoryString-Hooks.
+0.1.6 ergänzt den Backpack am Inventory-Unterdatei-Schreibaufruf des Spiels.
+Das Speicherformat bleibt gleich; keine separate Inhaltsdatei und kein
+Speichern bei Gegenstandsbewegungen. Die Veröffentlichung bleibt bis zum
+bestätigten Speichern/Laden-Test blockiert.
 Siehe [Fehleruntersuchung](docs/BUG-BACKPACK-PERSISTENCE.md).
 
 ## Funktionen
