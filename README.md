@@ -2,18 +2,17 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.12 – Vier Lagerschränke in Prüfung
+## 0.0.13 – Tresor und Aktenschrank in Prüfung
 
-Small, Medium, Large und Huge Storage Closet sind jetzt an die gemeinsame
-Lagerlogik angebunden, jeweils mit eigenen Plätzen (1–128), Reihen und
-DE/EN-Beschreibungen. 0 verwendet die Spielvorgabe. Änderungen wirken im
-laufenden Spiel, sobald kein Ziehen eines Items oder Speichern/Laden läuft.
+Safe und Filing Cabinet sind jetzt mit getrennten Slot-/Reiheneinstellungen
+an die gemeinsame Lagerlogik angebunden. Alle neun geplanten Lagertypen sind
+implementiert. Der Backpack ist weiterhin nicht aktiv.
 
-Alle drei Lagerregale wurden vom Nutzer getestet; für 0.0.11 wurden auch
-Umräumen, Schutz belegter Plätze und Speichern/Laden bestätigt.
-Die vier Schrank-IDs werden als smallstoragecloset, mediumstoragecloset,
-largestoragecloset und hugestoragecloset erwartet. Erkennung und Verhalten
-stehen für jeden Schrank noch zum Spieltest aus. Keine Änderungen am Saveformat.
+Die drei Regale und vier Schränke sind in den Nutzertests einschließlich
+Umräumen und Speichern/Laden bestätigt. Das Log von 0.0.12 bestätigt alle vier
+Schrank-IDs sowie Umräumen in Slot 1 und Verkleinern auf fünf Plätze.
+Für Tresor und Aktenschrank werden die Item-IDs `safe` und `filingcabinet`
+erwartet; Erkennung und Verhalten müssen noch im Spiel bestätigt werden.
 
 Direkte Compilerprüfung mit .NET-8-Referenzen erfolgreich (neun CS1701-Warnungen);
 der reguläre .NET-6-Build und Spieltest erfolgen auf dem Nutzer-PC.
@@ -39,7 +38,7 @@ Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0
 - Zusätzliche UI-Plätze werden bei Bedarf einmal erzeugt und wiederverwendet.
 - Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
 
-**Safe, Filing Cabinet und Backpack haben weiterhin nur Einstellungen.**
+**Der Backpack hat weiterhin nur Einstellungen.**
 Das kleine Regal ist in den dokumentierten Fällen im Spiel bestätigt. Keine
 Veröffentlichung als fertige Nexus-Version.
 
@@ -192,3 +191,13 @@ Jeden der vier Schränke separat prüfen, möglichst bestehend und neu platziert
 
 Die native Darstellung wird nur angebunden, wenn ein passender Visualizer
 vorhanden ist. Geschlossene Schränke erhalten keine künstliche Außenanzeige.
+
+## Testablauf 0.0.13
+
+- Tresor: 16 Plätze / 2 Reihen. Aktenschrank: 24 Plätze / 3 Reihen.
+- Jeweils ein Item im letzten Slot ablegen, bei freien vorderen Plätzen auf
+  5 Plätze / 1 Reihe verkleinern, anschließend Item entnehmen.
+- Bei mehr als fünf belegten Plätzen muss der Überhang erreichbar bleiben.
+- Bestehende und neu platzierte Objekte, Speichern/Laden und DE/EN prüfen.
+- Andere Lagertypen behalten ihre jeweiligen Einstellungen.
+- Eigenes Debug-Log zur Bestätigung von safe und filingcabinet bereitstellen.

@@ -60,7 +60,8 @@ internal sealed class RackStorage : IDisposable
         // Placement previews have no item definition and must not be resized.
         string itemId = Normalize(definition?.ID);
         bool match = definition != null && (itemId == "smallstoragerack" || itemId == "mediumstoragerack" || itemId == "largestoragerack" ||
-            itemId == "smallstoragecloset" || itemId == "mediumstoragecloset" || itemId == "largestoragecloset" || itemId == "hugestoragecloset");
+            itemId == "smallstoragecloset" || itemId == "mediumstoragecloset" || itemId == "largestoragecloset" || itemId == "hugestoragecloset" ||
+            itemId == "safe" || itemId == "filingcabinet");
         if (!match) return null;
         var rack = new Rack(entity, itemId);
         racks.Add(entity.Pointer, rack);
@@ -77,6 +78,8 @@ internal sealed class RackStorage : IDisposable
         "mediumstoragecloset" => settings.MediumClosetSlots.Value,
         "largestoragecloset" => settings.LargeClosetSlots.Value,
         "hugestoragecloset" => settings.HugeClosetSlots.Value,
+        "safe" => settings.SafeSlots.Value,
+        "filingcabinet" => settings.FilingCabinetSlots.Value,
         _ => throw new InvalidOperationException("Unsupported storage identity.")
     };
 
@@ -89,6 +92,8 @@ internal sealed class RackStorage : IDisposable
         "mediumstoragecloset" => settings.MediumClosetRows.Value,
         "largestoragecloset" => settings.LargeClosetRows.Value,
         "hugestoragecloset" => settings.HugeClosetRows.Value,
+        "safe" => settings.SafeRows.Value,
+        "filingcabinet" => settings.FilingCabinetRows.Value,
         _ => throw new InvalidOperationException("Unsupported storage identity.")
     };
 

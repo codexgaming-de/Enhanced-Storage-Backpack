@@ -32,6 +32,10 @@ internal sealed class Settings : IDisposable
     public MelonPreferences_Entry<int> LargeClosetRows { get; private set; } = null!;
     public MelonPreferences_Entry<int> HugeClosetSlots { get; private set; } = null!;
     public MelonPreferences_Entry<int> HugeClosetRows { get; private set; } = null!;
+    public MelonPreferences_Entry<int> SafeSlots { get; private set; } = null!;
+    public MelonPreferences_Entry<int> SafeRows { get; private set; } = null!;
+    public MelonPreferences_Entry<int> FilingCabinetSlots { get; private set; } = null!;
+    public MelonPreferences_Entry<int> FilingCabinetRows { get; private set; } = null!;
     public event Action? RackChanged;
     public event Action? LanguageChanged;
 
@@ -71,6 +75,8 @@ internal sealed class Settings : IDisposable
             if (index == 4) { MediumClosetSlots = slots; MediumClosetRows = rows; }
             if (index == 5) { LargeClosetSlots = slots; LargeClosetRows = rows; }
             if (index == 6) { HugeClosetSlots = slots; HugeClosetRows = rows; }
+            if (index == 7) { SafeSlots = slots; SafeRows = rows; }
+            if (index == 8) { FilingCabinetSlots = slots; FilingCabinetRows = rows; }
         }
         ApplyLanguage();
         foreach (var (entry, handler) in subscriptions)
@@ -108,7 +114,8 @@ internal sealed class Settings : IDisposable
         if (id == "Hotkey") return ("Taste für den Rucksack. Die Rucksackfunktion folgt in einem späteren Entwicklungsschritt.", "Key for opening the backpack. Backpack functionality will follow in a later development step.");
         if (category.EndsWith("_Backpack")) return ("Gewünschte Rucksackgröße von 1 bis 128 Plätzen. Die Rucksackfunktion ist noch nicht aktiv.", "Requested backpack capacity from 1 to 128 slots. Backpack functionality is not active yet.");
         bool implemented = category.EndsWith("_SmallStorageRack") || category.EndsWith("_MediumStorageRack") || category.EndsWith("_LargeStorageRack") ||
-            category.EndsWith("_SmallStorageCloset") || category.EndsWith("_MediumStorageCloset") || category.EndsWith("_LargeStorageCloset") || category.EndsWith("_HugeStorageCloset");
+            category.EndsWith("_SmallStorageCloset") || category.EndsWith("_MediumStorageCloset") || category.EndsWith("_LargeStorageCloset") || category.EndsWith("_HugeStorageCloset") ||
+            category.EndsWith("_Safe") || category.EndsWith("_FilingCabinet");
         string german = id == "Slots"
             ? "Anzahl der Plätze: 1 bis 128. 0 verwendet die Spielvorgabe. Belegte Plätze bleiben beim Verkleinern erhalten."
             : "Anzahl der angezeigten Reihen. 0 verwendet die Spielvorgabe. Höchstens so viele Reihen wie Plätze.";
@@ -149,14 +156,16 @@ internal sealed class Settings : IDisposable
             ReferenceEquals(entry, SmallClosetSlots) || ReferenceEquals(entry, SmallClosetRows) ||
             ReferenceEquals(entry, MediumClosetSlots) || ReferenceEquals(entry, MediumClosetRows) ||
             ReferenceEquals(entry, LargeClosetSlots) || ReferenceEquals(entry, LargeClosetRows) ||
-            ReferenceEquals(entry, HugeClosetSlots) || ReferenceEquals(entry, HugeClosetRows)) RackChanged?.Invoke();
+            ReferenceEquals(entry, HugeClosetSlots) || ReferenceEquals(entry, HugeClosetRows) ||
+            ReferenceEquals(entry, SafeSlots) || ReferenceEquals(entry, SafeRows) ||
+            ReferenceEquals(entry, FilingCabinetSlots) || ReferenceEquals(entry, FilingCabinetRows)) RackChanged?.Invoke();
         if (ReferenceEquals(entry, DebugLogging) && DebugLogging.Value) WriteDiagnosticSnapshot();
     }
 
     private void WriteDiagnosticSnapshot()
     {
         if (!DebugLogging.Value) return;
-        Trace("ESB_SETTINGS_SNAPSHOT | 0.0.12");
+        Trace("ESB_SETTINGS_SNAPSHOT | 0.0.13");
         foreach (var (entry, _) in subscriptions)
             Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }
