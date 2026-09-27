@@ -2,23 +2,24 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.1.0 – Erster Backpack-Spieltest
+## 0.1.1 – Layout und Regalseiten in Prüfung
 
-Alle neun Lagertypen wurden vom Nutzer einschließlich Umräumen und Speichern/Laden
-getestet. 0.1.0 ergänzt den Backpack: 1–128 Plätze, 40 pro Seite, native Oberfläche,
-Hotkey B (änderbar), DE/EN und sichere Größenänderung.
+Der Nutzer bestätigt die angeforderten Backpack-Tests mit 0.1.0, meldet aber
+zu tief liegende Navigation und einen über den Slots liegenden Fertig-Button.
+0.1.1 ordnet Titel, Untertitel, Slots, Navigation und Fertig gemeinsam auf dem
+Canvas an. Native Positionen werden beim Schließen wiederhergestellt.
 
-Der Rucksack wird gemeinsam mit der Hotbar im Inventar-Datensatz gespeichert.
-Es gibt keine unabhängige Rucksack-Speicherdatei und kein Speichern beim Ablegen.
-Das Verhalten der nativen Speicherpipeline muss noch im Spiel bestätigt werden.
+Small/Medium/Large Storage Rack besitzen jetzt ebenfalls Seitennavigation.
+Pro Seite höchstens 40 Slots, 5 sichtbare Reihen und 10 Spalten. Einstellungen
+mit 1–3 Reihen ergeben entsprechend kleinere Seiten. Die Slotanzahl bleibt
+unverändert; höhere Reihenzahlen werden für die Seitendarstellung auf 5 begrenzt.
+Quick Move arbeitet auf den sichtbaren Slots, Seitenwechsel während Drag-and-drop
+ist gesperrt. Nach Verkleinern wird die Seitenzahl an die verbleibenden Slots angepasst.
 
-**Entwicklungsversion, noch kein fertiger Nexus-Release.**
-Compilerprüfung erfolgreich mit elf Referenzversionswarnungen, 268 reine
-Persistenzprüfungen bestanden. .NET-6-Build und Spieltest auf dem Nutzer-PC stehen aus.
-Details und Testablauf: [Backpack 0.1.0](docs/BACKPACK-0.1.0.md).
-
+32.779 Größen-/Seitenprüfungen bestanden. Direkte Compilerprüfung erfolgreich
+mit zwölf CS1701-Warnungen (.NET-8-Referenzen); regulärer .NET-6-Build und visueller
+Spieltest stehen aus. Speichercode gegenüber 0.1.0 unverändert.
 Aktueller Branch: `feature/0.1.0-backpack`.
-Geprüfter Storage-Zwischenstand: `feature/0.0.7-medium-rack` (0.0.13).
 
 ## Funktionsumfang in Prüfung
 

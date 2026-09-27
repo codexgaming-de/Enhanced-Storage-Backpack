@@ -26,4 +26,21 @@ for (int occupied = 0; occupied < 128; occupied++)
     if (size < requested || size <= occupied || size > 128)
         throw new Exception($"Lost protected slot: target={requested}, index={occupied}, result={size}");
 }
+// Every slot must be reachable exactly once, including partial last pages.
+for (int total = 1; total <= 128; total++)
+for (int rows = 1; rows <= 128; rows++)
+{
+    int capacity = StoragePages.Capacity(rows);
+    var visits = new int[total];
+    for (int start = 0; start < total; start += capacity)
+    {
+        int count = Math.Min(capacity, total - start);
+        int visibleRows = Math.Min(Math.Min(rows, 5), count);
+        if (count > 40 || (count + visibleRows - 1) / visibleRows > 10)
+            throw new Exception("Page exceeds layout bounds.");
+        for (int i = 0; i < count; i++) visits[start + i]++;
+    }
+    tests++;
+    if (visits.Any(v => v != 1)) throw new Exception("Unreachable or repeated slot.");
+}
 Console.WriteLine($"{tests} checks passed.");

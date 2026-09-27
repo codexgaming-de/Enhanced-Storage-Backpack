@@ -14,6 +14,9 @@ internal sealed class RackMenu
     private GridLayoutGroup.Constraint constraint;
     private int constraintCount;
     private bool customized;
+    private readonly PagedMenuChrome chrome = new();
+    private StorageEntity? pageEntity;
+    private int page;
     public RackMenu(Settings settings) => this.settings = settings;
 
     public bool IsShowing(StorageEntity entity) => StorageMenu.InstanceExists && StorageMenu.Instance.IsOpen &&
@@ -48,17 +51,27 @@ internal sealed class RackMenu
         foreach (var slot in menu.SlotsUIs) slot.ClearSlot();
     }
 
-    public void Bind(StorageEntity entity)
+    public void Bind(StorageEntity entity, bool paginate = false)
     {
         if (!IsShowing(entity) || RackStorage.Dragging) return;
         Prepare(entity.ItemSlots.Count);
         var current = menu!;
+        int rows = Math.Clamp(entity.DisplayRowCount, 1, Math.Max(1, entity.ItemSlots.Count));
+        int perPage = paginate ? StoragePages.Capacity(rows) : entity.ItemSlots.Count;
+        int pages = Math.Max(1, (entity.ItemSlots.Count + perPage - 1) / perPage);
+        page = paginate ? Math.Clamp(page, 0, pages - 1) : 0;
+        pageEntity = paginate ? entity : null;
+        int start = page * perPage;
+        int count = Math.Min(perPage, entity.ItemSlots.Count - start);
+        rows = Math.Min(rows, count);
+        if (paginate) rows = Math.Min(rows, 5);
+        var visible = new Il2CppSystem.Collections.Generic.List<Il2CppScheduleOne.ItemFramework.ItemSlot>();
         for (int i = 0; i < current.SlotsUIs.Length; i++)
         {
             var ui = current.SlotsUIs[i];
             ui.ClearSlot();
-            ui.gameObject.SetActive(i < entity.ItemSlots.Count);
-            if (i < entity.ItemSlots.Count) ui.AssignSlot(entity.ItemSlots[i]);
+            ui.gameObject.SetActive(i < count);
+            if (i < count) { ui.AssignSlot(entity.ItemSlots[start + i]); visible.Add(entity.ItemSlots[start + i]); }
         }
         if (string.Equals(entity.StorageEntityName, "Small Storage Rack", StringComparison.OrdinalIgnoreCase))
             current.TitleLabel.text = settings.Text("Kleines Lagerregal", "Small Storage Rack");
@@ -79,8 +92,6 @@ internal sealed class RackMenu
         if (string.Equals(entity.StorageEntityName, "Filing Cabinet", StringComparison.OrdinalIgnoreCase))
             current.TitleLabel.text = settings.Text("Aktenschrank", "Filing Cabinet");
         var grid = current.SlotGridLayout;
-        int count = entity.ItemSlots.Count;
-        int rows = Math.Clamp(entity.DisplayRowCount, 1, Math.Max(1, count));
         int columns = (count + rows - 1) / rows;
         // No global canvas update or immediate recursive layout rebuild.
         grid.constraint = GridLayoutGroup.Constraint.FixedRowCount;
@@ -90,12 +101,25 @@ internal sealed class RackMenu
         settings.Trace($"ESB_RACK_LAYOUT | cell={grid.cellSize.x}x{grid.cellSize.y} | container={current.SlotContainer.rect.width}x{current.SlotContainer.rect.height}");
         LayoutRebuilder.MarkLayoutForRebuild(current.SlotContainer);
         customized = true;
-        if (ItemUIManager.InstanceExists) ItemUIManager.Instance.EnableQuickMove(entity.ItemSlots);
+        if (ItemUIManager.InstanceExists) ItemUIManager.Instance.EnableQuickMove(visible);
+        if (paginate) chrome.Show(current, page, pages, ChangePage);
         settings.Trace($"ESB_RACK_MENU | slots={count} | rows={rows} | columns={columns}");
     }
 
+    private void ChangePage(int direction)
+    {
+        if (pageEntity == null || !IsShowing(pageEntity) || RackStorage.Dragging) return;
+        page += direction;
+        Bind(pageEntity, true);
+    }
+    public void LayoutTick() => chrome.Tick();
+    public void Dispose() { Restore(); chrome.Dispose(); }
+
     public void Restore()
     {
+        chrome.Restore();
+        pageEntity = null;
+        page = 0;
         if (menu == null || !customized) return;
         menu.SlotGridLayout.constraint = constraint;
         menu.SlotGridLayout.constraintCount = constraintCount;

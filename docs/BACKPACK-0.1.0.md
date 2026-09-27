@@ -66,3 +66,21 @@ Für diesen ersten Persistenztest eine Spielstandkopie verwenden.
 Für eine Rückkehr zur geprüften Storage-Version kann der bestehende Branch
 feature/0.0.7-medium-rack (0.0.13) gebaut werden. Zuvor Backpack leeren und mit
 aktivierter Backpack-Version speichern, falls dessen Items erhalten bleiben sollen.
+
+
+## Nachtrag 0.1.1
+
+Nutzer meldet alle angeforderten Tests bestanden. Screenshot image(10).png zeigt
+128 Plätze: fünf Slotreihen laufen nach unten, Navigation überlappt die Hotbar,
+Fertig liegt in der zweiten Slotreihe. Ursache im Code: Slotraster erweitert,
+aber native Titel-/Schließen-Positionen nicht an die Rasterhöhe angepasst.
+
+Gemeinsames PagedMenuChrome ordnet die Elemente anhand der tatsächlichen
+Canvas-Bounds nach dem normalen Unity-Layoutpass an; keine globalen erzwungenen
+Canvas-Neuberechnungen. Beim Schließen werden ursprüngliche lokale Positionen
+wiederhergestellt. Alle drei Regaltypen verwenden dieselbe Navigation/Layoutlogik.
+
+Prüfen: Backpack 128 (Seiten 1–4), Fertig unter Navigation und Abstand zur Hotbar;
+Regale 128 mit 1/3/5 Reihen, letzte Seite und Slot 128; von letzter Seite auf
+10 verkleinern; wiederholt zwischen Backpack, Regal und Schrank wechseln.
+Visuelle Bestätigung dieser Anpassung steht aus.
