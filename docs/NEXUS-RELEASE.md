@@ -103,3 +103,11 @@ isolation have passed the project owner's gameplay tests.
 
 Dateiversion 0.1.6. Nur das geprüfte Paket aus dist/ verwenden.
 Checkliste: RELEASE-CHECKLIST.md. Keine generelle Fehlerfreiheit behaupten.
+
+## Short description
+
+Customize nine storage types and add a backpack with up to 128 slots each. Includes page navigation, live in-game settings, German/English support and save-linked backpack contents. Singleplayer, IL2CPP.
+
+## Permissions — copy to Nexus custom permission notes
+
+Developing and publishing a derivative mod requires prior permission from CoDeX-Gaming until at least 12 months have passed without a published mod update. After that period, mod forks may be developed and published without separate permission. Only actual mod releases count; ordinary GitHub commits do not reset the period. GitHub platform rights remain unaffected. See PERMISSIONS.md in the source repository for the full policy.

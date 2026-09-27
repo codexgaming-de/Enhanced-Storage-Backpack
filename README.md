@@ -111,3 +111,9 @@ SHA-256-Datei in `dist/`. Enthalten sind ausschließlich Mod-DLL, zweisprachige
 Installationshinweise, Changelog und Hash-Manifest. Bestehende Pakete werden nicht
 überschrieben. Es wird nichts automatisch installiert oder veröffentlicht.
 Siehe [Release-Checkliste](docs/RELEASE-CHECKLIST.md).
+
+## Weiterverwendung
+
+Es gilt die [12-Monats-Regel von CoDeX-Gaming](PERMISSIONS.md). Maßgeblich ist
+das letzte veröffentlichte Mod-Update, nicht der letzte GitHub-Commit.
+GitHubs Plattformrechte zum Ansehen und Forken bleiben unberührt.
