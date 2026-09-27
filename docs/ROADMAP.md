@@ -70,3 +70,13 @@ reine Registrierung einer Einstellung als fertig.
 Die Beschriftungen unserer Einstellungen und Kategorien müssen vollständig der
 gewählten Sprache entsprechen, keine gemischten deutschen/englischen Beschriftungen.
 Fremde Mod-Manager-Schaltflächen behalten dessen eigene Sprache.
+
+
+## Stand 0.1.0 (27.09.2026)
+
+Alle neun Storage-Typen in den Nutzertests bestätigt, inklusive Speichern/Laden.
+Backpack auf Branch feature/0.1.0-backpack implementiert und lokal kompiliert;
+268 reine Persistenzprüfungen bestanden. Nativer Spieltest noch offen.
+Der Speichervertrag wird durch Einbettung in denselben Inventar-JSON-Datensatz
+umgesetzt, nicht durch eine separat fortgeschriebene Datei.
+Siehe BACKPACK-0.1.0.md für Grenzen und verbindliche Testfälle.

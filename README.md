@@ -2,21 +2,23 @@
 
 Singleplayer-Mod für Schedule I von codexgaming-de, entwickelt mit KI-Unterstützung.
 
-## 0.0.13 – Tresor und Aktenschrank in Prüfung
+## 0.1.0 – Erster Backpack-Spieltest
 
-Safe und Filing Cabinet sind jetzt mit getrennten Slot-/Reiheneinstellungen
-an die gemeinsame Lagerlogik angebunden. Alle neun geplanten Lagertypen sind
-implementiert. Der Backpack ist weiterhin nicht aktiv.
+Alle neun Lagertypen wurden vom Nutzer einschließlich Umräumen und Speichern/Laden
+getestet. 0.1.0 ergänzt den Backpack: 1–128 Plätze, 40 pro Seite, native Oberfläche,
+Hotkey B (änderbar), DE/EN und sichere Größenänderung.
 
-Die drei Regale und vier Schränke sind in den Nutzertests einschließlich
-Umräumen und Speichern/Laden bestätigt. Das Log von 0.0.12 bestätigt alle vier
-Schrank-IDs sowie Umräumen in Slot 1 und Verkleinern auf fünf Plätze.
-Für Tresor und Aktenschrank werden die Item-IDs `safe` und `filingcabinet`
-erwartet; Erkennung und Verhalten müssen noch im Spiel bestätigt werden.
+Der Rucksack wird gemeinsam mit der Hotbar im Inventar-Datensatz gespeichert.
+Es gibt keine unabhängige Rucksack-Speicherdatei und kein Speichern beim Ablegen.
+Das Verhalten der nativen Speicherpipeline muss noch im Spiel bestätigt werden.
 
-Direkte Compilerprüfung mit .NET-8-Referenzen erfolgreich (neun CS1701-Warnungen);
-der reguläre .NET-6-Build und Spieltest erfolgen auf dem Nutzer-PC.
-Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0.6.
+**Entwicklungsversion, noch kein fertiger Nexus-Release.**
+Compilerprüfung erfolgreich mit elf Referenzversionswarnungen, 268 reine
+Persistenzprüfungen bestanden. .NET-6-Build und Spieltest auf dem Nutzer-PC stehen aus.
+Details und Testablauf: [Backpack 0.1.0](docs/BACKPACK-0.1.0.md).
+
+Aktueller Branch: `feature/0.1.0-backpack`.
+Geprüfter Storage-Zwischenstand: `feature/0.0.7-medium-rack` (0.0.13).
 
 ## Funktionsumfang in Prüfung
 
@@ -38,7 +40,7 @@ Der Entwicklungsstand liegt auf `feature/0.0.7-medium-rack`; `main` enthält 0.0
 - Zusätzliche UI-Plätze werden bei Bedarf einmal erzeugt und wiederverwendet.
 - Keine dauernden Welt-/Lagersuchen und keine periodischen Datei-Schreibvorgänge.
 
-**Der Backpack hat weiterhin nur Einstellungen.**
+**Der Backpack befindet sich im ersten Spieltest.**
 Das kleine Regal ist in den dokumentierten Fällen im Spiel bestätigt. Keine
 Veröffentlichung als fertige Nexus-Version.
 
@@ -48,7 +50,9 @@ Spiel beenden. Voraussetzungen: .NET SDK 8, Schedule I IL2CPP und MelonLoader.
 
 ```bash
 cd /home/codex/Enhanced-Storage-Backpack
-git pull --ff-only origin main &&
+git fetch origin &&
+git switch feature/0.1.0-backpack &&
+git pull --ff-only origin feature/0.1.0-backpack &&
 dotnet build -c Release -p:GameDirectory="/home/codex/Schreibtisch/Schedulue 1 Plugins/" &&
 cp "bin/Release/net6.0/EnhancedStorageBackpack.dll" \
    "/home/codex/Schreibtisch/Schedulue 1 Plugins/Mods/"

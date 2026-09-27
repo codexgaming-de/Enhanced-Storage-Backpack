@@ -36,6 +36,7 @@ internal sealed class Settings : IDisposable
     public MelonPreferences_Entry<int> SafeRows { get; private set; } = null!;
     public MelonPreferences_Entry<int> FilingCabinetSlots { get; private set; } = null!;
     public MelonPreferences_Entry<int> FilingCabinetRows { get; private set; } = null!;
+    public event Action? BackpackChanged;
     public event Action? RackChanged;
     public event Action? LanguageChanged;
 
@@ -111,8 +112,8 @@ internal sealed class Settings : IDisposable
     {
         if (id == "Language") return ("Wählt die Sprache der Einstellungen dieses Plugins.", "Selects the language of this plugin's settings.");
         if (id == "DebugLogging") return ("Schreibt Diagnosemeldungen nach UserData/Enhanced-Storage-Backpack-Debug.log.", "Writes diagnostics to UserData/Enhanced-Storage-Backpack-Debug.log.");
-        if (id == "Hotkey") return ("Taste für den Rucksack. Die Rucksackfunktion folgt in einem späteren Entwicklungsschritt.", "Key for opening the backpack. Backpack functionality will follow in a later development step.");
-        if (category.EndsWith("_Backpack")) return ("Gewünschte Rucksackgröße von 1 bis 128 Plätzen. Die Rucksackfunktion ist noch nicht aktiv.", "Requested backpack capacity from 1 to 128 slots. Backpack functionality is not active yet.");
+        if (id == "Hotkey") return ("Öffnet oder schließt den Rucksack während des Spiels.", "Opens or closes the backpack during gameplay.");
+        if (category.EndsWith("_Backpack")) return ("Rucksackgröße: 1 bis 128 Plätze, 40 pro Seite. Belegte Plätze bleiben beim Verkleinern geschützt.", "Backpack capacity: 1 to 128 slots, 40 per page. Occupied slots remain protected when shrinking.");
         bool implemented = category.EndsWith("_SmallStorageRack") || category.EndsWith("_MediumStorageRack") || category.EndsWith("_LargeStorageRack") ||
             category.EndsWith("_SmallStorageCloset") || category.EndsWith("_MediumStorageCloset") || category.EndsWith("_LargeStorageCloset") || category.EndsWith("_HugeStorageCloset") ||
             category.EndsWith("_Safe") || category.EndsWith("_FilingCabinet");
@@ -159,13 +160,14 @@ internal sealed class Settings : IDisposable
             ReferenceEquals(entry, HugeClosetSlots) || ReferenceEquals(entry, HugeClosetRows) ||
             ReferenceEquals(entry, SafeSlots) || ReferenceEquals(entry, SafeRows) ||
             ReferenceEquals(entry, FilingCabinetSlots) || ReferenceEquals(entry, FilingCabinetRows)) RackChanged?.Invoke();
+        if (ReferenceEquals(entry, BackpackSlots)) BackpackChanged?.Invoke();
         if (ReferenceEquals(entry, DebugLogging) && DebugLogging.Value) WriteDiagnosticSnapshot();
     }
 
     private void WriteDiagnosticSnapshot()
     {
         if (!DebugLogging.Value) return;
-        Trace("ESB_SETTINGS_SNAPSHOT | 0.0.13");
+        Trace("ESB_SETTINGS_SNAPSHOT | 0.1.0");
         foreach (var (entry, _) in subscriptions)
             Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }
@@ -174,6 +176,7 @@ internal sealed class Settings : IDisposable
     {
         foreach (var (entry, handler) in subscriptions) entry.OnEntryValueChangedUntyped.Unsubscribe(handler);
         subscriptions.Clear();
+        BackpackChanged = null;
         RackChanged = null;
         LanguageChanged = null;
     }

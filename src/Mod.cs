@@ -6,8 +6,10 @@ using Il2CppScheduleOne.ObjectScripts;
 using Il2CppScheduleOne.Storage;
 using Il2CppScheduleOne.UI;
 using MelonLoader;
+using Il2CppScheduleOne.PlayerScripts;
+using Il2CppScheduleOne.Persistence;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.0.13", "codexgaming-de")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.0", "codexgaming-de")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -17,6 +19,7 @@ public sealed class Mod : MelonMod
     private static Mod? instance;
     private Settings? settings;
     private RackStorage? storage;
+    private Backpack? backpack;
     private bool disabled;
     private bool refreshSettingsUi;
 
@@ -28,6 +31,10 @@ public sealed class Mod : MelonMod
         storage = new RackStorage(settings);
         try
         {
+            backpack = new Backpack(settings);
+            Patch(typeof(Player), "GetInventoryString", postfix: nameof(InventorySaving));
+            Patch(typeof(Player), "LoadInventory", prefix: nameof(InventoryLoading));
+            Patch(typeof(LoadManager), "StartGame", prefix: nameof(GameStarting));
             Patch(typeof(StorageEntity), "Start", postfix: nameof(StorageStarted));
             Patch(typeof(StorageEntityVisualizer), "Start", postfix: nameof(VisualizerStarted));
             Patch(typeof(PlaceableStorageEntity), "InitializeGridItem", postfix: nameof(Placed));
@@ -37,8 +44,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.0.13 | Neun Lagertypen aktiviert.", "ESB_READY | 0.0.13 | Nine storage types enabled."));
-            settings.Trace("ESB_READY | 0.0.13");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.0 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.0 | Nine storage types and backpack enabled."));
+            settings.Trace("ESB_READY | 0.1.0");
         }
         catch (Exception ex)
         {
@@ -72,6 +79,7 @@ public sealed class Mod : MelonMod
     {
         RefreshSettingsUi();
         if (!Active) return;
+        backpack?.Tick();
         try { storage!.Tick(); }
         catch (Exception ex) { disabled = true; settings!.Error("ESB_UPDATE_DISABLED", ex); }
     }
@@ -144,7 +152,35 @@ public sealed class Mod : MelonMod
     private static void ContentsChanged(StorageEntity __instance) => Run(s => s.ContentsChanged(__instance));
     private static void Opening(StorageEntity __0) => Run(s => s.BeforeOpen(__0));
     private static void Opened(StorageEntity __0) => Run(s => s.AfterOpen(__0));
-    private static void Closed() => Run(s => s.Closed());
+    private static void Closed()
+    {
+        instance?.backpack?.Closed();
+        Run(s => s.Closed());
+    }
+    private static void GameStarting() => instance?.backpack?.Reset();
+    private static bool LocalPlayer(Player player) => player.IsLocalPlayer ||
+        (Player.Local != null && Player.Local.Pointer == player.Pointer);
+    private static void InventorySaving(Player __instance, ref string __result)
+    {
+        if (!Active || !LocalPlayer(__instance) || instance?.backpack == null) return;
+        try { __result = instance.backpack.WriteInventory(__result); }
+        catch (Exception ex)
+        {
+            SaveManager.ReportSaveError();
+            instance.settings!.Error("ESB_BACKPACK_SAVE", ex);
+            throw; // Never silently save only the hotbar after a failed backpack snapshot.
+        }
+    }
+    private static void InventoryLoading(Player __instance, ref string __0)
+    {
+        if (!Active || !LocalPlayer(__instance) || instance?.backpack == null) return;
+        try { instance.backpack.ReadInventory(ref __0); }
+        catch (Exception ex)
+        {
+            instance.settings!.Error("ESB_BACKPACK_LOAD", ex);
+            throw;
+        }
+    }
     private static void Loading(StorageEntity __instance, Il2CppReferenceArray<ItemInstance> __0)
     {
         if (!Active) return;
@@ -161,6 +197,7 @@ public sealed class Mod : MelonMod
     {
         disabled = true;
         HarmonyInstance.UnpatchSelf();
+        backpack?.Dispose();
         storage?.Dispose();
         if (settings != null) settings.LanguageChanged -= RequestSettingsRefresh;
         settings?.Dispose();
