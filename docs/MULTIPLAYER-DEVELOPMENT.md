@@ -1,4 +1,4 @@
-# Multiplayer development — 0.2.0-dev.2
+# Multiplayer development — 0.2.0-dev.3
 
 Branch: feature/0.2.0-multiplayer-beta. Stable 0.1.6 remains on main.
 
@@ -112,8 +112,8 @@ has been run here. Handshake tests do not simulate Unity or Steam peers.
 ## Host transaction core (after dev.2 local test)
 
 `HostBackpackState` is a host-thread-only, pure C# foundation, **not yet wired to
-Steam messages, native ItemSlot changes, UI or disk writes**. Runtime remains dev.2
-and client access stays blocked. Do not describe this as implemented remote persistence.
+Steam messages, native ItemSlot changes, UI or disk writes**. The transaction core remains disconnected from native item mutations;
+client access stays blocked. Do not describe this as implemented remote persistence.
 
 - Per-player inventory/backpack pair; caller must supply authenticated transport identity.
 - Host-issued session and reconnect lease, monotonic sequence and revision checks.
@@ -148,3 +148,47 @@ Next concrete integration gate: establish how remote Player inventory mutations 
 RequestSavePlayer/PlayerManager.SavePlayer are ordered on the native host. The supplied
 interop assemblies expose declarations and native invocations, not those method bodies.
 Do not remove the client gate based on the pure-core tests alone.
+
+## dev.3 — native remote save preservation
+
+The owner supplied the Mono reference assembly from Steam's alternate branch:
+SHA256 50ad999a4ddaf35940fe6e2bc126317cbf05de7c59d55d51ad5b1f849c33d7ac.
+It is used only for inspection, never compiled into or distributed with this mod.
+The runtime and build references remain IL2CPP. Corresponding Mono and IL2CPP method
+signatures were checked; matching every native runtime behavior is not established.
+
+Findings from method bodies:
+- Player.GetInventoryString serializes the host's nine _inventory slots via ItemSet.
+- Player.LoadInventory only applies on the owner; it treats cash separately and
+  handles eight hotbar indices. It is NOT a host setter for remote inventories.
+- SetInventoryItem's server reader checks connection ownership; its logic replaces
+  one slot, with no ESB revision or coupled-backpack validation.
+- PlayerManager.WriteData queues player saves and adds new player records before
+  the queued writes complete.
+- RequestSavePlayer server logic invokes PlayerManager.SavePlayer, which can write
+  a player independently of a full world save. This must not become an ESB autosave.
+- PlayerManager.TryGetPlayerData reads saved inventory from disk. Its true return
+  means player data exists; it does NOT guarantee Inventory was read successfully.
+
+Implemented preservation only:
+- Before native PlayerManager save methods modify loaded-player records, load each
+  remote backpack baseline through the game's host-side save lookup.
+- Both GetInventoryString and the actual Inventory WriteSubfile boundary retain that
+  baseline inside CURRENT native inventory JSON. No separate files or writes added.
+- Never replace current hotbar with the old save's hotbar. Missing existing inventory,
+  unsupported/corrupt backpack data, conflicts and uncached identities fail the save.
+- New and vanilla players retain normal inventory JSON without an ESB extension.
+- Cache cleared at StartGame; bounded to 64 identities; never populated from network
+  payloads. Existing client gameplay gate remains intact.
+
+17 pure preservation assertions pass; direct compile against the supplied IL2CPP
+references and SteamNetworkLib passes with 13 CS1701 reference-version warnings.
+This is not the live remote transaction/save-barrier integration: no client backpack
+moves are enabled or persisted. HostBackpackState is still a separate tested core.
+Native multiplayer preservation needs community runtime testing once the complete
+beta is available. No additional solo test is requested just for this boundary.
+
+Next: a native inventory adapter must serialize all ESB transfers with vanilla
+SetInventoryItem updates, enforce item locks/filters and stack rules, and acknowledge
+both ends before saving. Merely sending periodic backpack snapshots on another
+transport would not establish ordering against the game's hotbar updates.

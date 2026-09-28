@@ -26,6 +26,7 @@ public sealed class Mod : MelonMod
     private Backpack? backpack;
     private MultiplayerDiagnostics? multiplayer;
     private SteamHostSettings? steamSettings;
+    private readonly RemoteBackpackSaves remoteSaves = new();
     private bool disabled;
     private bool refreshSettingsUi;
 
@@ -65,8 +66,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.2 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.2 | Multiplayer preparation: client inventory remains blocked."));
-            settings.Trace("ESB_READY | 0.2.0-dev.2 | development build, not a playable multiplayer beta");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.3 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.3 | Multiplayer preparation: client inventory remains blocked."));
+            settings.Trace("ESB_READY | 0.2.0-dev.3 | development build, not a playable multiplayer beta");
         }
         catch (Exception ex)
         {
@@ -188,6 +189,7 @@ public sealed class Mod : MelonMod
         instance?.backpack?.Reset();
         instance?.multiplayer?.Reset();
         instance?.steamSettings?.Reset();
+        instance?.remoteSaves.Reset();
     }
     private static void NetworkPlayerStarted(Player __instance)
         => instance?.multiplayer?.Observe("player-start", __instance);
@@ -213,14 +215,43 @@ public sealed class Mod : MelonMod
     private static void SaveRequested() => TraceSaveBoundary("SaveManager.Save");
     private static void PlayerWriteStarting(Player __instance) => TraceSaveBoundary("Player.WriteData.begin", __instance);
     private static void PlayerWriteFinished(Player __instance) => TraceSaveBoundary("Player.WriteData.end", __instance);
-    private static void ManagerWriteStarting() => TraceSaveBoundary("PlayerManager.WriteData.begin");
+    private static void ManagerWriteStarting()
+    {
+        TraceSaveBoundary("PlayerManager.WriteData.begin");
+        if (!PersistenceActive || !InstanceFinder.IsServer) return;
+        // Before WriteData adds new players to loadedPlayerData; otherwise a new
+        // player would look like an existing save with a missing Inventory file.
+        try
+        {
+            foreach (var player in Player.PlayerList)
+                if (player != null && !LocalPlayer(player)) instance!.EnsureRemoteBaseline(player);
+        }
+        catch (Exception ex)
+        {
+            SaveManager.ReportSaveError();
+            instance!.settings!.Error("ESB_REMOTE_SAVE_BASELINE", ex);
+            throw;
+        }
+    }
     private static void ManagerWriteFinished() => TraceSaveBoundary("PlayerManager.WriteData.end");
-    private static void ManagerPlayerSaving(Player __0) => TraceSaveBoundary("PlayerManager.SavePlayer", __0);
+    private static void ManagerPlayerSaving(Player __0)
+    {
+        TraceSaveBoundary("PlayerManager.SavePlayer", __0);
+        if (!PersistenceActive || !InstanceFinder.IsServer || LocalPlayer(__0)) return;
+        try { instance!.EnsureRemoteBaseline(__0); }
+        catch (Exception ex)
+        {
+            SaveManager.ReportSaveError();
+            instance!.settings!.Error("ESB_REMOTE_SAVE_BASELINE", ex);
+            throw;
+        }
+    }
     private static void InventorySaving(Player __instance, ref string __result)
     {
         TraceSaveBoundary("Player.GetInventoryString.return", __instance);
-        if (!PersistenceActive || !LocalPlayer(__instance) || instance?.backpack == null) return;
-        try { __result = instance.backpack.WriteInventory(__result); }
+        if (!PersistenceActive || instance?.backpack == null) return;
+        try { __result = LocalPlayer(__instance) ? instance.backpack.WriteInventory(__result)
+            : instance.PreserveRemoteInventory(__instance, __result); }
         catch (Exception ex)
         {
             SaveManager.ReportSaveError();
@@ -232,15 +263,16 @@ public sealed class Mod : MelonMod
     {
         // Native Player.WriteData can bypass the GetInventoryString detour.
         // Attach at the actual writer boundary, before the game's own file write.
-        // Restrict this shared API to the local player's Inventory subfile.
+        // Restrict this shared API to player Inventory subfiles.
         if (__1 != "Inventory") return;
         var player = __instance.TryCast<Player>();
         instance?.multiplayer?.Observe("inventory-subfile-write", player, __2.Length);
         if (!PersistenceActive || instance?.backpack == null) return;
-        if (player == null || !LocalPlayer(player)) return;
+        if (player == null) return;
         try
         {
-            __2 = instance.backpack.WriteInventory(__2);
+            __2 = LocalPlayer(player) ? instance.backpack.WriteInventory(__2)
+                : instance.PreserveRemoteInventory(player, __2);
             TraceSaveBoundary("Player.Inventory.WriteSubfile", player);
         }
         catch (Exception ex)
@@ -248,6 +280,29 @@ public sealed class Mod : MelonMod
             SaveManager.ReportSaveError();
             instance.settings!.Error("ESB_BACKPACK_SUBFILE_SAVE", ex);
             throw;
+        }
+    }
+    private string PreserveRemoteInventory(Player player, string inventory)
+    {
+        if (!InstanceFinder.IsServer) return inventory;
+        EnsureRemoteBaseline(player);
+        return remoteSaves.Preserve(player.PlayerCode, inventory);
+    }
+    private void EnsureRemoteBaseline(Player player)
+    {
+        string code = player.PlayerCode;
+        if (!remoteSaves.Contains(code))
+        {
+            if (!PlayerManager.InstanceExists)
+                throw new InvalidOperationException("PlayerManager unavailable for remote backpack preservation.");
+            bool found = PlayerManager.Instance.TryGetPlayerData(code, out var data, out string saved,
+                out var appearance, out var clothing, out var variables);
+            // The native method also returns true when a player exists but reading
+            // Inventory failed. Treat that as a save error, never an empty backpack.
+            if (found && string.IsNullOrWhiteSpace(saved))
+                throw new InvalidDataException("Existing remote player inventory could not be read.");
+            remoteSaves.Load(code, found ? saved : "{}");
+            settings!.Trace("ESB_REMOTE_SAVE_BASELINE | host save inspected; identity omitted");
         }
     }
     private static void InventoryLoading(Player __instance, ref string __0)
