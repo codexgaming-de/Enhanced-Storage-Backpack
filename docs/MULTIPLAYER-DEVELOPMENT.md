@@ -1,4 +1,4 @@
-# Multiplayer development — 0.2.0-dev.4
+# Multiplayer development — 0.2.0-dev.5
 
 Branch: feature/0.2.0-multiplayer-beta. Stable 0.1.6 remains on main.
 
@@ -261,3 +261,67 @@ Outstanding work has NOT been completed by this checkpoint:
 4. Implement storage allocation/compaction replication before native indexed RPCs.
 5. Run actual multi-peer integration tests and prepare the playable community beta.
 The active client inventory gate remains closed. Stable main is untouched.
+
+
+## dev.5 — bounded host inventory snapshot transport (NOT playable multiplayer)
+
+This change connects real inventory data to the native transport. After the native
+probe roundtrip, the owning client automatically requests a read-only snapshot.
+The host obtains the current native inventory, including the wallet, and attaches
+that player's preserved backpack from the host save cache. It does not accept item
+payloads from the client, instantiate received items, mutate slots or write files.
+The saved backpack is still the preservation baseline, **not live remote transaction state**.
+
+Authentication retains the actual FishNet reader-connection ownership check and
+Steam session/token/configuration checks. Snapshot requests must also match the
+native probe nonce. Replies target only the requesting player's owner. A successful
+snapshot exchange does not grant an inventory lease or unlock client gameplay.
+
+Transport limits:
+
+- Base64 encoding preserves Unicode across chunk boundaries.
+- At most 64 chunks of 4,096 characters per snapshot; oversized inventories are
+  rejected, never truncated. Large modded item metadata can exceed this limit.
+- At most four cached outgoing snapshots, with two chunks per peer per frame.
+- Retries replay the same captured snapshot, rather than recapturing changing slots.
+- At most three client requests, five seconds apart; 20-second receive timeout.
+- Session, connection, nonce, snapshot ID, chunk shape and SHA-256 digest are checked.
+- Incomplete or conflicting snapshots never become a completed receive result.
+- Context changes clear client state; expired or unauthorized host exports are dropped.
+- Native send failures preserve retry throttling instead of restarting requests every frame.
+- Logs contain counts/status only, with no item JSON, player identities or tokens.
+
+New markers: `ESB_SNAPSHOT_HOST`, `ESB_SNAPSHOT_CLIENT`, `ESB_SNAPSHOT_WAIT`,
+`ESB_SNAPSHOT_TIMEOUT`. A client success marker proves only that the snapshot was
+received and validated. It does not prove item movement, saving or reconnection.
+
+### Validation, 2026-09-28
+
+Baseline: dev.4 commit `74aab0fa5b76b2c2a7653d85b528e8099450b5a0`.
+The repository remains an IL2CPP MelonLoader mod, not an editable Unity game project.
+
+| Criterion | Result | Evidence / limitation |
+| --- | --- | --- |
+| Complete mod source compilation | Passed, fallback compiler | Roslyn 8.0.425 against supplied game/MelonLoader/SNL references; 0 errors, 13 pre-existing CS1701 net6/net8 reference warnings |
+| Snapshot wire/assembly validation | Passed | InventorySnapshotTests: 47 assertions, including out-of-order delivery, duplicates, mixed snapshots, stale contexts, Unicode, corruption and resource bounds |
+| Existing version protocol | Passed | MultiplayerTests: 862 checks |
+| Host settings protocol | Passed | HostSettingsTests: 23 assertions |
+| Existing native probe protocol | Passed | InventoryChannelTests: 16 checks |
+| Native RPC execution with host and client | Not run | No game runtime or second peer in this workspace |
+| User-target net6 release build | Not run | Fallback compiler output is not a distributable mod DLL |
+| Menu transfers, remote save/rejoin, shared storage | Not implemented end-to-end | Client gate remains closed |
+
+Reproduce the pure tests with `dotnet run --project tests/InventorySnapshotTests.csproj`
+and the corresponding existing test projects. The full mod still builds with the
+normal `dotnet build -c Release -p:GameDirectory="..."` on the game installation.
+No generated compiler output, game DLLs or third-party dependencies are committed.
+
+### Next integration boundary
+
+The snapshot receiver deliberately does not apply its contents to the UI yet.
+Before enabling client moves, implement the exclusive operation lease, native UI
+interception, host-side move/split/merge acknowledgement, and suppression of stale
+native hotbar replication. Couple those mutations to world-save timing and live
+reconnect state; the game's individual `PlayerManager.SavePlayer` path must not
+silently persist an unsaved backpack/hotbar pair. Then integrate shared-storage
+allocation/compaction ordering and perform host/client community beta tests.

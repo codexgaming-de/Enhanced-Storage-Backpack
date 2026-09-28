@@ -42,7 +42,7 @@ public sealed class Mod : MelonMod
             backpack = new Backpack(settings);
             multiplayer = new MultiplayerDiagnostics(settings);
             steamSettings = new SteamHostSettings(settings, multiplayer.HostOffer);
-            nativeChannel = new NativeInventoryChannel(settings, steamSettings, HarmonyInstance);
+            nativeChannel = new NativeInventoryChannel(settings, steamSettings, HarmonyInstance, ReadRemoteSnapshot);
             Patch(typeof(Player), "OnStartClient", postfix: nameof(NetworkPlayerStarted));
             Patch(typeof(Player), "RequestSavePlayer", prefix: nameof(NetworkSaveRequested));
             Patch(typeof(Player), "RpcLogic___RequestSavePlayer_2166136261", prefix: nameof(NetworkSaveReceived));
@@ -68,8 +68,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.4 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.4 | Multiplayer preparation: client inventory remains blocked."));
-            settings.Trace("ESB_READY | 0.2.0-dev.4 | development build, not a playable multiplayer beta");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.5 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.5 | Multiplayer preparation: client inventory remains blocked."));
+            settings.Trace("ESB_READY | 0.2.0-dev.5 | development build, not a playable multiplayer beta");
         }
         catch (Exception ex)
         {
@@ -285,6 +285,14 @@ public sealed class Mod : MelonMod
             instance.settings!.Error("ESB_BACKPACK_SUBFILE_SAVE", ex);
             throw;
         }
+    }
+    private string ReadRemoteSnapshot(Player player)
+    {
+        if (!InstanceFinder.IsServer || LocalPlayer(player))
+            throw new InvalidOperationException("Only a remote owner's host inventory may be exported.");
+        // The native getter carries the current host hotbar; the preservation cache
+        // supplies only this player's host-saved backpack. No inventory is restored or written.
+        return PreserveRemoteInventory(player, player.GetInventoryString());
     }
     private string PreserveRemoteInventory(Player player, string inventory)
     {
