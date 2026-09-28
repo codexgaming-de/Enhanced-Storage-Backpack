@@ -1,4 +1,4 @@
-# Multiplayer development — 0.2.0-dev.5
+# Multiplayer development — 0.2.0-dev.6
 
 Branch: feature/0.2.0-multiplayer-beta. Stable 0.1.6 remains on main.
 
@@ -364,3 +364,82 @@ game. Actual native item metadata/callback behavior and two-peer interaction rem
 unverified. Next work remains the runtime per-player owner/session lifecycle,
 network requests/acknowledgements, UI interception and coupled world-save/rejoin
 integration before allowing client writes.
+
+
+## dev.6 — native host session journal (NOT playable multiplayer)
+
+This milestone adds runtime hooks, not only an unused transaction helper. An owner
+is admitted when the authenticated native snapshot exchange reaches the host's
+snapshot provider. Admission captures trusted host inventory/player data in RAM.
+The local host/singleplayer path and unadmitted players keep their existing behavior.
+
+Runtime integration:
+
+- `Player.RpcLogic___SetInventoryItem_2317364410`: event-driven RAM inventory updates.
+  No frame polling and no disk write on an item change.
+- `PlayerManager.SavePlayer`: admitted owners' individual saves update RAM instead
+  of advancing their inventory file outside a world save. Native disconnect
+  acknowledgement is allowed to finish; it is not a promise of a world disk save.
+- `ISaveable.WriteSubfile` for player `Inventory`: a second boundary suppresses
+  individual inventory writes, including teardown, if the getter/manager detour is
+  bypassed. Explicit world saves still use the coupled inventory JSON.
+- `Player.PreDestroyClientObjects` (matching owner connection only) and
+  `Player.OnStopClient`: capture before teardown, then retain the detached session.
+- `PlayerManager.TryGetPlayerData`: rejoin receives the live RAM inventory plus
+  captured player/appearance/clothing/variable data instead of older disk data.
+- Rebinding requires native hotbar/wallet replication to match that live snapshot.
+  A delayed old object's disconnect cannot detach a new binding. An already managed
+  owner can complete rebinding through native replication without a new mod
+  handshake; otherwise an incomplete restore blocks the world-save player stage.
+- During pending restoration, inventory serialization uses the cached pair instead
+  of a newly spawned player's not-yet-restored hotbar.
+- `PlayerManager.WriteData`: while `SaveManager.IsSaving` and server role are true,
+  detached player snapshots are written inside the explicit world save, before the
+  native directory list/cleanup is built. Connected players use native saving.
+- `LoadManager.StartGame` and mod disposal clear RAM state, so restarting/reloading
+  a world discards unsaved changes in both containers.
+
+Offline persistence uses native `Players/Player_<code>/Player.json`, `Inventory.json`,
+`Clothing.json`, `Variables.json`, and optional `Appearance.json`. There is no new
+standalone backpack save file. Inventory contains the hotbar and backpack in the
+same JSON; its temporary file is renamed over the destination and removed on normal
+completion. Other mods' files are not deleted. This is **not** an atomic transaction
+for the entire game's multi-file world save. Disconnect during an in-progress world
+save, native cleanup timing and disk failures still require actual game validation.
+
+The journal is limited to 64 identities, at most 1,048,576 characters per subfile and
+4,194,304 retained characters overall. Capture validation completes before replacing
+a cached entry. Failed native capture quarantines the account; restore/world-flush
+cannot silently reuse the earlier inventory. The backpack content still comes from
+`RemoteBackpackSaves` preservation: live backpack mutation requests are not enabled.
+
+Validation on 2026-09-28:
+
+- Fallback Roslyn compilation against supplied references: 0 errors, 13 existing
+  CS1701 net6/net8 reference warnings. No target net6 distributable was produced here.
+- RemotePlayerJournalTests: 50 assertions, including real isolated temporary-file
+  writes, no writes on capture/leave/rejoin, saved and unsaved coupled pairs,
+  identity isolation, stale native bindings, restore matching, corrupted data,
+  fault quarantine, memory bounds and preservation of other-mod files.
+- InventorySnapshotTests: 47 assertions; RemoteBackpackSaveTests: 17 assertions.
+- MultiplayerTests: 862 checks; HostSettingsTests: 23 assertions.
+- Native runtime hooks, native save cleanup and host/client rejoin: **not run**.
+  The workspace has supplied assemblies, but no running game or second peer.
+
+New diagnostic prefixes: `ESB_REMOTE_SESSION_CAPTURE`, `ESB_REMOTE_SESSION_DEFER`,
+`ESB_REMOTE_SESSION_LEAVE`, `ESB_REMOTE_SESSION_RESTORE`,
+`ESB_REMOTE_SESSION_WORLD_SAVE`, `ESB_REMOTE_SESSION_FAULT`.
+The existing single debug log and its three-session retention are unchanged.
+
+### Remaining implementation, explicitly not claimed complete
+
+Network move requests/acknowledgements and native menu interception still do not
+call the prepared host transfer adapter. Its save barrier must be connected to the
+runtime journal when those calls are introduced. In particular, native hotbar
+replication must not overwrite a host transfer with a stale client slot afterward;
+reliable transport alone does not solve that concurrent mutation problem.
+
+Shared-storage client slot allocation before indexed RPCs, ordered compaction/content
+replication, cash transfers, quick-move batches and end-to-end multiplayer tests
+remain outstanding. Do not publish this development build as the community gameplay
+beta yet. Stable 0.1.6 remains on main.

@@ -27,6 +27,7 @@ public sealed class Mod : MelonMod
     private MultiplayerDiagnostics? multiplayer;
     private SteamHostSettings? steamSettings;
     private NativeInventoryChannel? nativeChannel;
+    private NativeRemotePlayerJournal? remoteJournal;
     private readonly RemoteBackpackSaves remoteSaves = new();
     private bool disabled;
     private bool refreshSettingsUi;
@@ -42,6 +43,7 @@ public sealed class Mod : MelonMod
             backpack = new Backpack(settings);
             multiplayer = new MultiplayerDiagnostics(settings);
             steamSettings = new SteamHostSettings(settings, multiplayer.HostOffer);
+            remoteJournal = new NativeRemotePlayerJournal(settings, p => PreserveRemoteInventory(p, NativeRemotePlayerJournal.ReadNativeInventory(p)), HarmonyInstance);
             nativeChannel = new NativeInventoryChannel(settings, steamSettings, HarmonyInstance, ReadRemoteSnapshot);
             Patch(typeof(Player), "OnStartClient", postfix: nameof(NetworkPlayerStarted));
             Patch(typeof(Player), "RequestSavePlayer", prefix: nameof(NetworkSaveRequested));
@@ -68,8 +70,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.5 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.5 | Multiplayer preparation: client inventory remains blocked."));
-            settings.Trace("ESB_READY | 0.2.0-dev.5 | development build, not a playable multiplayer beta");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.6 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.6 | Multiplayer preparation: client inventory remains blocked."));
+            settings.Trace("ESB_READY | 0.2.0-dev.6 | development build, not a playable multiplayer beta");
         }
         catch (Exception ex)
         {
@@ -194,6 +196,7 @@ public sealed class Mod : MelonMod
         instance?.steamSettings?.Reset();
         instance?.nativeChannel?.Reset();
         instance?.remoteSaves.Reset();
+        instance?.remoteJournal?.Reset();
     }
     private static void NetworkPlayerStarted(Player __instance)
         => instance?.multiplayer?.Observe("player-start", __instance);
@@ -263,21 +266,23 @@ public sealed class Mod : MelonMod
             throw; // Never silently save only the hotbar after a failed backpack snapshot.
         }
     }
-    private static void InventorySubfileWriting(ISaveable __instance, string __1, ref string __2)
+    private static bool InventorySubfileWriting(ISaveable __instance, string __1, ref string __2)
     {
         // Native Player.WriteData can bypass the GetInventoryString detour.
         // Attach at the actual writer boundary, before the game's own file write.
         // Restrict this shared API to player Inventory subfiles.
-        if (__1 != "Inventory") return;
+        if (__1 != "Inventory") return true;
         var player = __instance.TryCast<Player>();
         instance?.multiplayer?.Observe("inventory-subfile-write", player, __2.Length);
-        if (!PersistenceActive || instance?.backpack == null) return;
-        if (player == null) return;
+        if (!PersistenceActive || instance?.backpack == null) return true;
+        if (player == null) return true;
         try
         {
+            if (instance.remoteJournal?.DeferInventoryWrite(player) == true) return false;
             __2 = LocalPlayer(player) ? instance.backpack.WriteInventory(__2)
                 : instance.PreserveRemoteInventory(player, __2);
             TraceSaveBoundary("Player.Inventory.WriteSubfile", player);
+            return true;
         }
         catch (Exception ex)
         {
@@ -292,11 +297,14 @@ public sealed class Mod : MelonMod
             throw new InvalidOperationException("Only a remote owner's host inventory may be exported.");
         // The native getter carries the current host hotbar; the preservation cache
         // supplies only this player's host-saved backpack. No inventory is restored or written.
-        return PreserveRemoteInventory(player, player.GetInventoryString());
+        string snapshot = PreserveRemoteInventory(player, player.GetInventoryString());
+        remoteJournal!.Admit(player, snapshot);
+        return snapshot;
     }
     private string PreserveRemoteInventory(Player player, string inventory)
     {
         if (!InstanceFinder.IsServer) return inventory;
+        if (remoteJournal != null && remoteJournal.PendingInventory(player, out string pendingInventory)) return pendingInventory;
         EnsureRemoteBaseline(player);
         return remoteSaves.Preserve(player.PlayerCode, inventory);
     }
@@ -345,6 +353,7 @@ public sealed class Mod : MelonMod
         disabled = true;
         HarmonyInstance.UnpatchSelf();
         nativeChannel?.Dispose();
+        remoteJournal?.Dispose();
         steamSettings?.Dispose();
         backpack?.Dispose();
         storage?.Dispose();
