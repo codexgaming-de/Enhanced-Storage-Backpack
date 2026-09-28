@@ -1,3 +1,9 @@
+> **Development branch — 0.2.0-dev.1. Not a playable multiplayer beta.**
+> Host configuration envelope and native network/save diagnostics are implemented.
+> Client inventory access remains blocked pending synchronization and persistence.
+> Stable singleplayer release: 0.1.6 on `main`.
+> See [multiplayer development and testing](docs/MULTIPLAYER-DEVELOPMENT.md).
+
 # Enhanced Storage + Backpack
 
 Singleplayer-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.

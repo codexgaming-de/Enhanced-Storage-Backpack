@@ -4,6 +4,7 @@
 
 using HarmonyLib;
 using Il2CppFishNet;
+using Il2CppFishNet.Connection;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.ObjectScripts;
@@ -13,7 +14,7 @@ using MelonLoader;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.6", "CoDeX-Gaming")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", EnhancedStorageBackpack.MultiplayerProtocol.Build, "CoDeX-Gaming")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -24,6 +25,7 @@ public sealed class Mod : MelonMod
     private Settings? settings;
     private RackStorage? storage;
     private Backpack? backpack;
+    private MultiplayerDiagnostics? multiplayer;
     private bool disabled;
     private bool refreshSettingsUi;
 
@@ -36,6 +38,14 @@ public sealed class Mod : MelonMod
         try
         {
             backpack = new Backpack(settings);
+            multiplayer = new MultiplayerDiagnostics(settings);
+            Patch(typeof(Player), "OnStartClient", postfix: nameof(NetworkPlayerStarted));
+            Patch(typeof(Player), "RequestSavePlayer", prefix: nameof(NetworkSaveRequested));
+            Patch(typeof(Player), "RpcLogic___RequestSavePlayer_2166136261", prefix: nameof(NetworkSaveReceived));
+            Patch(typeof(Player), "ReceivePlayerData", prefix: nameof(NetworkPlayerSending));
+            Patch(typeof(Player), "RpcWriter___Target_ReceivePlayerData_3244732873", prefix: nameof(NetworkPlayerSending));
+            Patch(typeof(Player), "RpcWriter___Observers_ReceivePlayerData_3244732873", prefix: nameof(NetworkPlayerSending));
+            Patch(typeof(Player), "RpcLogic___ReceivePlayerData_3244732873", prefix: nameof(NetworkPlayerReceiving));
             Patch(typeof(Player), "GetInventoryString", postfix: nameof(InventorySaving));
             Patch(typeof(ISaveable), "WriteSubfile", prefix: nameof(InventorySubfileWriting));
             Patch(typeof(Player), "LoadInventory", prefix: nameof(InventoryLoading));
@@ -57,8 +67,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.6 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.6 | Nine storage types and backpack enabled."));
-            settings.Trace("ESB_READY | 0.1.6");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.1 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.1 | Multiplayer preparation: client inventory remains blocked."));
+            settings.Trace("ESB_READY | 0.2.0-dev.1 | development build, not a playable multiplayer beta");
         }
         catch (Exception ex)
         {
@@ -174,11 +184,26 @@ public sealed class Mod : MelonMod
         instance?.backpack?.Closed();
         Run(s => s.Closed());
     }
-    private static void GameStarting() => instance?.backpack?.Reset();
+    private static void GameStarting()
+    {
+        instance?.backpack?.Reset();
+        instance?.multiplayer?.Reset();
+    }
+    private static void NetworkPlayerStarted(Player __instance)
+        => instance?.multiplayer?.Observe("player-start", __instance);
+    private static void NetworkSaveRequested(Player __instance)
+        => instance?.multiplayer?.Observe("save-request-send", __instance);
+    private static void NetworkSaveReceived(Player __instance)
+        => instance?.multiplayer?.Observe("save-request-server", __instance);
+    private static void NetworkPlayerSending(Player __instance, NetworkConnection __0, ref string __2)
+        => instance?.multiplayer?.Outgoing(__instance, __0, ref __2);
+    private static void NetworkPlayerReceiving(Player __instance, ref string __2)
+        => instance?.multiplayer?.Incoming(__instance, ref __2);
     private static bool LocalPlayer(Player player) => player.IsLocalPlayer ||
         (Player.Local != null && Player.Local.Pointer == player.Pointer);
     private static void TraceSaveBoundary(string stage, Player? player = null)
     {
+        instance?.multiplayer?.Observe(stage, player);
         // Diagnostics must never interrupt the game's save pipeline.
         try
         {
@@ -210,8 +235,10 @@ public sealed class Mod : MelonMod
         // Native Player.WriteData can bypass the GetInventoryString detour.
         // Attach at the actual writer boundary, before the game's own file write.
         // Restrict this shared API to the local player's Inventory subfile.
-        if (!PersistenceActive || __1 != "Inventory" || instance?.backpack == null) return;
+        if (__1 != "Inventory") return;
         var player = __instance.TryCast<Player>();
+        instance?.multiplayer?.Observe("inventory-subfile-write", player, __2.Length);
+        if (!PersistenceActive || instance?.backpack == null) return;
         if (player == null || !LocalPlayer(player)) return;
         try
         {
