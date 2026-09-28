@@ -36,6 +36,22 @@ internal sealed class Settings : IDisposable
     public MelonPreferences_Entry<int> SafeRows { get; private set; } = null!;
     public MelonPreferences_Entry<int> FilingCabinetSlots { get; private set; } = null!;
     public MelonPreferences_Entry<int> FilingCabinetRows { get; private set; } = null!;
+    private MultiplayerProtocol.Offer? hostConfiguration;
+    internal int EffectiveBackpackSlots => Il2CppFishNet.InstanceFinder.IsClientOnly && hostConfiguration != null
+        ? hostConfiguration.BackpackSlots : BackpackSlots.Value;
+    internal int HostStorageValue(string id, bool rows, int local)
+    {
+        if (!Il2CppFishNet.InstanceFinder.IsClientOnly || hostConfiguration == null) return local;
+        int index = Array.IndexOf(MultiplayerProtocol.StorageIds, id);
+        return index < 0 ? local : (rows ? hostConfiguration.Rows[index] : hostConfiguration.Slots[index]);
+    }
+    internal void SetHostConfiguration(MultiplayerProtocol.Offer? value)
+    {
+        if (System.Text.Json.JsonSerializer.Serialize(hostConfiguration) == System.Text.Json.JsonSerializer.Serialize(value)) return;
+        hostConfiguration = value;
+        RackChanged?.Invoke(); BackpackChanged?.Invoke();
+        // Do not write host values into local MelonPreferences.
+    }
     public event Action? BackpackChanged;
     public event Action? RackChanged;
     public event Action? LanguageChanged;

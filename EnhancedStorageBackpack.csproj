@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>EnhancedStorageBackpack</AssemblyName>
-    <Version>0.2.0-dev.1</Version>
+    <Version>0.2.0-dev.2</Version>
     <Authors>CoDeX-Gaming</Authors>
     <Company>CoDeX-Gaming</Company>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
@@ -12,6 +12,9 @@
     <GameAssembliesDirectory Condition="'$(GameAssembliesDirectory)' == ''">$(GameDirectory)/MelonLoader/Il2CppAssemblies</GameAssembliesDirectory>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SteamNetworkLib">
+      <HintPath>$(GameDirectory)/UserLibs/SteamNetworkLib.dll</HintPath><Private>false</Private>
+    </Reference>
     <Compile Include="src/**/*.cs" />
     <Reference Include="MelonLoader">
       <HintPath>$(MelonLoaderDirectory)/MelonLoader.dll</HintPath>
@@ -26,6 +29,7 @@
     </Reference>
   </ItemGroup>
   <Target Name="CheckMelonLoaderReference" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(GameDirectory)/UserLibs/SteamNetworkLib.dll')" Text="SteamNetworkLib 1.6.0 IL2CPP fehlt: UserLibs/SteamNetworkLib.dll installieren (Nexus 1396)." />
     <Error Condition="!Exists('$(MelonLoaderDirectory)/MelonLoader.dll')" Text="MelonLoader.dll fehlt. Bitte -p:GameDirectory=&quot;/vollstaendiger/Pfad/Schedule I&quot; angeben." />
     <Error Condition="!Exists('$(GameAssembliesDirectory)/UnityEngine.CoreModule.dll')" Text="UnityEngine.CoreModule.dll fehlt in MelonLoader/Il2CppAssemblies. Bitte den Spielpfad pruefen und MelonLoader einmal starten." />
   </Target>

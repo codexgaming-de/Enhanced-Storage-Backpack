@@ -1,5 +1,6 @@
-> **Development branch — 0.2.0-dev.1. Not a playable multiplayer beta.**
-> Host configuration envelope and native network/save diagnostics are implemented.
+> **Development branch — 0.2.0-dev.2. Not a playable multiplayer beta.**
+> SteamNetworkLib 1.6.0 IL2CPP, a bidirectional version handshake and session-only host settings are implemented.
+> Install the dependency separately in `UserLibs/SteamNetworkLib.dll` before building/running this development branch.
 > Client inventory access remains blocked pending synchronization and persistence.
 > Stable singleplayer release: 0.1.6 on `main`.
 > See [multiplayer development and testing](docs/MULTIPLAYER-DEVELOPMENT.md).

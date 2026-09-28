@@ -69,7 +69,8 @@ internal sealed class RackStorage : IDisposable
         return rack;
     }
 
-    private int ConfiguredSlots(Rack rack) => rack.ItemId switch
+    private int ConfiguredSlots(Rack rack) => settings.HostStorageValue(rack.ItemId, false, LocalSlots(rack));
+    private int LocalSlots(Rack rack) => rack.ItemId switch
     {
         "smallstoragerack" => settings.SmallRackSlots.Value,
         "mediumstoragerack" => settings.MediumRackSlots.Value,
@@ -83,7 +84,8 @@ internal sealed class RackStorage : IDisposable
         _ => throw new InvalidOperationException("Unsupported storage identity.")
     };
 
-    private int ConfiguredRows(Rack rack) => rack.ItemId switch
+    private int ConfiguredRows(Rack rack) => settings.HostStorageValue(rack.ItemId, true, LocalRows(rack));
+    private int LocalRows(Rack rack) => rack.ItemId switch
     {
         "smallstoragerack" => settings.SmallRackRows.Value,
         "mediumstoragerack" => settings.MediumRackRows.Value,

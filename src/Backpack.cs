@@ -91,7 +91,7 @@ internal sealed class Backpack : IDisposable
     {
         var items = savedPayload == null ? Array.Empty<string?>() : BackpackSave.Decode(savedPayload);
         var restored = new BackpackOwner();
-        Grow(restored, Math.Max(Math.Clamp(settings.BackpackSlots.Value, 1, 128), items.Length));
+        Grow(restored, Math.Max(Math.Clamp(settings.EffectiveBackpackSlots, 1, 128), items.Length));
         for (int i = 0; i < items.Length; i++)
         {
             if (items[i] == null) continue;
@@ -114,7 +114,7 @@ internal sealed class Backpack : IDisposable
     private void Resize()
     {
         var slots = owner!.ItemSlots;
-        int target = Math.Clamp(settings.BackpackSlots.Value, 1, 128);
+        int target = Math.Clamp(settings.EffectiveBackpackSlots, 1, 128);
         if (slots.Count != target)
         {
             menu.ClearBindings();

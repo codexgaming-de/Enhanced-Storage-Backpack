@@ -4,7 +4,6 @@
 
 using HarmonyLib;
 using Il2CppFishNet;
-using Il2CppFishNet.Connection;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.ObjectScripts;
@@ -26,6 +25,7 @@ public sealed class Mod : MelonMod
     private RackStorage? storage;
     private Backpack? backpack;
     private MultiplayerDiagnostics? multiplayer;
+    private SteamHostSettings? steamSettings;
     private bool disabled;
     private bool refreshSettingsUi;
 
@@ -39,12 +39,10 @@ public sealed class Mod : MelonMod
         {
             backpack = new Backpack(settings);
             multiplayer = new MultiplayerDiagnostics(settings);
+            steamSettings = new SteamHostSettings(settings, multiplayer.HostOffer);
             Patch(typeof(Player), "OnStartClient", postfix: nameof(NetworkPlayerStarted));
             Patch(typeof(Player), "RequestSavePlayer", prefix: nameof(NetworkSaveRequested));
             Patch(typeof(Player), "RpcLogic___RequestSavePlayer_2166136261", prefix: nameof(NetworkSaveReceived));
-            Patch(typeof(Player), "ReceivePlayerData", prefix: nameof(NetworkPlayerSending));
-            Patch(typeof(Player), "RpcWriter___Target_ReceivePlayerData_3244732873", prefix: nameof(NetworkPlayerSending));
-            Patch(typeof(Player), "RpcWriter___Observers_ReceivePlayerData_3244732873", prefix: nameof(NetworkPlayerSending));
             Patch(typeof(Player), "RpcLogic___ReceivePlayerData_3244732873", prefix: nameof(NetworkPlayerReceiving));
             Patch(typeof(Player), "GetInventoryString", postfix: nameof(InventorySaving));
             Patch(typeof(ISaveable), "WriteSubfile", prefix: nameof(InventorySubfileWriting));
@@ -67,8 +65,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.1 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.1 | Multiplayer preparation: client inventory remains blocked."));
-            settings.Trace("ESB_READY | 0.2.0-dev.1 | development build, not a playable multiplayer beta");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.2 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.2 | Multiplayer preparation: client inventory remains blocked."));
+            settings.Trace("ESB_READY | 0.2.0-dev.2 | development build, not a playable multiplayer beta");
         }
         catch (Exception ex)
         {
@@ -104,6 +102,7 @@ public sealed class Mod : MelonMod
 
     public override void OnUpdate()
     {
+        steamSettings?.Tick();
         RefreshSettingsUi();
         if (!Active) return;
         backpack?.Tick();
@@ -188,6 +187,7 @@ public sealed class Mod : MelonMod
     {
         instance?.backpack?.Reset();
         instance?.multiplayer?.Reset();
+        instance?.steamSettings?.Reset();
     }
     private static void NetworkPlayerStarted(Player __instance)
         => instance?.multiplayer?.Observe("player-start", __instance);
@@ -195,8 +195,6 @@ public sealed class Mod : MelonMod
         => instance?.multiplayer?.Observe("save-request-send", __instance);
     private static void NetworkSaveReceived(Player __instance)
         => instance?.multiplayer?.Observe("save-request-server", __instance);
-    private static void NetworkPlayerSending(Player __instance, NetworkConnection __0, ref string __2)
-        => instance?.multiplayer?.Outgoing(__instance, __0, ref __2);
     private static void NetworkPlayerReceiving(Player __instance, ref string __2)
         => instance?.multiplayer?.Incoming(__instance, ref __2);
     private static bool LocalPlayer(Player player) => player.IsLocalPlayer ||
@@ -279,6 +277,7 @@ public sealed class Mod : MelonMod
     {
         disabled = true;
         HarmonyInstance.UnpatchSelf();
+        steamSettings?.Dispose();
         backpack?.Dispose();
         storage?.Dispose();
         if (settings != null) settings.LanguageChanged -= RequestSettingsRefresh;

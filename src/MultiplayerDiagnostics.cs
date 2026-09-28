@@ -1,5 +1,4 @@
 using Il2CppFishNet;
-using Il2CppFishNet.Connection;
 using Il2CppScheduleOne.PlayerScripts;
 
 namespace EnhancedStorageBackpack;
@@ -39,19 +38,6 @@ internal sealed class MultiplayerDiagnostics
             settings.MediumClosetRows.Value, settings.LargeClosetRows.Value,
             settings.HugeClosetRows.Value, settings.SafeRows.Value, settings.FilingCabinetRows.Value }
     };
-
-    internal void Outgoing(Player player, NetworkConnection? connection, ref string inventory)
-    {
-        if (!InstanceFinder.IsServer) return;
-        // Host-owned configuration travels with the native player-load response.
-        // Multiple writer detours are intentional; Attach replaces its key.
-        try
-        {
-            inventory = MultiplayerProtocol.Attach(inventory, HostOffer());
-            Observe("host-offer-sent", player, inventory.Length);
-        }
-        catch (Exception ex) { Report("host-offer", ex); }
-    }
 
     internal void Incoming(Player player, ref string inventory)
     {

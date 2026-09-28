@@ -1,104 +1,110 @@
-# Multiplayer development — 0.2.0-dev.1
+# Multiplayer development — 0.2.0-dev.2
 
-28 September 2026. Baseline: 3ecac4bd16a633a9f261dbe2ba89ee9d4a4b6a9e.
 Branch: feature/0.2.0-multiplayer-beta. Stable 0.1.6 remains on main.
 
-## Current milestone: transport preparation, not a playable beta
+## Implemented in dev.2
 
-Implemented:
-- Versioned, bounded host configuration envelope with a fresh session token.
-- Nine storage slot/row pairs and backpack capacity from the host.
-- Metadata attached at native Player.ReceivePlayerData entry and generated
-  Target/Observers writer boundaries; repeat attachment is idempotent.
-- Metadata removed and validated at RpcLogic___ReceivePlayerData before vanilla
-  inventory loading. Neither vanilla fields nor the existing backpack key is removed.
-- Own debug log observes player start, inventory reads/writes and save request
-  boundaries. At most one line per stage/role/peer per load session; at most 64
-  peer labels. No names, platform IDs, contents or save paths in these new markers.
-- Client interaction remains disabled. Offers do not grant inventory access.
-- Stable save payload version remains 1. No additional inventory file or autosave.
+- SteamNetworkLib 1.6.0 IL2CPP as an external dependency. Not bundled or modified.
+- Dedicated reliable P2P channel 21837 and namespaced message key.
+- No mod-created lobby: membership and host identity are obtained from the existing
+  game lobby and Steam's lobby owner, additionally checked against FishNet server role.
+- Bounded hello / offer / acknowledgement / ready handshake, matching build,
+  client nonce, host session and increasing configuration revision.
+- Sender identity comes from the actual transport callback, never a JSON sender field.
+- Only the host supplies nine storage slot/row pairs and backpack capacity.
+- Session-only client settings; local MelonPreferences are not overwritten.
+- Host changes are picked up within the two-second control interval and sent to peers.
+  Local host resizing retains its existing update timing. No per-frame config sends.
+- Own log: ESB_STEAM_READY, ESB_HOST_SETTINGS, ESB_HANDSHAKE_CLIENT, failures.
+- Native inventory transport prototype removed from outgoing RPCs. The receiving
+  stripper remains for compatibility with dev.1. No new save file or autosave.
 
-This snapshot does not synchronize live settings, transfer items, authenticate a
-completed bidirectional handshake, persist remote backpacks, or protect simultaneous
-storage mutations. It must NOT be uploaded as the promised playable multiplayer beta.
-There is no claim that matching protocol metadata establishes trust or ownership.
+**Client inventory access remains blocked.** This is not yet the public playable beta.
+Slot allocation, synchronized compaction, item transfer authority and remote backpack
+persistence are not complete. A completed settings handshake alone does not unlock them.
+Language, keybind and diagnostics remain local; capacity settings are host-controlled.
 
-## Confirmed architecture / evidence
+## Dependency setup
+
+Author: Bars Studio / ifBars. Nexus: https://www.nexusmods.com/schedule1/mods/1396
+Release: https://github.com/ifBars/SteamNetworkLib/releases/tag/v1.6.0
+Documentation: https://ifbars.github.io/SteamNetworkLib/docs/getting-started.html
+
+Install the IL2CPP package from Nexus into the game's UserLibs directory.
+The required reference/runtime path is `UserLibs/SteamNetworkLib.dll`.
+If using the GitHub DLL named `SteamNetworkLib-IL2Cpp.dll`, rename that downloaded
+file to `SteamNetworkLib.dll` in UserLibs. Do not install two copies. Do not use Mono.
+The library stays separately installed and is excluded from our release ZIP.
+Current developer documentation specifies runtime-matching build references;
+the Nexus description's Mono-reference instruction disagrees with that documentation.
+We compiled against the released v1.6.0 IL2CPP binary, not an invented API or stub.
+The upstream repository contains the MIT licence; Nexus's default permissions differ.
+No upstream source or binary is redistributed by this branch.
+
+## Confirmed local baseline — dev.1
+
+The owner tested and supplied Enhanced-Storage-Backpack-Debug(20260928-111123).log.
+28 September 2026, 13:05 and 13:10 Berlin sessions initialized dev.1 successfully.
+At 13:08:39 the backpack snapshot had 80 slots / 2 occupied slots.
+Main-menu reload at 13:09:15 and full-restart reload at 13:10:35 restored 80 / 2.
+No errors in that supplied log. Player start and actual Inventory writer hooks ran.
+No remote transport, remote save or exact item quantities were established by that log.
+
+## Architecture and unknowns
 
 This is an external net6.0 MelonLoader IL2CPP mod, not a Unity Editor project.
-There are no Assets/Packages/ProjectSettings or connected Editor/Play Mode.
-Unity Editor version and render pipeline are not established by this repository.
-Available game references expose FishNet runtime and native storage RPC interfaces.
+No connected Editor/Play Mode; Unity version/render pipeline not established here.
+Game networking uses FishNet. Inspected native wrappers: Player, PlayerManager,
+PlayerData, StorageEntity, ISaveable, InstanceFinder and Lobby.
 
-Inspected mod files: Mod.cs, Backpack.cs, BackpackOwner.cs, BackpackSave.cs,
-RackStorage.cs, Settings.cs, EnhancedStorageBackpack.csproj.
-Inspected supplied native wrappers (not redistributed): Player, PlayerManager,
-PlayerData, StorageEntity, ISaveable, InstanceFinder.
+Player has RequestSavePlayer, ReceivePlayerData, GetInventoryString, LoadInventory
+and WriteData. Storage exposes slot-indexed item/quantity/filter/lock RPCs and
+CurrentPlayerAccessor. Stable rack shrinking swaps local ItemSlot references;
+this cannot be independently repeated on clients. Native implementations/call ordering
+are not visible in the supplied interop wrappers and require real runtime evidence.
 
-Confirmed interfaces:
-- Player inventory is represented by _inventory; PlayerCode identifies players.
-- RequestSavePlayer / generated server logic and ReturnSaveRequest exist.
-- ReceivePlayerData accepts PlayerData plus inventory JSON and other player data.
-- Storage has slot-indexed item/quantity/filter/lock RPCs and CurrentPlayerAccessor.
-- Stable persistence hooks GetInventoryString, ISaveable.WriteSubfile and LoadInventory.
-- Stable rack shrinking swaps ItemSlot references locally. This is not a network
-  transaction and cannot be independently repeated on clients.
+## Next gates
 
-Unknown: actual native call ordering, bypassed detours, remote save timing, joining
-and disconnect timing, and atomicity relative to vanilla inventory transfers.
-The supplied interop assemblies expose signatures, not native implementation bodies.
-The 0.1.6 save bug demonstrated why hook installation alone is insufficient proof.
+1. Verify SteamNetworkLib initialization and existing solo behavior on Nobara.
+2. Host-controlled storage allocation on clients BEFORE native item RPCs, stable
+   indices and synchronized compaction; coordinate active access and dragging.
+3. Per-player backpack transactions coupled to the same player inventory snapshot.
+4. Save barrier and reconnect handling without mismatched hotbar/backpack revisions.
+5. Solo rule tests and regression, then separately labelled community multiplayer beta.
 
-## Next implementation gates
+Both host and clients require the same eventual beta and dependency. Never install
+stable and development mod DLLs together. Use a backup or separate test save.
+Rollback: restore the stable DLL and pre-test save. Do not distribute compiler-check DLLs.
 
-1. Compile on Nobara and confirm native patch installation plus solo regression.
-2. Establish a bounded bidirectional handshake bound to the real connection owner;
-   reject version mismatch and stale session traffic before granting access.
-3. Host-controlled storage capacities with pre-snapshot allocation on join, stable
-   slot indices, synchronized resize/compaction, and access/drag coordination.
-4. Per-player backpack transfers coupled to the matching player inventory snapshot.
-   No independently persisted backpack state. Validate server authority and identity.
-5. Save barrier/reconnect handling: never write mismatched hotbar/backpack revisions;
-   do not silently report a completed save when a required peer snapshot is missing.
-6. Solo protocol/state tests, normal native regression, then separate community beta.
+## Local test for dev.2
 
-Both host and clients will need the same eventual beta. Stable DLL and beta DLL
-must never be installed together. The host will determine shared capacity; language
-and hotkey remain local preferences. Rollback: return to 0.1.6 and the pre-test save.
-
-## Local test for this development snapshot
-
-Use a separate test save or a backup. Close the game before replacing the DLL.
-Build (do not use the stable packaging script for this prerelease):
+After installing SteamNetworkLib, close the game:
 
 ```bash
 cd /home/codex/Enhanced-Storage-Backpack
-git fetch origin
-git switch --track origin/feature/0.2.0-multiplayer-beta
+git switch feature/0.2.0-multiplayer-beta
+git pull --ff-only origin feature/0.2.0-multiplayer-beta
 dotnet build -c Release -p:GameDirectory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
 ```
 
-Replace only EnhancedStorageBackpack.dll in Mods with bin/Release/net6.0 output.
-Enable our debug logging before loading the test save.
-1. Startup should report 0.2.0-dev.1 and no ESB_INITIALIZATION error.
-2. Open backpack and a storage; transfer items and test pagination.
-3. Save, return to main menu, reload; verify both hotbar and backpack quantities.
-4. Exit fully and reload. Check unsaved transfer rollback in both directions.
-5. Send UserData/Enhanced-Storage-Backpack-Debug.log and the build output.
+Replace Mods/EnhancedStorageBackpack.dll with the resulting net6.0 DLL.
+Keep our debug logging enabled before startup.
+- Confirm ESB_READY 0.2.0-dev.2 and ESB_STEAM_READY, no initialization errors.
+- Load test save, change host rack slots/rows and backpack capacity; check normal UI.
+- Save, reload from main menu, then fully restart and reload.
+- Send own debug log and build output. No second peer is needed for this local test.
+- Without a client, ESB_HANDSHAKE_CLIENT is not expected.
 
-Look for ESB_MP_PATH lines (player-start, inventory-subfile-write and save paths).
-A host-offer event may not occur in a solo session; its absence is not proof of
-failure. Real transport and remote-player behavior need two actual peers later.
+## Validation
 
-## Validation in development environment
+Direct Roslyn compile against supplied references and released SteamNetworkLib:
+passed with 12 known net8/net6 CS1701 warnings and no new compiler warnings/errors.
+862 pure protocol assertions and 23 host-handshake assertions passed.
+Assertions cover wrong sender, cross-player tokens, stale revisions, out-of-order
+confirmation, duplicate messages, altered same-revision settings, version mismatch,
+rejoin/host-change rejection, payload bounds and preserving inventory JSON.
+No native Steam traffic, two-peer gameplay, disconnect or remote persistence test
+has been run here. Handshake tests do not simulate Unity or Steam peers.
 
-- Direct Roslyn compile with supplied game references: passed; known net8/net6
-  reference warnings remain. This compiler-check DLL is not distributable.
-- Pure protocol suite: 862 assertions passed, including 1..128 capacities,
-  duplicate attachment, malformed/mismatched messages, preserving hotbar and
-  backpack JSON, and vanilla saves without metadata.
-- Existing backpack codec suite: 272 assertions passed.
-- No native gameplay, real two-peer traffic or disconnect test executed here.
-- These tests exercise pure rules, not simulated Unity/FishNet peers.
-
-Run locally: dotnet run --project tests/MultiplayerProtocolTests.csproj
+`dotnet run --project tests/HostSettingsTests.csproj`
+`dotnet run --project tests/MultiplayerProtocolTests.csproj`
