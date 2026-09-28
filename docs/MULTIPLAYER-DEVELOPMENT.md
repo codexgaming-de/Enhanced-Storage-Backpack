@@ -192,3 +192,34 @@ Next: a native inventory adapter must serialize all ESB transfers with vanilla
 SetInventoryItem updates, enforce item locks/filters and stack rules, and acknowledge
 both ends before saving. Merely sending periodic backpack snapshots on another
 transport would not establish ordering against the game's hotbar updates.
+
+## Transfer adapter work after dev.3 (step 1 still in progress)
+
+Inspected the Mono ItemUIManager and HotbarSlot implementations. SlotClicked performs
+quick-move, while EndDrag performs an ordinary drop. Starting a drag only changes
+presentation; it does not remove the source item. Cash uses separate balance logic.
+
+Added BackpackTransferRules and NativeBackpackTransfer:
+- Host-provided slot rules support full/partial moves, bounded merges and full swaps.
+- Native adapter checks hard/player filters, source removal and target addition locks,
+  and both reverse directions for swaps. Rechecks contents, locks, filters and capacity
+  before mutation. Linked sibling slots and cash slots/items are rejected for now.
+- Copies native item subclasses before mutation; internal slot setters avoid recursive
+  owner RPCs. On a setter failure both original slots are attempted for restoration;
+  caller must quarantine interaction on failure, especially failed rollback.
+- Tests cover 26 transfer-rule scenarios, including single-item transfers, full targets,
+  swap filters/locks, invalid quantities and overflow. Native Unity setters, copy
+  metadata fidelity and rollback callbacks cannot be executed in the plain-C# tests.
+- IL2CPP reference compile succeeds; 13 CS1701 reference-version warnings remain.
+
+**Not active in gameplay yet.** These classes are not wired to the UI or P2P callbacks.
+Do not call NativeBackpackTransfer directly from a message without resolving and
+validating the sender's owned slots, session/revision, inventory lease and save barrier.
+Do not describe these rules as completed network synchronization. Build stays dev.3.
+
+Before enabling step 1, finish reliable request/acknowledgement and native RPC ordering:
+Steam P2P messages and vanilla FishNet SetInventoryItem use independent transports;
+a Steam confirmation alone does not establish that earlier vanilla slot updates have
+arrived. Any ordering fence must be validated on the native reliable channel. Cash
+balance movement, quick-move batching, timeout recovery and client UI bindings remain.
+No new solo test or DLL replacement is needed for these currently unconnected classes.
