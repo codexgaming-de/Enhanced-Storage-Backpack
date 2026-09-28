@@ -65,7 +65,7 @@ are not visible in the supplied interop wrappers and require real runtime eviden
 
 ## Next gates
 
-1. Verify SteamNetworkLib initialization and existing solo behavior on Nobara.
+1. DONE locally: dev.2 SteamNetworkLib initialization and solo save/reload verified below.
 2. Host-controlled storage allocation on clients BEFORE native item RPCs, stable
    indices and synchronized compaction; coordinate active access and dragging.
 3. Per-player backpack transactions coupled to the same player inventory snapshot.
@@ -108,3 +108,43 @@ has been run here. Handshake tests do not simulate Unity or Steam peers.
 
 `dotnet run --project tests/HostSettingsTests.csproj`
 `dotnet run --project tests/MultiplayerProtocolTests.csproj`
+
+## Host transaction core (after dev.2 local test)
+
+`HostBackpackState` is a host-thread-only, pure C# foundation, **not yet wired to
+Steam messages, native ItemSlot changes, UI or disk writes**. Runtime remains dev.2
+and client access stays blocked. Do not describe this as implemented remote persistence.
+
+- Per-player inventory/backpack pair; caller must supply authenticated transport identity.
+- Host-issued session and reconnect lease, monotonic sequence and revision checks.
+- Requests identify slots only; they cannot supply fabricated item contents.
+- Whole-stack move to an empty slot; exact JSON retained, duplicate command idempotent.
+- Host compaction protects occupied slots when requested capacity is insufficient.
+- Save barrier captures both containers at one revision and freezes mutations until
+  the exact save ticket completes. No automatic or independent backpack file writes.
+- Reconnect retains live host state; a new loaded game uses a fresh state/session.
+- Defensive snapshots; bounded player/slot counts. No polling or networking in this core.
+
+Integration still MUST provide native lock/filter checks, stack splitting/merging,
+quantity validation, authorization of all other inventory mutations (use, pickup,
+trade and storage), authenticated peer/player mapping, and a confirmed native save
+completion/failure path. The core is not safe to expose to clients until those adapters
+exist. Storage transfers are not implemented by this core. A save ticket alone does
+not make the game's filesystem writes atomic. Tests simulate state reload from the
+captured pair; they do not test native game persistence or a connection drop.
+
+`dotnet run --project tests/HostBackpackTests.csproj`
+3028 assertions passed, including 1000 transfers with duplicate packets and item
+conservation, identity rejection, stale state, safe shrinking, save freeze, reconnect,
+and discarding unsaved moves on simulated reload.
+
+The supplied 20260928-124026 log confirms dev.2 at 14:36/14:39 Berlin, library
+1.6.0.0 initialized, small closet 10/1 and medium closet 20/2 applied immediately.
+Save 14:38:07, main-menu reload 14:38:35 and restart reload 14:39:35 show 80 backpack
+slots / 2 occupied. No errors recorded. No remote settings handshake is present.
+The stale 0.1.6 settings-snapshot log label now uses MultiplayerProtocol.Build.
+
+Next concrete integration gate: establish how remote Player inventory mutations and
+RequestSavePlayer/PlayerManager.SavePlayer are ordered on the native host. The supplied
+interop assemblies expose declarations and native invocations, not those method bodies.
+Do not remove the client gate based on the pure-core tests alone.
