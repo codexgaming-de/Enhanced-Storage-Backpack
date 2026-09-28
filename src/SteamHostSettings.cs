@@ -22,6 +22,7 @@ internal sealed class SteamHostSettings : IDisposable
     private readonly Dictionary<(ulong Peer, string Kind), float> lastMessages = new();
     private readonly List<Task<bool>> sends = new();
     private readonly HashSet<ulong> members = new();
+    private readonly Dictionary<ulong, long> accepted = new();
     private HostSettingsSession? client;
     private MultiplayerProtocol.Offer? offer;
     private string configuration = "";
@@ -46,7 +47,7 @@ internal sealed class SteamHostSettings : IDisposable
     internal void Reset()
     {
         client = null; offer = null; configuration = ""; revision = 0;
-        peerTokens.Clear(); lastMessages.Clear(); members.Clear();
+        peerTokens.Clear(); lastMessages.Clear(); members.Clear(); accepted.Clear();
         settings.SetHostConfiguration(null);
         lobbyId = ownerId = localId = 0; dirty = true; nextPoll = 0;
     }
@@ -86,7 +87,7 @@ internal sealed class SteamHostSettings : IDisposable
                         string serialized = JsonSerializer.Serialize(latest);
                         if (serialized != configuration)
                         {
-                            configuration = serialized; offer = latest; revision++; dirty = true;
+                            configuration = serialized; offer = latest; revision++; accepted.Clear(); dirty = true;
                         }
                         if (dirty)
                         {
@@ -102,7 +103,7 @@ internal sealed class SteamHostSettings : IDisposable
         }
         catch (Exception ex)
         {
-            settings.SetHostConfiguration(null);
+            Reset();
             if (!reportedError) { reportedError = true; settings.Error("ESB_STEAM", ex); }
         }
     }
@@ -124,7 +125,7 @@ internal sealed class SteamHostSettings : IDisposable
         if (count > 64) throw new InvalidOperationException("Lobby exceeds ESB handshake limit.");
         for (int i = 0; i < count; i++) members.Add(SteamMatchmaking.GetLobbyMemberByIndex(lobby, i).m_SteamID);
         foreach (var peer in peerTokens.Keys.Where(x => !members.Contains(x)).ToArray())
-        { peerTokens.Remove(peer); foreach (var key in lastMessages.Keys.Where(x => x.Peer == peer).ToArray()) lastMessages.Remove(key); }
+        { peerTokens.Remove(peer); accepted.Remove(peer); foreach (var key in lastMessages.Keys.Where(x => x.Peer == peer).ToArray()) lastMessages.Remove(key); }
     }
     private bool CurrentMember(ulong id)
     {
@@ -159,6 +160,7 @@ internal sealed class SteamHostSettings : IDisposable
             {
                 if (message.Kind == "hello")
                 {
+                    if (!peerTokens.TryGetValue(from, out var oldToken) || oldToken != message.ClientToken) accepted.Remove(from);
                     peerTokens[from] = message.ClientToken;
                     SendOffer(from, message.ClientToken);
                 }
@@ -166,6 +168,7 @@ internal sealed class SteamHostSettings : IDisposable
                     peerTokens.TryGetValue(from, out string? token) && token == message.ClientToken &&
                     message.Session == offer.Session && message.Revision == revision)
                 {
+                    accepted[from] = revision;
                     Send(from, new HostSettingsSession.Message { Kind = "ready", ClientToken = token,
                         Session = offer.Session, Revision = revision });
                     // Acknowledgement is retried; do not log every heartbeat.
@@ -200,6 +203,17 @@ internal sealed class SteamHostSettings : IDisposable
         sends.Add(network.SendMessageToPlayerAsync(new CSteamID(peer), new DataSyncMessage
             { Key = Key, Value = HostSettingsSession.Encode(message), DataType = "base64-json" }));
     }
+    internal bool TryClientContext(out string session, out string token)
+    {
+        session = token = "";
+        if (!InstanceFinder.IsClientOnly || client?.Ready != true || !CurrentMember(ownerId)) return false;
+        session = client.Session!; token = client.Hello().ClientToken;
+        return true;
+    }
+    internal bool PeerContextMatches(ulong peer, string session, string token) =>
+        InstanceFinder.IsServer && localId == ownerId && offer != null && offer.Session == session &&
+        accepted.TryGetValue(peer, out long value) && value == revision &&
+        peerTokens.TryGetValue(peer, out var expected) && expected == token && CurrentMember(peer);
     public void Dispose()
     {
         settings.RackChanged -= Changed; settings.BackpackChanged -= Changed;

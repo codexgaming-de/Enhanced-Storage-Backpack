@@ -1,4 +1,4 @@
-# Multiplayer development — 0.2.0-dev.3
+# Multiplayer development — 0.2.0-dev.4
 
 Branch: feature/0.2.0-multiplayer-beta. Stable 0.1.6 remains on main.
 
@@ -223,3 +223,41 @@ a Steam confirmation alone does not establish that earlier vanilla slot updates 
 arrived. Any ordering fence must be validated on the native reliable channel. Cash
 balance movement, quick-move batching, timeout recovery and client UI bindings remain.
 No new solo test or DLL replacement is needed for these currently unconnected classes.
+
+## dev.4 — native reliable-channel probe (NOT playable multiplayer)
+
+Added NativeInventoryChannel and InventoryChannelProbe. This is a diagnostic roundtrip,
+not an item command handler. No inventories, variables, save files or world state are
+changed by the probe. It runs only for clients after the Steam settings handshake.
+At most three requests per handshake context are sent, five seconds apart.
+
+Evidence from inspected Mono implementation:
+- Player.SendValue and Player.SetInventoryItem both use FishNet reliable channel 0.
+- SendValue's server reader lacks an ownership check. We explicitly capture the
+  reader's actual NetworkConnection, compare it with the target player's Owner,
+  then check the Steam-acknowledged peer token and current host session.
+- ReceiveValue's TargetRpc can return a string to the owner. Our reserved key is
+  intercepted before native variable logic; no game variable is created.
+- Native reader context is restored with a Harmony finalizer even after exceptions.
+- Replies require matching build, host session, client token and random probe nonce.
+- Configuration revisions invalidate accepted peer contexts until acknowledged again.
+- Steam transport errors now clear the handshake state instead of leaving it ready.
+
+Expected evidence with TWO real peers:
+ESB_NATIVE_CHANNEL_HOST — authenticated request received and reply sent.
+ESB_NATIVE_CHANNEL_CLIENT — matching reply received by the owning client.
+The absence of these markers in a solo session is expected. Pure tests cannot establish
+that IL2CPP's native reader invokes both detours in the assumed scope. If a detour is
+bypassed, the reserved variable is unknown to vanilla and no ESB item change is made.
+
+16 protocol checks pass (correlation, session/token/build mismatch, bounds, malformed
+messages and non-probe message rejection). Full reference compile has no errors and
+13 CS1701 warnings. This is not a real Steam/FishNet or Unity runtime test.
+
+Outstanding work has NOT been completed by this checkpoint:
+1. Bind validated item requests, native slots, acknowledgements and menu actions.
+2. Implement cash balances, quick-move batches, client timeouts and recovery.
+3. Integrate coupled world-save barrier and disconnected/rejoining player persistence.
+4. Implement storage allocation/compaction replication before native indexed RPCs.
+5. Run actual multi-peer integration tests and prepare the playable community beta.
+The active client inventory gate remains closed. Stable main is untouched.

@@ -26,6 +26,7 @@ public sealed class Mod : MelonMod
     private Backpack? backpack;
     private MultiplayerDiagnostics? multiplayer;
     private SteamHostSettings? steamSettings;
+    private NativeInventoryChannel? nativeChannel;
     private readonly RemoteBackpackSaves remoteSaves = new();
     private bool disabled;
     private bool refreshSettingsUi;
@@ -41,6 +42,7 @@ public sealed class Mod : MelonMod
             backpack = new Backpack(settings);
             multiplayer = new MultiplayerDiagnostics(settings);
             steamSettings = new SteamHostSettings(settings, multiplayer.HostOffer);
+            nativeChannel = new NativeInventoryChannel(settings, steamSettings, HarmonyInstance);
             Patch(typeof(Player), "OnStartClient", postfix: nameof(NetworkPlayerStarted));
             Patch(typeof(Player), "RequestSavePlayer", prefix: nameof(NetworkSaveRequested));
             Patch(typeof(Player), "RpcLogic___RequestSavePlayer_2166136261", prefix: nameof(NetworkSaveReceived));
@@ -66,8 +68,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.3 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.3 | Multiplayer preparation: client inventory remains blocked."));
-            settings.Trace("ESB_READY | 0.2.0-dev.3 | development build, not a playable multiplayer beta");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.4 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.4 | Multiplayer preparation: client inventory remains blocked."));
+            settings.Trace("ESB_READY | 0.2.0-dev.4 | development build, not a playable multiplayer beta");
         }
         catch (Exception ex)
         {
@@ -104,6 +106,7 @@ public sealed class Mod : MelonMod
     public override void OnUpdate()
     {
         steamSettings?.Tick();
+        nativeChannel?.Tick();
         RefreshSettingsUi();
         if (!Active) return;
         backpack?.Tick();
@@ -189,6 +192,7 @@ public sealed class Mod : MelonMod
         instance?.backpack?.Reset();
         instance?.multiplayer?.Reset();
         instance?.steamSettings?.Reset();
+        instance?.nativeChannel?.Reset();
         instance?.remoteSaves.Reset();
     }
     private static void NetworkPlayerStarted(Player __instance)
@@ -332,6 +336,7 @@ public sealed class Mod : MelonMod
     {
         disabled = true;
         HarmonyInstance.UnpatchSelf();
+        nativeChannel?.Dispose();
         steamSettings?.Dispose();
         backpack?.Dispose();
         storage?.Dispose();

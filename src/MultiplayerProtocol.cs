@@ -6,7 +6,7 @@ namespace EnhancedStorageBackpack;
 // Data-only protocol: this does not authorize inventory access or write saves.
 internal static class MultiplayerProtocol
 {
-    internal const string Build = "0.2.0-dev.3";
+    internal const string Build = "0.2.0-dev.4";
     internal const int Version = 1;
     internal const string Key = "EnhancedStorageBackpackNetwork";
     internal const int MaximumOfferCharacters = 8192;
