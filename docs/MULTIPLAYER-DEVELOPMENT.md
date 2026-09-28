@@ -325,3 +325,42 @@ native hotbar replication. Couple those mutations to world-save timing and live
 reconnect state; the game's individual `PlayerManager.SavePlayer` path must not
 silently persist an unsaved backpack/hotbar pair. Then integrate shared-storage
 allocation/compaction ordering and perform host/client community beta tests.
+
+
+## Prepared native transaction boundary (after dev.5 snapshot transport)
+
+`NativeBackpackTransfer.Execute` now connects native slot preparation/commit to
+`HostBackpackState.ApplyNative`. This is an internal host adapter; **the network
+handlers and menu do not call it yet**. The runtime client gate remains closed.
+There is no new public multiplayer release and the development build label remains dev.5.
+
+The adapter refreshes state from trusted native host slots and detects intervening
+vanilla hotbar changes through the revision. A request includes an explicit amount;
+the legacy opaque whole-stack path rejects quantity requests. The native adapter
+continues to enforce item compatibility, capacity, filters and locks for moves,
+partial moves, merges and full swaps. Cash remains unsupported by this adapter.
+
+Prepared results are serialized and cloned before native mutation. Preparation may
+not change container sizes or unrelated slots. While preparation/commit is active,
+reentrant moves, reconnect, disconnect, resizing, reads and save snapshots are
+blocked. A successful native commit advances sequence/revision exactly once. The
+same request can be acknowledged again without another commit; changed amounts
+are not accepted as duplicates.
+
+Native results are compared against the prepared source/target JSON. If a native
+commit or its postcondition fails, the adapter attempts both slot restorations and
+the transaction core quarantines that player's state. Quarantined state cannot be
+read, saved, reconnected or silently refreshed; a game reload creates a new core.
+Preparation failures before the native commit do not quarantine unchanged state.
+These protections apply to users of this core; the game save pipeline has NOT yet
+been wired to its barrier and must not be described as protected by it at runtime.
+
+Validation: full fallback Roslyn compilation against supplied references passed
+with 0 errors and the same 13 CS1701 reference-version warnings. HostBackpackTests
+passed 3,069 assertions (including the existing 1,000-transfer replay loop; this is
+not 3,069 distinct gameplay scenarios). BackpackTransferTests passed 26 scenarios.
+Native commit ordering/failure tests use explicit fake callbacks, not a running
+game. Actual native item metadata/callback behavior and two-peer interaction remain
+unverified. Next work remains the runtime per-player owner/session lifecycle,
+network requests/acknowledgements, UI interception and coupled world-save/rejoin
+integration before allowing client writes.

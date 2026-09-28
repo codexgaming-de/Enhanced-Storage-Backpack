@@ -10,7 +10,7 @@ internal sealed class NativeBackpackTransfer
 {
     private readonly ItemSlot source, target;
     private readonly ItemInstance? oldSource, oldTarget, nextSource, nextTarget;
-    private readonly string? sourceJson, targetJson;
+    private readonly string? sourceJson, targetJson, nextSourceJson, nextTargetJson;
     private bool used;
     internal BackpackTransferRules.Plan Plan { get; }
     private static string? Json(ItemSlot slot) => slot.ItemInstance?.GetItemData().GetJson(false);
@@ -47,6 +47,31 @@ internal sealed class NativeBackpackTransfer
         if (oldSource == null || (destination != null && oldTarget == null) || nextTarget == null ||
             ((Plan.Kind == BackpackTransferRules.Kind.Swap || source.Quantity != Plan.Amount) && nextSource == null))
             throw new InvalidOperationException("Native item copy failed before transfer.");
+        nextSourceJson = nextSource?.GetItemData().GetJson(false);
+        nextTargetJson = nextTarget?.GetItemData().GetJson(false);
+    }
+    // This is the single native commit entry point for a validated host session.
+    // The caller supplies arrays from the authenticated player's native owners.
+    // Wire/menu activation remains gated until save/rejoin integration is complete.
+    internal static HostBackpackState.Outcome Execute(HostBackpackState host, ulong sender,
+        HostBackpackState.Move request, ItemSlot[] inventory, ItemSlot[] backpack)
+    {
+        // A legitimate vanilla change invalidates the previously offered revision.
+        host.RefreshNative(sender, inventory.Select(Json).ToArray(), backpack.Select(Json).ToArray());
+        return host.ApplyNative(sender, request, snapshot =>
+        {
+            var from = request.FromArea == HostBackpackState.Area.Inventory ? inventory : backpack;
+            var to = request.ToArea == HostBackpackState.Area.Inventory ? inventory : backpack;
+            var transfer = new NativeBackpackTransfer(from[request.FromSlot], to[request.ToSlot], request.Amount);
+            if (transfer.Plan.Kind == BackpackTransferRules.Kind.Reject) return null;
+            var nextInventory = snapshot.Inventory;
+            var nextBackpack = snapshot.Backpack;
+            var nextFrom = request.FromArea == HostBackpackState.Area.Inventory ? nextInventory : nextBackpack;
+            var nextTo = request.ToArea == HostBackpackState.Area.Inventory ? nextInventory : nextBackpack;
+            nextFrom[request.FromSlot] = transfer.nextSourceJson;
+            nextTo[request.ToSlot] = transfer.nextTargetJson;
+            return new HostBackpackState.NativeChange(nextInventory, nextBackpack, transfer.Apply);
+        });
     }
     internal void Apply()
     {
@@ -73,6 +98,9 @@ internal sealed class NativeBackpackTransfer
             // protocol is responsible for replicating the completed pair.
             source.SetStoredItem(nextSource!, true);
             target.SetStoredItem(nextTarget!, true);
+            // Native/mod callbacks must not silently produce a different result.
+            if (Json(source) != nextSourceJson || Json(target) != nextTargetJson)
+                throw new InvalidOperationException("Native transfer result differs from the prepared pair.");
         }
         catch (Exception original)
         {
