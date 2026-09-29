@@ -1,3 +1,15 @@
+MULTIPLAYER BETA 0.2.0-beta.1 / EXPERIMENTELL
+
+Diese Beta benötigt dieselbe Version auf Host und allen Clients sowie separat
+SteamNetworkLib 1.6.0 IL2CPP in UserLibs/SteamNetworkLib.dll. Nur eine ESB-DLL in Mods.
+Bitte MULTIPLAYER-BETA.md und BETA-FEEDBACK.md im Archiv lesen. Die nachfolgenden
+Singleplayer-Grundschritte ersetzen nicht die Beta-Abhängigkeit und Beta-Hinweise.
+
+This beta requires the same version on host and all clients, plus separately
+installed SteamNetworkLib 1.6.0 IL2CPP in UserLibs/SteamNetworkLib.dll. One ESB DLL only.
+Read MULTIPLAYER-BETA.md and BETA-FEEDBACK.md first. The singleplayer basics below
+do not replace the beta dependency and limitations above.
+
 Enhanced Storage + Backpack 0.1.6 — CoDeX-Gaming
 
 DEUTSCH

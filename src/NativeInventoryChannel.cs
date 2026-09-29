@@ -11,6 +11,20 @@ namespace EnhancedStorageBackpack;
 // variable creation or item mutation. Authenticated, read-only snapshot preflight.
 internal sealed class NativeInventoryChannel : IDisposable
 {
+    internal const string CommandKey = "codexgaming.esb.backpack-command.v1";
+    internal const string ReplyKey = "codexgaming.esb.backpack-reply.v1";
+    internal Action<Player, BackpackCommand>? CommandReceived;
+    internal Action<InventorySnapshotWire>? ReplyReceived;
+    internal Action<BackpackCommand>? ControlReceived;
+    internal bool ClientReady => complete && steam.TryTransportContext(out _, out _);
+    internal bool ClientContext(out string session, out string token) => steam.TryTransportContext(out session, out token);
+    internal bool PeerReady(Player player) => proofs.TryGetValue(player.Pointer, out var proof) &&
+        ulong.TryParse(player.PlayerCode, out ulong peer) && steam.PeerTransportMatches(peer, proof.Session, proof.Token);
+    internal BackpackCommand Context(Player player, string kind, string nonce)
+    {
+        var proof = proofs[player.Pointer];
+        return new BackpackCommand { Session = proof.Session, Token = proof.Token, Nonce = nonce, Kind = kind };
+    }
     private const string Key = "codexgaming.esb.inventory-channel.v1";
     private static NativeInventoryChannel? current;
     private static (IntPtr Player, NetworkConnection? Connection) reader;
@@ -43,12 +57,24 @@ internal sealed class NativeInventoryChannel : IDisposable
     { reader = __state; return __exception; }
     private static bool ServerValue(Player __instance, string __0, string __1, bool __2)
     {
-        if (__0 != Key && __0 != NativeInventorySnapshots.Key) return true;
+        if (__0 != Key && __0 != NativeInventorySnapshots.Key && __0 != CommandKey) return true;
         // SendValue itself has no ownership requirement. Authenticate the actual
         // reader connection; player codes or a payload sender alone are insufficient.
         if (current == null || !InstanceFinder.IsServer || __2 || reader.Player != __instance.Pointer ||
             reader.Connection == null || __instance.Owner == null ||
             reader.Connection.ClientId != __instance.Owner.ClientId) return false;
+        if (__0 == CommandKey)
+        {
+            try
+            {
+                var command = BackpackCommand.Decode(__1);
+                if (current.PeerReady(__instance) && current.proofs.TryGetValue(__instance.Pointer, out var proof) &&
+                    command.Session == proof.Session && command.Token == proof.Token)
+                    current.CommandReceived?.Invoke(__instance, command);
+            }
+            catch (Exception ex) { current.Report(ex); }
+            return false;
+        }
         if (__0 == Key) current.HandleServer(__instance, __1);
         else current.HandleSnapshot(__instance, __1);
         return false;
@@ -89,10 +115,24 @@ internal sealed class NativeInventoryChannel : IDisposable
     }
     private static bool ClientValue(Player __instance, string __1, string __2)
     {
-        if (__1 != Key && __1 != NativeInventorySnapshots.Key) return true;
+        if (__1 != Key && __1 != NativeInventorySnapshots.Key && __1 != ReplyKey && __1 != CommandKey) return true;
         if (current == null || !InstanceFinder.IsClientOnly || !__instance.IsLocalPlayer) return false;
         try
         {
+            if (__1 == CommandKey)
+            {
+                var control = BackpackCommand.Decode(__2);
+                if (current.complete && current.ClientContext(out string s, out string t) && control.Session == s && control.Token == t)
+                    current.ControlReceived?.Invoke(control);
+                return false;
+            }
+            if (__1 == ReplyKey)
+            {
+                var packet = InventorySnapshotWire.Decode(__2);
+                if (current.complete && current.ClientContext(out string s, out string t) && packet.Session == s && packet.Token == t)
+                    current.ReplyReceived?.Invoke(packet);
+                return false;
+            }
             if (__1 == NativeInventorySnapshots.Key)
             {
                 var packet = InventorySnapshotWire.Decode(__2);
@@ -106,7 +146,7 @@ internal sealed class NativeInventoryChannel : IDisposable
                 reply.Session == session && reply.Token == token)
             {
                 current.complete = true;
-                current.settings.Trace("ESB_NATIVE_CHANNEL_CLIENT | roundtrip confirmed; inventory remains blocked");
+                current.settings.Trace("ESB_NATIVE_CHANNEL_CLIENT | roundtrip confirmed");
             }
         }
         catch (Exception ex) { current.Report(ex); }
@@ -121,7 +161,7 @@ internal sealed class NativeInventoryChannel : IDisposable
         if (InstanceFinder.IsServer) { snapshots.TickHost(SnapshotAuthenticated); return; }
         if (!InstanceFinder.IsClientOnly) { Reset(); return; }
         if (Player.Local == null ||
-            !steam.TryClientContext(out string session, out string token)) { Reset(); return; }
+            !steam.TryTransportContext(out string session, out string token)) { Reset(); return; }
         if (pending == null || pending.Session != session || pending.Token != token)
         {
             Reset(); pending = new InventoryChannelProbe { Session = session, Token = token, Nonce = Guid.NewGuid().ToString("N") };

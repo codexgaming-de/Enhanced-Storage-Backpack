@@ -1,3 +1,36 @@
+# Beta validation — 0.2.0-beta.1, 2026-09-29
+
+The historical 0.1.6 report below applies to the stable singleplayer release only.
+It does not validate the new multiplayer runtime.
+
+| Check | Result |
+| --- | --- |
+| Full source reference compile | Zero errors; 14 CS1701 .NET 6/8 reference warnings |
+| Multiplayer protocol | 862 assertions passed |
+| Host settings handshake | 23 assertions passed |
+| Host backpack core | 3,069 assertions passed, including repeated invariant checks |
+| Remote backpack preservation | 17 assertions passed |
+| Native-independent transfer rules | 26 scenarios passed |
+| Native channel probe protocol | 16 assertions passed |
+| Snapshot chunk/integrity protocol | 47 assertions passed |
+| Remote session journal | 50 assertions passed; isolated filesystem exercised |
+| New command/receipt/cash rules | 51 assertions passed |
+| Beta packager | Six tests passed with simulated build output |
+| Normal SDK/net6.0 build here | Blocked by SDK Process.GetStat/GetStartTime startup exception |
+| Real host/client gameplay | Not performed; community beta validation pending |
+| Native UI, RPC detours, timing, cash replication | Compiled, not executed in-game here |
+| Performance benchmark / process-crash recovery | Not performed |
+
+The reference-check DLL is not packaged or distributed. The release script builds
+net6.0 on the user's PC and records hashes. Packaging tests validate allowlisting,
+manifest and failure paths; their simulated DLL is not a usable mod binary.
+Follow-up: direct MSBuild.dll invocation also fails during process inspection.
+Reset now preserves nested cancellation state; existing foreign storage slots are
+not rejected solely for exceeding ESB’s capacity limit.
+Stable main is kept separate. No claim of bug-free multiplayer or atomic world saves.
+
+---
+
 # Validation — 0.1.6
 
 Updated 27 September 2026. Runtime code baseline:

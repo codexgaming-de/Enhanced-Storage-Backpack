@@ -20,6 +20,7 @@ internal sealed class BackpackMenu
     private int oldCount, page;
 
     public bool IsOpen { get; private set; }
+    internal Func<bool>? InteractionBlocked;
     public BackpackMenu(Settings settings) { this.settings = settings; capacity = new RackMenu(settings); }
 
     public void Open(BackpackOwner inventory)
@@ -38,6 +39,10 @@ internal sealed class BackpackMenu
             Bind();
         }
         catch { Closed(); throw; }
+    }
+    internal void ReplaceOwner(BackpackOwner inventory)
+    {
+        ClearBindings(); owner = inventory; Bind();
     }
     public void Close() { if (IsOpen && menu != null) menu.Close(); Closed(); }
     public void Closed()
@@ -83,7 +88,7 @@ internal sealed class BackpackMenu
     public void LayoutTick() => chrome.Tick();
     private void ChangePage(int direction)
     {
-        if (RackStorage.Dragging || !IsOpen) return;
+        if (RackStorage.Dragging || !IsOpen || InteractionBlocked?.Invoke() == true) return;
         page += direction;
         Bind();
     }

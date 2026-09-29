@@ -210,6 +210,17 @@ internal sealed class SteamHostSettings : IDisposable
         session = client.Session!; token = client.Hello().ClientToken;
         return true;
     }
+    // Preserve authenticated transport identity across a settings re-ack. A
+    // configuration refresh must not strand an inventory operation in flight.
+    internal bool TryTransportContext(out string session, out string token)
+    {
+        session = token = "";
+        if (!InstanceFinder.IsClientOnly || client?.Session == null || !CurrentMember(ownerId)) return false;
+        session = client.Session; token = client.Hello().ClientToken; return true;
+    }
+    internal bool PeerTransportMatches(ulong peer, string session, string token) =>
+        InstanceFinder.IsServer && localId == ownerId && offer?.Session == session &&
+        peerTokens.TryGetValue(peer, out var expected) && expected == token && CurrentMember(peer);
     internal bool PeerContextMatches(ulong peer, string session, string token) =>
         InstanceFinder.IsServer && localId == ownerId && offer != null && offer.Session == session &&
         accepted.TryGetValue(peer, out long value) && value == revision &&

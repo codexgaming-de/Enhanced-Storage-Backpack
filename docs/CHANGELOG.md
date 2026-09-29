@@ -1,3 +1,19 @@
+# 0.2.0-beta.1 — 2026-09-28 (experimental multiplayer)
+
+- Connect client backpack UI to authenticated host move requests and acknowledgements.
+- Prepare native move/split/merge/swap and cash transfers before changing host inventory.
+- Add ordered hotbar receipts, duplicate-response handling and abort recovery.
+- Retain current remote backpack/inventory state in host session memory for rejoin.
+- Save coupled remote state only during regular world saves; gate saves on synchronization.
+- Synchronize all nine storage layouts, items, locks and filters from the host.
+- Freeze client interaction briefly during storage reconfiguration and saves.
+- Keep language, hotkey and logging local; preserve backpack pagination after moves.
+- Add explicit beta packaging, dependency checks and community feedback documentation.
+- Stable singleplayer 0.1.6 remains available separately.
+
+Status: reference compiler and automated algorithm tests passed. Native multiplayer
+and the distributable net6.0 package are not validated in this environment.
+
 # Enhanced Storage + Backpack
 
 ## 0.1.6 — initial public release

@@ -6,6 +6,7 @@ using Il2CppScheduleOne.Persistence;
 using Il2CppScheduleOne.UI;
 using Il2CppScheduleOne.UI.Items;
 using UnityEngine;
+using Il2CppFishNet;
 
 namespace EnhancedStorageBackpack;
 
@@ -48,6 +49,14 @@ internal sealed class RackStorage : IDisposable
         (LoadManager.InstanceExists && LoadManager.Instance.IsLoading) ||
         (SaveManager.InstanceExists && SaveManager.Instance.IsSaving);
 
+    internal Func<bool>? DeferHostChanges;
+    internal bool NeedsApply => pending;
+    internal StorageEntity[] Tracked => racks.Values.Where(r => r.Entity != null && !r.Failed).Select(r => r.Entity).ToArray();
+    internal void ApplyPending()
+    {
+        pending = false;
+        foreach (var rack in racks.Values.ToArray()) Apply(rack);
+    }
     public void Request() => pending = true;
 
     private Rack? Track(StorageEntity entity)
@@ -122,7 +131,7 @@ internal sealed class RackStorage : IDisposable
         Request();
     }
 
-    private static void Grow(StorageEntity entity, int size)
+    internal static void Grow(StorageEntity entity, int size)
     {
         var slots = entity.ItemSlots;
         if (slots.Count >= size) return;
@@ -325,7 +334,7 @@ internal sealed class RackStorage : IDisposable
     {
         try { menu.LayoutTick(); }
         catch (Exception ex) { settings.Error("ESB_STORAGE_LAYOUT", ex); }
-        if (!pending || SaveOrLoadInProgress || Dragging) return;
+        if (InstanceFinder.IsClientOnly || !pending || SaveOrLoadInProgress || Dragging || DeferHostChanges?.Invoke() == true) return;
         pending = false;
         foreach (var rack in racks.Values.ToArray())
         {
@@ -340,11 +349,40 @@ internal sealed class RackStorage : IDisposable
         var rack = Track(entity);
         settings.Trace($"ESB_STORAGE_OPEN | name={entity.StorageEntityName} | supportedRack={rack != null} | slots={entity.ItemSlots.Count}");
         if (rack == null || rack.Failed) return;
-        if (!SaveOrLoadInProgress && !Dragging) Apply(rack);
+        if (!InstanceFinder.IsClientOnly && !SaveOrLoadInProgress && !Dragging && DeferHostChanges?.Invoke() != true) Apply(rack);
         else Request();
         menu.Prepare(entity.ItemSlots.Count);
     }
 
+    internal bool Supports(StorageEntity entity) => Track(entity) != null;
+    internal void ReplicaLayout(StorageEntity entity, int count, int rows)
+    {
+        if (!InstanceFinder.IsClientOnly || count < 1 || count > 128 || rows < 1 || rows > 128) return;
+        var rack = Track(entity);
+        if (rack == null) return;
+        if (menu.IsShowing(entity)) menu.ClearBindings();
+        Grow(entity, count);
+        var slots = entity.ItemSlots;
+        Il2CppSystem.Action contentsChanged = (Il2CppSystem.Action)entity.ContentsChanged;
+        // This is an authoritative full replacement, preceded by a client freeze.
+        // Clear both occupied and empty slots before the native full replication.
+        foreach (var slot in slots) slot.SetStoredItem(null!, true);
+        for (int i = slots.Count - 1; i >= count; i--)
+        {
+            var slot = slots[i];
+            slot.onItemDataChanged -= contentsChanged;
+            var group = slot.SiblingSet;
+            if (group != null)
+                for (int j = group.Slots.Count - 1; j >= 0; j--)
+                    if (group.Slots[j].Pointer == slot.Pointer) group.Slots.RemoveAt(j);
+            slot._SiblingSet_k__BackingField = null!;
+            slot._SlotOwner_k__BackingField = null!;
+            slots.RemoveAt(i);
+        }
+        entity.SlotCount = count; entity.DisplayRowCount = rows;
+        SyncVisualSlots(rack);
+        if (menu.IsShowing(entity)) menu.Bind(entity, true);
+    }
     public void AfterOpen(StorageEntity entity)
     {
         if (racks.TryGetValue(entity.Pointer, out var rack) && !rack.Failed) menu.Bind(entity, true);

@@ -12,6 +12,7 @@ internal sealed class NativeBackpackTransfer
     private readonly ItemInstance? oldSource, oldTarget, nextSource, nextTarget;
     private readonly string? sourceJson, targetJson, nextSourceJson, nextTargetJson;
     private bool used;
+    private readonly bool cash;
     internal BackpackTransferRules.Plan Plan { get; }
     private static string? Json(ItemSlot slot) => slot.ItemInstance?.GetItemData().GetJson(false);
     private static BackpackTransferRules.Slot Describe(ItemSlot slot) => new(
@@ -19,13 +20,34 @@ internal sealed class NativeBackpackTransfer
     private static bool Unsupported(ItemSlot slot) => slot.SiblingSet != null || slot.TryCast<CashSlot>() != null ||
         slot.ItemInstance?.TryCast<CashInstance>() != null;
 
-    internal NativeBackpackTransfer(ItemSlot source, ItemSlot target, int amount)
+    internal NativeBackpackTransfer(ItemSlot source, ItemSlot target, int amount, float cashAmount = 0, bool sourceWallet = false, bool targetWallet = false)
     {
         this.source = source; this.target = target;
         sourceJson = Json(source); targetJson = Json(target);
         var item = source.ItemInstance;
         var destination = target.ItemInstance;
-        bool unsupported = Unsupported(source) || Unsupported(target);
+        if (cashAmount > 0)
+        {
+            cash = true; Plan = new(BackpackTransferRules.Kind.Reject);
+            var fromCash = item?.TryCast<CashInstance>();
+            var toCash = destination?.TryCast<CashInstance>();
+            if (fromCash == null || (destination != null && toCash == null) || source.Pointer == target.Pointer ||
+                source.SiblingSet != null || target.SiblingSet != null || source.IsLocked || source.IsRemovalLocked ||
+                target.IsLocked || target.IsAddLocked || !target.DoesItemMatchHardFilters(item!) || !target.DoesItemMatchPlayerFilters(item!)) return;
+            float available = fromCash.Balance, balance = toCash?.Balance ?? 0;
+            float moved = CashTransferRules.Amount(available, balance, cashAmount, targetWallet);
+            if (moved <= 0) return;
+            oldSource = item!.GetCopy(); oldTarget = destination?.GetCopy();
+            var remainder = oldSource.GetCopy().Cast<CashInstance>(); remainder.SetBalance(available - moved);
+            var addition = (destination ?? item).GetCopy().Cast<CashInstance>(); addition.SetBalance(balance + moved);
+            nextSource = remainder.Balance <= 0 && !sourceWallet ? null : remainder;
+            nextTarget = addition;
+            nextSourceJson = nextSource?.GetItemData().GetJson(false);
+            nextTargetJson = nextTarget.GetItemData().GetJson(false);
+            Plan = new(destination == null ? BackpackTransferRules.Kind.Move : BackpackTransferRules.Kind.Merge, 1);
+            return;
+        }
+        bool unsupported = sourceWallet || targetWallet || Unsupported(source) || Unsupported(target);
         bool targetAccepts = !unsupported && item != null && target.DoesItemMatchHardFilters(item) && target.DoesItemMatchPlayerFilters(item);
         bool sourceAccepts = !unsupported && destination != null && source.DoesItemMatchHardFilters(destination) && source.DoesItemMatchPlayerFilters(destination);
         bool stack = item != null && destination != null && destination.CanStackWith(item, false);
@@ -73,6 +95,8 @@ internal sealed class NativeBackpackTransfer
             return new HostBackpackState.NativeChange(nextInventory, nextBackpack, transfer.Apply);
         });
     }
+    internal string? NextSource => nextSourceJson;
+    internal string? NextTarget => nextTargetJson;
     internal void Apply()
     {
         if (used || Plan.Kind == BackpackTransferRules.Kind.Reject)
@@ -80,7 +104,7 @@ internal sealed class NativeBackpackTransfer
         // Reject intervening vanilla changes or new locks, even on the same frame.
         if (Json(source) != sourceJson || Json(target) != targetJson || source.IsLocked ||
             source.IsRemovalLocked || target.IsLocked || target.IsAddLocked ||
-            Unsupported(source) || Unsupported(target) ||
+            (!cash && (Unsupported(source) || Unsupported(target))) ||
             (Plan.Kind == BackpackTransferRules.Kind.Swap && (source.IsAddLocked || target.IsRemovalLocked)))
             throw new InvalidOperationException("Native slots changed before transfer.");
         if (nextTarget != null && (!target.DoesItemMatchHardFilters(nextTarget) || !target.DoesItemMatchPlayerFilters(nextTarget)))
@@ -88,7 +112,7 @@ internal sealed class NativeBackpackTransfer
         if (Plan.Kind == BackpackTransferRules.Kind.Swap && nextSource != null &&
             (!source.DoesItemMatchHardFilters(nextSource) || !source.DoesItemMatchPlayerFilters(nextSource)))
             throw new InvalidOperationException("Source filter changed before swap.");
-        if (Plan.Kind != BackpackTransferRules.Kind.Swap &&
+        if (!cash && Plan.Kind != BackpackTransferRules.Kind.Swap &&
             target.GetCapacityForItem(source.ItemInstance, true) < Plan.Amount)
             throw new InvalidOperationException("Destination capacity changed before transfer.");
         used = true;

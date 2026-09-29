@@ -24,6 +24,11 @@ internal sealed class RemoteBackpackSaves
         }
         payloads.Add(player, payload);
     }
+    internal void UpdateLive(string player, string?[] items)
+    {
+        if (!payloads.ContainsKey(player)) throw new InvalidOperationException("Unknown remote owner.");
+        payloads[player] = BackpackSave.Encode(items);
+    }
     internal string Preserve(string player, string currentInventory)
     {
         if (!payloads.TryGetValue(player, out string? payload))

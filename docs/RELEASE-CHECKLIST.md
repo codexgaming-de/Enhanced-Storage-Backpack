@@ -1,3 +1,8 @@
+> Historical stable singleplayer 0.1.6 material below.
+> For the additional 0.2.0-beta.1 multiplayer upload use MULTIPLAYER-BETA.md,
+> BETA-FEEDBACK.md and the current CHANGELOG.md. Do not replace the stable file.
+> Mark the additional download experimental; native two-peer validation is pending.
+
 # Nexus release checklist — 0.1.6
 
 ## Prepared

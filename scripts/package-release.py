@@ -14,15 +14,23 @@ from zipfile import ZipFile, ZIP_DEFLATED
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--game-directory', required=True)
+    parser.add_argument('--beta', action='store_true', help='Explicitly package an experimental multiplayer beta')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     game = Path(args.game_directory).expanduser().resolve()
     project = root / 'EnhancedStorageBackpack.csproj'
     xml = ET.parse(project).getroot()
     version = xml.findtext('.//Version')
-    if xml.findtext('.//TargetFramework') != 'net6.0' or not re.fullmatch(r'\d+\.\d+\.\d+', version or ''):
+    pattern = r'\d+\.\d+\.\d+-beta\.\d+' if args.beta else r'\d+\.\d+\.\d+'
+    if xml.findtext('.//TargetFramework') != 'net6.0' or not re.fullmatch(pattern, version or ''):
         raise RuntimeError('Unexpected release version or target framework.')
-    for ref in ('MelonLoader/net6/MelonLoader.dll', 'MelonLoader/Il2CppAssemblies/Assembly-CSharp.dll'):
+    protocol = (root / 'src/MultiplayerProtocol.cs').read_text()
+    if f'Build = "{version}"' not in protocol:
+        raise RuntimeError('Project and multiplayer protocol versions differ.')
+    refs = ['MelonLoader/net6/MelonLoader.dll', 'MelonLoader/Il2CppAssemblies/Assembly-CSharp.dll']
+    if args.beta:
+        refs.append('UserLibs/SteamNetworkLib.dll')
+    for ref in refs:
         if not (game / ref).is_file():
             raise RuntimeError(f'Missing build reference: {game / ref}')
     output = root / 'dist'
@@ -45,7 +53,13 @@ def main():
             'CHANGELOG.md': (root / 'docs/CHANGELOG.md').read_bytes(),
             'PERMISSIONS.md': (root / 'PERMISSIONS.md').read_bytes(),
         }
+        if args.beta:
+            for name in ('MULTIPLAYER-BETA.md', 'BETA-FEEDBACK.md'):
+                files[name] = (root / 'docs' / name).read_bytes()
         manifest = {'version': version, 'targetFramework': 'net6.0',
+                    'channel': 'experimental-multiplayer-beta' if args.beta else 'stable',
+                    'nativeMultiplayerTested': False if args.beta else None,
+                    'externalDependencies': ['SteamNetworkLib 1.6.0 IL2CPP (UserLibs)'] if args.beta else [],
                     'files': {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}}
         files['manifest.json'] = (json.dumps(manifest, indent=2) + '\n').encode()
         packed = staging / archive.name

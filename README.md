@@ -1,22 +1,18 @@
-> **Development branch — 0.2.0-dev.6. Not a playable multiplayer beta.**
-> SteamNetworkLib 1.6.0 IL2CPP, a bidirectional version handshake and session-only host settings are implemented.
-> Install the dependency separately in `UserLibs/SteamNetworkLib.dll` before building/running this development branch.
-> Read-only host inventory snapshots now use authenticated native RPCs, bounded chunks and integrity checks.
-> Authenticated remote players now have a host session journal for world-save-only persistence and live reconnect data.
-> Client backpack access remains blocked pending transaction requests, acknowledgements and UI integration.
-> Stable singleplayer release: 0.1.6 on `main`.
-> See [multiplayer development and testing](docs/MULTIPLAYER-DEVELOPMENT.md).
+> **Experimental multiplayer beta — 0.2.0-beta.1.**
+> Runtime integration is implemented; real two-peer gameplay has not yet been validated.
+> Host and clients require the identical beta and SteamNetworkLib 1.6.0 IL2CPP in `UserLibs`.
+> Stable singleplayer 0.1.6 remains on `main` and a separate Nexus download.
+> Read [beta installation and limitations](docs/MULTIPLAYER-BETA.md) and
+> [community feedback](docs/BETA-FEEDBACK.md).
 
 # Enhanced Storage + Backpack
 
-Singleplayer-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
+Storage- und Backpack-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Stand: 0.1.6, normale Spieltests bestanden; Release-Paket in Vorbereitung.**
-Bestätigt sind Speichern/Laden über Hauptmenü und vollständigen Neustart,
-ungespeicherte Bewegungen ohne Duplikate, getrennte Spielstände A → B → A
-und Polizeidurchsuchungen. Zusätzlich auf dem Hauptspielstand getestet.
-Die Prüfung des tatsächlich verpackten Builds steht noch aus.
+**Dieser Branch: 0.2.0-beta.1.** Die früher bestätigten Singleplayer-Tests von
+0.1.6 ersetzen keine Multiplayer-Prüfung dieser Beta. Die Host-/Client-Laufzeitprüfung
+übernimmt wie vereinbart die Community-Beta; bekannte Grenzen stehen in der Beta-Anleitung.
 
 ## Funktionen
 
@@ -42,7 +38,7 @@ Die Prüfung des tatsächlich verpackten Builds steht noch aus.
 
 Die sichtbare Gegenstandsdarstellung eines Regals ist durch dessen Stellfläche
 begrenzt; 128 Plätze bedeuten nicht 128 gleichzeitig sichtbare Gegenstandsmodelle.
-Multiplayer und die Mono-Version des Spiels werden nicht unterstützt.
+Multiplayer ist auf diesem Branch experimentell. Mono wird nicht unterstützt.
 
 ## Speichern und Laden
 
@@ -68,13 +64,13 @@ Spiel zuerst beenden, dann auf dem bisherigen Projektbranch:
 
 ```bash
 cd /home/codex/Enhanced-Storage-Backpack &&
-git pull --ff-only origin feature/0.1.0-backpack &&
+git pull --ff-only origin feature/0.2.0-multiplayer-beta &&
 dotnet build -c Release -p:GameDirectory="/home/codex/Schreibtisch/Schedulue 1 Plugins/" &&
 cp bin/Release/net6.0/EnhancedStorageBackpack.dll \
    "/home/codex/Schreibtisch/Schedulue 1 Plugins/Mods/"
 ```
 
-Bei einem neuen Checkout zuerst den Branch `feature/0.1.0-backpack` auswählen.
+Bei einem neuen Checkout zuerst den Branch `feature/0.2.0-multiplayer-beta` auswählen.
 Spiele- und Loader-DLLs werden nur lokal referenziert und nicht mitgeliefert.
 Alternative Buildparameter: `MelonLoaderDirectory`, `GameAssembliesDirectory`.
 Eine einzige Version der Mod-DLL im Ordner `Mods` verwenden.
@@ -112,7 +108,7 @@ dotnet run --project tests/DiagnosticLogTests.csproj -c Release
 ## Release-Paket erstellen
 
 ```bash
-python3 scripts/package-release.py --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
+python3 scripts/package-release.py --beta --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
 ```
 
 Erstellt nach erfolgreichem frischem Release-Build ein geprüftes ZIP und eine
@@ -126,3 +122,19 @@ Siehe [Release-Checkliste](docs/RELEASE-CHECKLIST.md).
 Es gilt die [12-Monats-Regel von CoDeX-Gaming](PERMISSIONS.md). Maßgeblich ist
 das letzte veröffentlichte Mod-Update, nicht der letzte GitHub-Commit.
 GitHubs Plattformrechte zum Ansehen und Forken bleiben unberührt.
+
+## Multiplayer-Beta paketieren
+
+Mit beendetem Spiel und installierter IL2CPP-Abhängigkeit:
+
+```bash
+python3 scripts/package-release.py --beta --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
+```
+
+Ergebnis: `dist/Enhanced-Storage-Backpack-0.2.0-beta.1.zip` und SHA-256-Datei.
+Der Packager baut net6.0 neu, kopiert nur freigegebene Moddateien und legt die
+Beta-Anleitung/Rückmeldevorlage bei. Keine Spiel- oder SteamNetworkLib-DLL wird
+mitgeliefert. Vorhandene Archive werden nicht überschrieben.
+
+Neue Befehls-/Receipt-/Geldprüfungen: `dotnet run --project tests/BackpackCommandTests.csproj`.
+Weitere Multiplayer-Prüfprojekte stehen unter `tests`; sie simulieren keine nativen Peers.

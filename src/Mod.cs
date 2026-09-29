@@ -28,6 +28,7 @@ public sealed class Mod : MelonMod
     private SteamHostSettings? steamSettings;
     private NativeInventoryChannel? nativeChannel;
     private NativeRemotePlayerJournal? remoteJournal;
+    private RemoteBackpackRuntime? remoteBackpack;
     private readonly RemoteBackpackSaves remoteSaves = new();
     private bool disabled;
     private bool refreshSettingsUi;
@@ -45,6 +46,11 @@ public sealed class Mod : MelonMod
             steamSettings = new SteamHostSettings(settings, multiplayer.HostOffer);
             remoteJournal = new NativeRemotePlayerJournal(settings, p => PreserveRemoteInventory(p, NativeRemotePlayerJournal.ReadNativeInventory(p)), HarmonyInstance);
             nativeChannel = new NativeInventoryChannel(settings, steamSettings, HarmonyInstance, ReadRemoteSnapshot);
+            remoteBackpack = new RemoteBackpackRuntime(settings, nativeChannel, storage, HarmonyInstance, ReadRemoteSnapshot, (p, items) =>
+            {
+                remoteSaves.UpdateLive(p.PlayerCode, items);
+                remoteJournal.Admit(p, PreserveRemoteInventory(p, NativeRemotePlayerJournal.ReadNativeInventory(p)));
+            });
             Patch(typeof(Player), "OnStartClient", postfix: nameof(NetworkPlayerStarted));
             Patch(typeof(Player), "RequestSavePlayer", prefix: nameof(NetworkSaveRequested));
             Patch(typeof(Player), "RpcLogic___RequestSavePlayer_2166136261", prefix: nameof(NetworkSaveReceived));
@@ -70,8 +76,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-dev.6 | Multiplayer-Vorbereitung: Client-Inventar noch gesperrt.", "ESB_READY | 0.2.0-dev.6 | Multiplayer preparation: client inventory remains blocked."));
-            settings.Trace("ESB_READY | 0.2.0-dev.6 | development build, not a playable multiplayer beta");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-beta.1 | Experimentelle Multiplayer-Beta.", "ESB_READY | 0.2.0-beta.1 | Experimental multiplayer beta."));
+            settings.Trace("ESB_READY | 0.2.0-beta.1 | experimental; native multiplayer validation pending");
         }
         catch (Exception ex)
         {
@@ -88,7 +94,7 @@ public sealed class Mod : MelonMod
 
     private static void VisualizerStarted() => Run(storage => storage.Request());
 
-    private static bool Active => instance != null && !instance.disabled && !InstanceFinder.IsClientOnly;
+    private static bool Active => instance != null && !instance.disabled;
 
     // Runtime UI/storage failures must not bypass inventory persistence. Keep
     // reading/writing the backpack snapshot even when interactive updates stop.
@@ -107,11 +113,13 @@ public sealed class Mod : MelonMod
 
     public override void OnUpdate()
     {
+        if (disabled) { RefreshSettingsUi(); return; }
         steamSettings?.Tick();
         nativeChannel?.Tick();
+        remoteBackpack?.Tick();
         RefreshSettingsUi();
         if (!Active) return;
-        backpack?.Tick();
+        if (!InstanceFinder.IsClientOnly) backpack?.Tick();
         try { storage!.Tick(); }
         catch (Exception ex) { disabled = true; settings!.Error("ESB_UPDATE_DISABLED", ex); }
     }
@@ -182,15 +190,27 @@ public sealed class Mod : MelonMod
     private static void Placed(PlaceableStorageEntity __instance) => Run(s => s.Started(__instance.StorageEntity));
     private static void Destroyed(StorageEntity __instance) => Run(s => s.Removed(__instance));
     private static void ContentsChanged(StorageEntity __instance) => Run(s => s.ContentsChanged(__instance));
-    private static void Opening(StorageEntity __0) => Run(s => s.BeforeOpen(__0));
-    private static void Opened(StorageEntity __0) => Run(s => s.AfterOpen(__0));
+    private static bool Opening(StorageEntity __0)
+    {
+        if (InstanceFinder.IsClientOnly && instance?.storage?.Supports(__0) == true &&
+            instance.remoteBackpack?.CanOpenStorage(__0) != true) return false;
+        Run(s => s.BeforeOpen(__0)); return true;
+    }
+    private static void Opened(StorageEntity __0)
+    {
+        if (InstanceFinder.IsClientOnly && instance?.storage?.Supports(__0) == true &&
+            instance.remoteBackpack?.CanOpenStorage(__0) != true) return;
+        Run(s => s.AfterOpen(__0));
+    }
     private static void Closed()
     {
         instance?.backpack?.Closed();
+        instance?.remoteBackpack?.Closed();
         Run(s => s.Closed());
     }
     private static void GameStarting()
     {
+        instance?.remoteBackpack?.Reset();
         instance?.backpack?.Reset();
         instance?.multiplayer?.Reset();
         instance?.steamSettings?.Reset();
@@ -352,6 +372,7 @@ public sealed class Mod : MelonMod
     {
         disabled = true;
         HarmonyInstance.UnpatchSelf();
+        remoteBackpack?.Dispose();
         nativeChannel?.Dispose();
         remoteJournal?.Dispose();
         steamSettings?.Dispose();
