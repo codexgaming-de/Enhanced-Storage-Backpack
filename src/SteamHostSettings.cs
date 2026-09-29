@@ -30,6 +30,8 @@ internal sealed class SteamHostSettings : IDisposable
     private long revision;
     private float nextInit, nextPoll;
     private bool dirty = true, reportedError, reportedWaiting;
+    private float nextTrace;
+    private long sentMessages, receivedMessages, completedSends, refusedSends, failedSends;
 
     internal SteamHostSettings(Settings settings, Func<MultiplayerProtocol.Offer> getOffer)
     {
@@ -72,6 +74,9 @@ internal sealed class SteamHostSettings : IDisposable
                 if (sends[i].IsCompleted)
                 {
                     var completed = sends[i]; sends.RemoveAt(i);
+                    if (completed.IsFaulted) failedSends++;
+                    else if (completed.IsCanceled || !completed.Result) refusedSends++;
+                    else completedSends++;
                     if (completed.IsFaulted) { _ = completed.Exception; settings.Trace("ESB_STEAM_SEND | failed; retry on next handshake"); }
                     else if (!completed.IsCanceled && !completed.Result) settings.Trace("ESB_STEAM_SEND | refused; retry on next handshake");
                 }
@@ -79,6 +84,7 @@ internal sealed class SteamHostSettings : IDisposable
             {
                 nextPoll = now + 2;
                 RefreshLobby();
+                TraceHandshake(now);
                 if (lobbyId != 0)
                 {
                     if (localId == ownerId && InstanceFinder.IsServer)
@@ -105,6 +111,25 @@ internal sealed class SteamHostSettings : IDisposable
         {
             Reset();
             if (!reportedError) { reportedError = true; settings.Error("ESB_STEAM", ex); }
+        }
+    }
+    // Temporary beta probe: once per 15 seconds, only in the dedicated debug log.
+    // No Steam IDs, tokens, inventory contents or save paths are recorded.
+    private void TraceHandshake(float now)
+    {
+        if (!settings.DebugLogging.Value || now < nextTrace) return;
+        nextTrace = now + 15;
+        try
+        {
+            bool exists = Lobby.InstanceExists;
+            bool inLobby = exists && Lobby.Instance.IsInLobby;
+            bool rawIdPresent = exists && Lobby.Instance.LobbyID != 0;
+            settings.Trace($"ESB_HANDSHAKE_TRACE_V1 | lobbyExists={exists} | inLobby={inLobby} | rawLobbyId={rawIdPresent} | lobbyId={lobbyId != 0} | ownerId={ownerId != 0} | localId={localId != 0} | localIsOwner={localId != 0 && localId == ownerId} | server={InstanceFinder.IsServer} | clientOnly={InstanceFinder.IsClientOnly} | members={members.Count} | clientSession={client != null} | ready={client?.Ready == true} | peerTokens={peerTokens.Count} | accepted={accepted.Count} | revision={revision} | sent={sentMessages} | received={receivedMessages} | completed={completedSends} | refused={refusedSends} | failed={failedSends} | pending={sends.Count}");
+        }
+        catch (Exception ex)
+        {
+            // A diagnostic probe must not reset or interrupt a live handshake.
+            settings.Trace("ESB_HANDSHAKE_TRACE_V1 | probe-error=" + ex.GetType().Name);
         }
     }
     private void RefreshLobby()
@@ -146,6 +171,7 @@ internal sealed class SteamHostSettings : IDisposable
     private void Received(object? sender, P2PMessageReceivedEventArgs e)
     {
         if (e.Channel != Channel || e.Message is not DataSyncMessage data || data.Key != Key) return;
+        receivedMessages++;
         try
         {
             ulong from = e.SenderId.m_SteamID;
@@ -202,6 +228,7 @@ internal sealed class SteamHostSettings : IDisposable
         if (sends.Count >= 64 || !CurrentMember(peer)) return;
         sends.Add(network.SendMessageToPlayerAsync(new CSteamID(peer), new DataSyncMessage
             { Key = Key, Value = HostSettingsSession.Encode(message), DataType = "base64-json" }));
+        sentMessages++;
     }
     internal bool TryClientContext(out string session, out string token)
     {
