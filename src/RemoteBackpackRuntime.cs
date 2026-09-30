@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using HarmonyLib;
 using Il2CppFishNet;
+using Il2CppFishNet.Connection;
+using Il2CppFishNet.Serializing;
 using Il2CppScheduleOne.ItemFramework;
 using Il2CppScheduleOne.Persistence;
 using Il2CppScheduleOne.PlayerScripts;
@@ -74,8 +76,8 @@ internal sealed class RemoteBackpackRuntime : IDisposable
         settings.BackpackChanged += ConfigurationChanged;
         channel.CommandReceived = Receive; channel.ReplyReceived = Reply; channel.ControlReceived = Control;
         storageSync = new NativeStorageSync(storage, channel, harmony);
-        harmony.Patch(AccessTools.Method(typeof(Player), "RpcLogic___SetInventoryItem_2317364410"),
-            prefix: new HarmonyMethod(typeof(RemoteBackpackRuntime), nameof(NativeReceipt)));
+        harmony.Patch(AccessTools.Method(typeof(Player), "RpcReader___Server_SetInventoryItem_2317364410"),
+            prefix: new HarmonyMethod(typeof(RemoteBackpackRuntime), nameof(NativeReceiptReader)));
         foreach (string method in new[] { "SetInventoryItem", "RpcWriter___Server_SetInventoryItem_2317364410" })
             harmony.Patch(AccessTools.Method(typeof(Player), method), prefix: new HarmonyMethod(typeof(RemoteBackpackRuntime), nameof(EmitInventory)));
         harmony.Patch(AccessTools.Method(typeof(ItemUIManager), "SlotClicked"), prefix: new HarmonyMethod(typeof(RemoteBackpackRuntime), nameof(Click)));
@@ -178,6 +180,7 @@ internal sealed class RemoteBackpackRuntime : IDisposable
         peer.Receipts = new NativeMoveReceipts(peer.Before, peer.After);
         peer.Moved = transfer.Plan.Amount;
         peer.Transfer = transfer; peer.Deadline = Time.realtimeSinceStartup + 25;
+        settings.Trace($"ESB_REMOTE_MOVE_PLAN | changedSlots={peer.Receipts.Indices.Length}");
         Send(peer, command, "plan");
     }
     private void Resize(Peer peer)
@@ -248,10 +251,42 @@ internal sealed class RemoteBackpackRuntime : IDisposable
     }
     private void Abort(Peer peer)
     {
+        settings.Trace("ESB_REMOTE_MOVE_ABORT | restoring host inventory state");
         peer.Transfer = null; peer.Recovering = true;
         // Host slots were not changed: return an authoritative recovery snapshot.
         peer.Core.RefreshNative(ulong.Parse(peer.Player.PlayerCode), Inventory(peer.Player).Select(Json).ToArray(), Slots(peer.Owner).Select(Json).ToArray());
         Send(peer, BackpackCommand.Decode(peer.Request), "abort");
+    }
+    private static bool NativeReceiptReader(Player __instance, PooledReader __0, NetworkConnection __2)
+    {
+        var self = current;
+        if (self == null || !InstanceFinder.IsServer || __instance.IsLocalPlayer ||
+            !self.peers.TryGetValue(__instance.PlayerCode, out var peer) || peer.Player.Pointer != __instance.Pointer)
+            return true;
+        // Preserve the game's ownership checks before reading or applying a receipt.
+        if (!__instance.IsServerInitialized || __2 == null || !__instance.OwnerMatches(__2) || __2.IsLocalClient)
+            return false;
+        if (peer.Faulted) return false;
+        if (peer.Transfer == null && !peer.Recovering) return true;
+        int position = __0.Position;
+        try
+        {
+            int index = __0.ReadInt32();
+            if (peer.Receipts?.Contains(index) != true)
+            { __0.Position = position; return true; }
+            if (peer.Recovering) return false;
+            var item = ItemSerializers.ReadItemInstance(__0);
+            self.settings.Trace("ESB_REMOTE_MOVE_RECEIPT | authenticated owner update received");
+            NativeReceipt(__instance, index, item);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            peer.Faulted = true;
+            self.settings.Error("ESB_REMOTE_RECEIPT_FAULT", ex);
+            SaveManager.ReportSaveError();
+            return false;
+        }
     }
     private static bool NativeReceipt(Player __instance, int __0, ItemInstance __1)
     {
