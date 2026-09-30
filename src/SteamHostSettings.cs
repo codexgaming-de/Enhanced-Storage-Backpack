@@ -124,7 +124,7 @@ internal sealed class SteamHostSettings : IDisposable
             bool exists = Lobby.InstanceExists;
             bool inLobby = exists && Lobby.Instance.IsInLobby;
             bool rawIdPresent = exists && Lobby.Instance.LobbyID != 0;
-            settings.Trace($"ESB_HANDSHAKE_TRACE_V1 | lobbyExists={exists} | inLobby={inLobby} | rawLobbyId={rawIdPresent} | lobbyId={lobbyId != 0} | ownerId={ownerId != 0} | localId={localId != 0} | localIsOwner={localId != 0 && localId == ownerId} | server={InstanceFinder.IsServer} | clientOnly={InstanceFinder.IsClientOnly} | members={members.Count} | clientSession={client != null} | ready={client?.Ready == true} | peerTokens={peerTokens.Count} | accepted={accepted.Count} | revision={revision} | sent={sentMessages} | received={receivedMessages} | completed={completedSends} | refused={refusedSends} | failed={failedSends} | pending={sends.Count}");
+            settings.Trace($"ESB_HANDSHAKE_TRACE_V1 | lobbyExists={exists} | inLobby={inLobby} | rawLobbyId={rawIdPresent} | serviceLobbyId={CurrentSteamLobbyId() != 0} | lobbyId={lobbyId != 0} | ownerId={ownerId != 0} | localId={localId != 0} | localIsOwner={localId != 0 && localId == ownerId} | server={InstanceFinder.IsServer} | clientOnly={InstanceFinder.IsClientOnly} | members={members.Count} | clientSession={client != null} | ready={client?.Ready == true} | peerTokens={peerTokens.Count} | accepted={accepted.Count} | revision={revision} | sent={sentMessages} | received={receivedMessages} | completed={completedSends} | refused={refusedSends} | failed={failedSends} | pending={sends.Count}");
         }
         catch (Exception ex)
         {
@@ -132,9 +132,17 @@ internal sealed class SteamHostSettings : IDisposable
             settings.Trace("ESB_HANDSHAKE_TRACE_V1 | probe-error=" + ex.GetType().Name);
         }
     }
+    private static ulong CurrentSteamLobbyId()
+    {
+        // Lobby.LobbyID is an unpopulated legacy property in the current game.
+        // The active Steam service owns the ID and clears it when leaving.
+        if (!Lobby.InstanceExists || !Lobby.Instance.IsInLobby) return 0;
+        var service = Lobby.Instance._lobbyService?.TryCast<SteamLobbyService>();
+        return service != null && service.IsInLobby ? service._lobbyID : 0;
+    }
     private void RefreshLobby()
     {
-        ulong id = Lobby.InstanceExists && Lobby.Instance.IsInLobby ? Lobby.Instance.LobbyID : 0;
+        ulong id = CurrentSteamLobbyId();
         ulong owner = id == 0 ? 0 : SteamMatchmaking.GetLobbyOwner(new CSteamID(id)).m_SteamID;
         ulong local = network.LocalPlayerId64;
         if (id != lobbyId || owner != ownerId || local != localId)
@@ -154,7 +162,7 @@ internal sealed class SteamHostSettings : IDisposable
     }
     private bool CurrentMember(ulong id)
     {
-        if (lobbyId == 0 || !Lobby.InstanceExists || !Lobby.Instance.IsInLobby || Lobby.Instance.LobbyID != lobbyId) return false;
+        if (lobbyId == 0 || CurrentSteamLobbyId() != lobbyId) return false;
         var lobby = new CSteamID(lobbyId);
         if (SteamMatchmaking.GetLobbyOwner(lobby).m_SteamID != ownerId) return false;
         int count = SteamMatchmaking.GetNumLobbyMembers(lobby);
