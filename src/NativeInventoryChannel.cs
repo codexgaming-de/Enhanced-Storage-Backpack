@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Il2CppFishNet;
 using Il2CppFishNet.Connection;
+using Il2CppFishNet.Serializing;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 using UnityEngine;
@@ -47,14 +48,27 @@ internal sealed class NativeInventoryChannel : IDisposable
             finalizer: new HarmonyMethod(typeof(NativeInventoryChannel), nameof(ReaderFinished)));
         harmony.Patch(AccessTools.Method(typeof(Player), "RpcLogic___SendValue_3589193952"),
             prefix: new HarmonyMethod(typeof(NativeInventoryChannel), nameof(ServerValue)));
-        harmony.Patch(AccessTools.Method(typeof(Player), "RpcLogic___ReceiveValue_3895153758"),
-            prefix: new HarmonyMethod(typeof(NativeInventoryChannel), nameof(ClientValue)));
         harmony.Patch(AccessTools.Method(typeof(Player), "RpcReader___Target_ReceiveValue_3895153758"),
             prefix: new HarmonyMethod(typeof(NativeInventoryChannel), nameof(ClientReaderStarting)));
     }
-    private static void ClientReaderStarting(Player __instance)
+    private static bool ClientReaderStarting(Player __instance, PooledReader __0)
     {
-        current?.TraceReceive($"stage=reader | clientInitialized={__instance.IsClientInitialized} | local={__instance.IsLocalPlayer} | clientOnly={InstanceFinder.IsClientOnly}");
+        // The native reader is reached, while the generated RpcLogic hook is
+        // bypassed in the tested IL2CPP build. Dispatch our keys here exactly once.
+        // Restore the cursor before handing any unrelated message to the game.
+        int position = __0.Position;
+        string key;
+        try { key = __0.ReadString(); }
+        catch { __0.Position = position; return true; }
+        if (key != Key && key != NativeInventorySnapshots.Key && key != ReplyKey && key != CommandKey)
+        { __0.Position = position; return true; }
+        try
+        {
+            string value = __0.ReadString();
+            if (__instance.IsClientInitialized) ClientValue(__instance, key, value);
+        }
+        catch (Exception ex) { current?.Report(ex); }
+        return false;
     }
     private void TraceReceive(string detail)
     {
