@@ -37,6 +37,7 @@ internal sealed class NativeInventoryChannel : IDisposable
     private float next;
     private int attempts;
     private bool complete, reported;
+    private int receiveTraces;
     internal NativeInventoryChannel(Settings settings, SteamHostSettings steam, HarmonyLib.Harmony harmony, Func<Player, string> readSnapshot)
     {
         this.settings = settings; this.steam = steam; current = this;
@@ -48,6 +49,18 @@ internal sealed class NativeInventoryChannel : IDisposable
             prefix: new HarmonyMethod(typeof(NativeInventoryChannel), nameof(ServerValue)));
         harmony.Patch(AccessTools.Method(typeof(Player), "RpcLogic___ReceiveValue_3895153758"),
             prefix: new HarmonyMethod(typeof(NativeInventoryChannel), nameof(ClientValue)));
+        harmony.Patch(AccessTools.Method(typeof(Player), "RpcReader___Target_ReceiveValue_3895153758"),
+            prefix: new HarmonyMethod(typeof(NativeInventoryChannel), nameof(ClientReaderStarting)));
+    }
+    private static void ClientReaderStarting(Player __instance)
+    {
+        current?.TraceReceive($"stage=reader | clientInitialized={__instance.IsClientInitialized} | local={__instance.IsLocalPlayer} | clientOnly={InstanceFinder.IsClientOnly}");
+    }
+    private void TraceReceive(string detail)
+    {
+        if (!settings.DebugLogging.Value || receiveTraces >= 12) return;
+        receiveTraces++;
+        settings.Trace("ESB_NATIVE_RECEIVE_TRACE_V1 | " + detail);
     }
     private static void ReaderStarting(Player __instance, NetworkConnection __2,
         out (IntPtr Player, NetworkConnection? Connection) __state)
@@ -116,6 +129,7 @@ internal sealed class NativeInventoryChannel : IDisposable
     private static bool ClientValue(Player __instance, string __1, string __2)
     {
         if (__1 != Key && __1 != NativeInventorySnapshots.Key && __1 != ReplyKey && __1 != CommandKey) return true;
+        current?.TraceReceive($"stage=logic | probe={__1 == Key} | local={__instance.IsLocalPlayer} | clientOnly={InstanceFinder.IsClientOnly} | pending={current.pending != null} | complete={current.complete}");
         if (current == null || !InstanceFinder.IsClientOnly || !__instance.IsLocalPlayer) return false;
         try
         {
@@ -141,6 +155,8 @@ internal sealed class NativeInventoryChannel : IDisposable
                 return false;
             }
             var reply = InventoryChannelProbe.Decode(__2);
+            bool contextReady = current.steam.TryClientContext(out string activeProbeSession, out string activeProbeToken);
+            current.TraceReceive($"stage=probe-check | matches={current.pending != null && reply.IsReplyTo(current.pending)} | contextReady={contextReady} | sessionMatches={reply.Session == activeProbeSession} | tokenMatches={reply.Token == activeProbeToken}");
             if (current.pending != null && !current.complete && reply.IsReplyTo(current.pending) &&
                 current.steam.TryClientContext(out string session, out string token) &&
                 reply.Session == session && reply.Token == token)
@@ -174,7 +190,7 @@ internal sealed class NativeInventoryChannel : IDisposable
         if (attempts == 3) settings.Trace("ESB_NATIVE_CHANNEL_PROBE | final attempt sent; wait for client roundtrip marker");
     }
     internal void Reset()
-    { pending = null; complete = false; attempts = 0; next = 0; lastReplies.Clear(); proofs.Clear(); snapshots.Reset(); }
+    { pending = null; complete = false; attempts = 0; next = 0; receiveTraces = 0; lastReplies.Clear(); proofs.Clear(); snapshots.Reset(); }
     private void Report(Exception ex)
     { if (!reported) { reported = true; settings.Error("ESB_NATIVE_CHANNEL", ex); } }
     public void Dispose()
