@@ -51,6 +51,7 @@ internal sealed class RemoteBackpackRuntime : IDisposable
     private string receiving = "", lease = "", appliedPlan = "", frozen = "";
     private long revision;
     private float retry, requestStarted;
+    private long requestTimestamp;
     private bool applyingClient, cancelling, faulted;
     private CanvasGroup? inputGroup;
     private bool previousInteractable;
@@ -310,6 +311,7 @@ internal sealed class RemoteBackpackRuntime : IDisposable
     private void Begin(BackpackCommand command)
     {
         if (!channel.ClientContext(out string session, out string token)) return;
+        requestTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
         command.Session = session; command.Token = token; command.Nonce = Guid.NewGuid().ToString("N");
         request = command; receiver = null; receiving = ""; appliedPlan = "";
         UpdateInputGate();
@@ -338,6 +340,7 @@ internal sealed class RemoteBackpackRuntime : IDisposable
                     { Session = request.Session, Token = request.Token, Nonce = request.Nonce }));
             }
             if (!receiver.Accept(packet)) return;
+            var processing = System.Diagnostics.Stopwatch.StartNew();
             string inventory = receiver.Inventory!;
             using var doc = JsonDocument.Parse(inventory);
             var info = doc.RootElement.GetProperty("ESBMove").Deserialize<ReplyData>() ?? throw new InvalidDataException("Missing reply metadata.");
@@ -369,12 +372,15 @@ internal sealed class RemoteBackpackRuntime : IDisposable
             }
             if (info.Kind == "abort") SendControl("recovered");
             string? payload = BackpackSave.Extract(ref inventory);
-            var owner = Restore(payload == null ? new string?[settings.EffectiveBackpackSlots] : BackpackSave.Decode(payload));
+            var valuesBackpack = payload == null ? new string?[settings.EffectiveBackpackSlots] : BackpackSave.Decode(payload);
+            var oldOwner = clientOwner;
+            var owner = UpdateClientOwner(valuesBackpack, out int changedSlots);
             bool wasOpen = menu.IsOpen;
             clientOwner = owner; lease = info.Lease; revision = info.Revision;
             request = null; receiver = null; UpdateInputGate();
-            if (wasOpen) menu.ReplaceOwner(owner);
-            else if (frozen.Length == 0 && info.Kind == "state") menu.Open(owner);
+            if (wasOpen && !ReferenceEquals(oldOwner, owner)) menu.ReplaceOwner(owner);
+            else if (!wasOpen && frozen.Length == 0 && info.Kind == "state") menu.Open(owner);
+            settings.Trace($"ESB_REMOTE_CLIENT_TIMING | kind={info.Kind} | totalMs={(System.Diagnostics.Stopwatch.GetTimestamp() - requestTimestamp) * 1000 / System.Diagnostics.Stopwatch.Frequency} | processingMs={processing.ElapsedMilliseconds} | changedSlots={changedSlots} | rebuilt={!ReferenceEquals(oldOwner, owner)}");
             if (quickRemaining > 0)
             {
                 if (info.Kind == "done" && info.Moved > 0 && frozen.Length == 0)
@@ -386,6 +392,21 @@ internal sealed class RemoteBackpackRuntime : IDisposable
             }
         }
         catch (Exception ex) { faulted = true; settings.Error("ESB_REMOTE_CLIENT_FAULT", ex); }
+    }
+    private BackpackOwner UpdateClientOwner(string?[] values, out int changedSlots)
+    {
+        if (values.Length < 1 || values.Length > 128) throw new InvalidDataException("Invalid backpack capacity.");
+        if (clientOwner == null || clientOwner.ItemSlots.Count != values.Length)
+        { changedSlots = values.Length; return Restore(values); }
+        // Keep slot identities and their UI bindings. Decode every changed item
+        // before mutating any slot, just as Restore validates before publication.
+        var updates = new List<(int Index, ItemInstance? Item)>();
+        for (int i = 0; i < values.Length; i++)
+            if (Json(clientOwner.ItemSlots[i]) != values[i]) updates.Add((i, Load(values[i])));
+        foreach (var update in updates)
+            clientOwner.ItemSlots[update.Index].SetStoredItem(update.Item!, true);
+        changedSlots = updates.Count;
+        return clientOwner;
     }
     private void ApplyLocal(string?[] items, int[] indices)
     {
