@@ -1,4 +1,4 @@
-# Multiplayer implementation — 0.2.0-beta.1
+# Multiplayer implementation — 0.2.0-beta.2
 
 Branch: `feature/0.2.0-multiplayer-beta`. Stable `main` remains 0.1.6.
 Date: 2026-09-28. Author/project lead: CoDeX-Gaming; Codex-assisted implementation.
@@ -53,8 +53,9 @@ clients or a fault cannot be silently counted as a successful save.
 - Normal `dotnet build` in this execution environment aborts inside the SDK's
   `Process.GetStat/GetStartTime` startup, before MSBuild. The user must produce the
   distributable net6.0 DLL using the supplied package command on their PC.
-- No Unity/game process, two-peer test, native RPC timing test, or performance
-  benchmark was available. Do not interpret compiler/algorithm tests as those tests.
+- The owner confirmed two-client core gameplay tests on 30 September–1 October 2026.
+  Transfer logs measured 153–221 ms end-to-end and 1–2 ms final-response processing.
+  This is not an FPS benchmark or validation on separate PCs. See RELEASE-VALIDATION.md.
 
 See MULTIPLAYER-BETA.md for installation and explicit limitations, and
 BETA-FEEDBACK.md for the community test/report plan. Do not ship development or

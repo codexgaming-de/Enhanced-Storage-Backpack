@@ -58,7 +58,9 @@ def main():
                 files[name] = (root / 'docs' / name).read_bytes()
         manifest = {'version': version, 'targetFramework': 'net6.0',
                     'channel': 'experimental-multiplayer-beta' if args.beta else 'stable',
-                    'nativeMultiplayerTested': False if args.beta else None,
+                    'nativeMultiplayerTested': True if args.beta else None,
+                    'nativeTestScope': 'Owner-confirmed two-client core tests on one PC; gameplay baseline fefe743' if args.beta else None,
+                    'exactPackagedDllTested': False,
                     'externalDependencies': ['SteamNetworkLib 1.6.0 IL2CPP (UserLibs)'] if args.beta else [],
                     'files': {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}}
         files['manifest.json'] = (json.dumps(manifest, indent=2) + '\n').encode()

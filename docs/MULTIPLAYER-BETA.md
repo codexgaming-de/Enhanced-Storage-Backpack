@@ -1,15 +1,15 @@
-# Enhanced Storage with Backpack — 0.2.0-beta.1
+# Enhanced Storage with Backpack — 0.2.0-beta.2
 
-By CoDeX-Gaming. Experimental community beta, 28 September 2026.
-Developed with OpenAI Codex assistance. Native multiplayer gameplay has not been
-validated with two running peers. Automated tests do not establish compatibility
+By CoDeX-Gaming. Experimental community beta, 1 October 2026.
+Developed with OpenAI Codex assistance. Core multiplayer gameplay was tested by the project owner with two Steam accounts
+on one Nobara PC (main client and Wolf/Moonlight client). Automated tests do not establish compatibility
 with every game version, mod combination or disconnect timing.
 
 ## Deutsch
 
 Die stabile Singleplayer-Version **0.1.6** bleibt separat erhältlich. Diese Beta
 ersetzt sie nicht. Für die Beta verwenden **Host und alle Mitspieler dieselbe
-0.2.0-beta.1** und **SteamNetworkLib 1.6.0 IL2CPP**. Eine Mischung mit der stabilen
+0.2.0-beta.2** und **SteamNetworkLib 1.6.0 IL2CPP**. Eine Mischung mit der stabilen
 Version oder unmodifizierten Clients wird nicht unterstützt. Nur IL2CPP, nicht Mono.
 
 ### Installation
@@ -52,9 +52,10 @@ Version oder unmodifizierten Clients wird nicht unterstützt. Nur IL2CPP, nicht 
 
 ### Grenzen dieser ersten Beta
 
-Die nativen IL2CPP-Hooks, echte Host/Client-Kommunikation, Cash-Rückmeldungen,
-Wiederbeitritt und gemeinsame Lagerbedienung sind noch nicht im Multiplayer
-bestätigt. Der native Welt-Speichervorgang besteht weiterhin aus mehreren Dateien;
+Zwei-Client-Kerntests mit gewöhnlichen Items, Speichern/Laden, Wiederbeitritt,
+sicherer Größenänderung und gemeinsamer Lagerbedienung wurden vom Projektbetreiber
+bestätigt. Cash-Sonderfälle, getrennte PCs/WAN, 3–4 Spieler und erzwungene Abbrüche
+sind noch nicht validiert. Der native Welt-Speichervorgang besteht aus mehreren Dateien;
 der Mod macht ihn nicht atomar gegen Prozessabbruch oder Stromausfall.
 
 Andere Mods, die Inventare, RPCs oder Speichervorgänge verändern, können Konflikte
@@ -98,8 +99,22 @@ a failed/deferred save request, not a successful save. Check the dedicated debug
 log. A synchronization fault can keep interaction blocked until the save is
 reloaded. The game's multi-file save is not made crash-atomic by this mod.
 
-**No two-peer gameplay validation has been performed for this build.** Use a
+**Core two-client gameplay passed on the baseline used for this release.**
+Cash-specific cases, separate-PC/WAN play, 3–4 players and forced crashes remain
+unverified. The exact packaged DLL still requires its final smoke test. Use a
 separate test save/copy. Game versions and inventory/network/save mods can affect
 compatibility. No host migration or anti-cheat guarantees are provided. Keep the
 stable DLL and your pre-beta singleplayer save for rollback. Downgrading a modified
 beta save is unverified. See BETA-FEEDBACK.md for the community report template.
+
+## Diagnostic notes / Diagnosehinweise
+
+The optional connection and transfer traces remain enabled only with DebugLogging.
+The log may show `ESB_MP_host-offer-rejected` for an empty native inventory during
+join; this legacy diagnostic is separate from the Steam handshake. Include the
+full session log rather than interpreting that line alone.
+
+Die optionale Verbindungs- und Transferdiagnose bleibt für die Beta erhalten.
+`ESB_MP_host-offer-rejected` kann beim Beitritt für ein leeres natives Inventar
+erscheinen; diese alte Diagnose ist nicht das Ergebnis des Steam-Verbindungsaufbaus.
+Bitte bei Problemen den vollständigen Sitzungslog beilegen.

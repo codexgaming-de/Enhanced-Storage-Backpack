@@ -1,6 +1,6 @@
 # Community feedback / Community-Rückmeldung
 
-Version: 0.2.0-beta.1
+Version: 0.2.0-beta.2
 
 Please include / Bitte angeben:
 

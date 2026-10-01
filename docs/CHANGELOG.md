@@ -1,3 +1,20 @@
+# 0.2.0-beta.2 — 2026-10-01
+
+- Fix host/client handshake by reading the active Steam lobby service ID.
+- Receive backpack replies and inventory receipts at the native RPC readers.
+- Preserve existing client slots/UI bindings after transfers; update changed slots only.
+- Keep automatic host confirmation; no client-side prediction or approval dialog.
+- Owner-confirmed two-client tests: item counts, save/load, unsaved rollback,
+  rejoin, personal backpack isolation, live backpack/storage resizing,
+  concurrent storage access, and saving during transfers.
+- Keep opt-in connection/transfer diagnostics for community feedback.
+- Stable singleplayer 0.1.6 remains a separate download.
+
+Tested gameplay baseline: `fefe743c82e24f11f70f1d43adeba063a5db0acc`.
+Beta.2 changes release metadata/documentation/packaging only. The exact packaged
+DLL still needs a smoke test before upload. Cash-specific and adverse-network
+scenarios are not covered by these user confirmations.
+
 # 0.2.0-beta.1 — 2026-09-28 (experimental multiplayer)
 
 - Connect client backpack UI to authenticated host move requests and acknowledgements.

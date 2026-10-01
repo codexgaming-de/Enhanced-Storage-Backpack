@@ -57,7 +57,9 @@ class PackageTests(unittest.TestCase):
                 'CHANGELOG.md', 'PERMISSIONS.md', 'MULTIPLAYER-BETA.md', 'BETA-FEEDBACK.md', 'manifest.json'})
             manifest = json.loads(z.read('manifest.json'))
             self.assertEqual(manifest['channel'], 'experimental-multiplayer-beta')
-            self.assertFalse(manifest['nativeMultiplayerTested'])
+            self.assertTrue(manifest['nativeMultiplayerTested'])
+            self.assertFalse(manifest['exactPackagedDllTested'])
+            self.assertIn('one PC', manifest['nativeTestScope'])
             self.assertIsNone(z.testzip())
         self.assertTrue(Path(str(archive) + '.sha256').is_file())
 

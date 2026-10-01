@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>EnhancedStorageBackpack</AssemblyName>
-    <Version>0.2.0-beta.1</Version>
+    <Version>0.2.0-beta.2</Version>
     <Authors>CoDeX-Gaming</Authors>
     <Company>CoDeX-Gaming</Company>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>

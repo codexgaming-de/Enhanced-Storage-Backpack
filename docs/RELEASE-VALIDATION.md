@@ -1,3 +1,46 @@
+# Beta release validation — 0.2.0-beta.2, 2026-10-01
+
+Gameplay baseline: `fefe743c82e24f11f70f1d43adeba063a5db0acc` (tested as beta.1).
+Evidence: project-owner reports and supplied diagnostic logs, 30 September–1 October.
+Environment: two Steam accounts on one Nobara PC, main client as host and a
+Wolf/Moonlight client; Schedule I 0.4.6f13 IL2CPP, MelonLoader 0.7.3,
+SteamNetworkLib 1.6.0. This is not an independent multi-machine test.
+
+| Check | Result |
+| --- | --- |
+| Host settings handshake and native reply roundtrip | Confirmed by both logs |
+| Client backpack deposit, withdrawal, internal moves | User passed |
+| Split/count check: 10 total, 6 hotbar / 4 backpack | User passed every step |
+| Host save, reload and rejoin | 6/4 distribution restored |
+| Exit without saving | Saved distribution restored; no duplicates reported |
+| Rejoin while host remains in game | Current distribution retained |
+| Live backpack 80 → 100 → 80 with item in slot 100 | User passed; item retained and accessible |
+| Medium rack 50 slots / 5 rows → 16 / 2 | User passed; both peers consistent |
+| Host/client personal backpacks and reload | Contents remained separate |
+| Concurrent access to same storage/stack | Live updates and total quantity preserved |
+| Host save during repeated backpack transfers | User passed including reload |
+| Client transfer timing | 153–221 ms total; final response processing 1–2 ms |
+| Exact beta.2 ZIP/DLL | Build and smoke test on owner's PC still required |
+
+No runtime transfer behavior was changed for beta.2. Confirmation remains automatic;
+client prediction was explicitly deferred until community feedback. Connection traces
+are opt-in at 15-second intervals; receive traces are capped and transfer timing is
+opt-in. All use the existing single debug log retaining three logged sessions.
+
+Remaining unverified: separate-PC/WAN latency and packet loss, 3–4 players,
+forced crashes during saves, cash-specific native transfers, broad mod combinations,
+and general FPS/memory benchmarking. A legacy empty-inventory diagnostic can still
+emit ESB_MP_host-offer-rejected during join; it is not the Steam handshake result.
+Do not treat that message alone as proof of handshake failure.
+
+Beta release gate: build the net6.0 package, verify its checksum, install the DLL
+extracted from that exact ZIP on both peers, check join/transfer/save/reload, then
+upload as an optional experimental file. Keep stable 0.1.6 available.
+
+---
+
+## Historical validation records (superseded where noted above)
+
 # Beta validation — 0.2.0-beta.1, 2026-09-29
 
 The historical 0.1.6 report below applies to the stable singleplayer release only.

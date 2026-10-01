@@ -76,8 +76,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-beta.1 | Experimentelle Multiplayer-Beta.", "ESB_READY | 0.2.0-beta.1 | Experimental multiplayer beta."));
-            settings.Trace("ESB_READY | 0.2.0-beta.1 | experimental; native multiplayer validation pending");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-beta.2 | Experimentelle Multiplayer-Beta.", "ESB_READY | 0.2.0-beta.2 | Experimental multiplayer beta."));
+            settings.Trace("ESB_READY | 0.2.0-beta.2 | experimental; two-client core tests confirmed");
         }
         catch (Exception ex)
         {
