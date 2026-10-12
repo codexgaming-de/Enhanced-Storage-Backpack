@@ -335,8 +335,8 @@ public sealed class Mod : MelonMod
         {
             if (!PlayerManager.InstanceExists)
                 throw new InvalidOperationException("PlayerManager unavailable for remote backpack preservation.");
-            bool found = PlayerManager.Instance.TryGetPlayerData(code, out var data, out string saved,
-                out var appearance, out var clothing, out var variables);
+            bool found = PlayerManager.Instance.TryGetPlayerData(code, false, out var data);
+            string saved = data?.InventoryString ?? "";
             // The native method also returns true when a player exists but reading
             // Inventory failed. Treat that as a save error, never an empty backpack.
             if (found && string.IsNullOrWhiteSpace(saved))
