@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Il2CppScheduleOne.Avatar.Player;
 using Il2CppFishNet;
 using Il2CppFishNet.Connection;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
@@ -13,7 +14,7 @@ namespace EnhancedStorageBackpack;
 // The local player's stable persistence path is not intercepted by this component.
 internal sealed class NativeRemotePlayerJournal : IDisposable
 {
-    private sealed record NativeData(Player? Player, PlayerData Data, Il2CppReferenceArray<VariableData> Variables);
+    private sealed record NativeData(Player? Player, PlayerData Data, Il2CppReferenceArray<VariableData> Variables, PlayerAppearance Appearance);
     private static NativeRemotePlayerJournal? current;
     private readonly RemotePlayerJournal journal = new();
     private readonly Dictionary<string, NativeData> native = new(StringComparer.Ordinal);
@@ -25,7 +26,12 @@ internal sealed class NativeRemotePlayerJournal : IDisposable
         this.settings = settings; this.inventory = inventory; current = this;
         Patch(harmony, typeof(PlayerManager), "SavePlayer", nameof(SavingOne));
         Patch(harmony, typeof(PlayerManager), "WriteData", nameof(SavingWorld));
-        Patch(harmony, typeof(PlayerManager), "TryGetPlayerData", nameof(Restoring));
+        // 0.4.7 has callback and synchronous overloads. Patch the synchronous
+        // data source explicitly; the old six-argument API no longer exists.
+        var restore = AccessTools.Method(typeof(PlayerManager), "TryGetPlayerData",
+            new[] { typeof(string), typeof(bool), typeof(FullPlayerData).MakeByRefType() })
+            ?? throw new MissingMethodException("PlayerManager.TryGetPlayerData(string, bool, out FullPlayerData)");
+        harmony.Patch(restore, prefix: new HarmonyMethod(typeof(NativeRemotePlayerJournal), nameof(Restoring)));
         Patch(harmony, typeof(Player), "OnStopClient", nameof(Leaving));
         Patch(harmony, typeof(Player), "PreDestroyClientObjects", nameof(ConnectionLeaving));
         harmony.Patch(AccessTools.Method(typeof(Player), "RpcLogic___SetInventoryItem_2317364410"),
@@ -83,7 +89,9 @@ internal sealed class NativeRemotePlayerJournal : IDisposable
         var snapshot = new RemotePlayerJournal.Snapshot(data.GetJson(), currentInventory ?? inventory(player),
             player.GetAppearanceString(), player.GetClothingString(), new VariableCollectionData(vars).GetJson());
         journal.Capture(code, player.Pointer.ToInt64(), snapshot);
-        native[code] = new NativeData(player, data, vars);
+        var appearance = player.CurrentAppearance
+            ?? throw new InvalidDataException("Remote player appearance unavailable during capture.");
+        native[code] = new NativeData(player, data, vars, appearance.Clone());
     }
     private void Failure(string code, Exception error)
     {
@@ -163,11 +171,10 @@ internal sealed class NativeRemotePlayerJournal : IDisposable
             self.Failure(__instance.PlayerCode, ex);
         }
     }
-    private static bool Restoring(string __0, ref PlayerData __1, ref string __2,
-        ref string __3, ref string __4, ref Il2CppReferenceArray<VariableData> __5, ref bool __result)
+    private static bool Restoring(string __0, bool __1, ref FullPlayerData __2, ref bool __result)
     {
         var self = current;
-        if (!HostLoaded || self == null || !self.journal.Contains(__0)) return true;
+        if (__1 || !HostLoaded || self == null || !self.journal.Contains(__0)) return true;
         try
         {
             if (!self.journal.Detached(__0))
@@ -178,8 +185,8 @@ internal sealed class NativeRemotePlayerJournal : IDisposable
             }
             var saved = self.journal.Read(__0);
             var data = self.native[__0];
-            __1 = data.Data; __2 = saved.Inventory; __3 = saved.Appearance;
-            __4 = saved.Clothing; __5 = data.Variables; __result = true;
+            __2 = new FullPlayerData(data.Data, saved.Inventory, data.Appearance.Clone(), saved.Clothing, data.Variables);
+            __result = true;
             self.restoreIssued.Add(__0);
             self.settings.Trace("ESB_REMOTE_SESSION_RESTORE | session inventory supplied instead of older disk state");
             return false;
