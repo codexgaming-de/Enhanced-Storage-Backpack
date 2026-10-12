@@ -10,10 +10,12 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <MelonLoaderDirectory Condition="'$(MelonLoaderDirectory)' == ''">$(GameDirectory)/MelonLoader/net6</MelonLoaderDirectory>
     <GameAssembliesDirectory Condition="'$(GameAssembliesDirectory)' == ''">$(GameDirectory)/MelonLoader/Il2CppAssemblies</GameAssembliesDirectory>
+    <SteamNetworkLibPath Condition="'$(SteamNetworkLibPath)' == '' and Exists('$(GameDirectory)/UserLibs/SteamNetworkLib-IL2Cpp.dll')">$(GameDirectory)/UserLibs/SteamNetworkLib-IL2Cpp.dll</SteamNetworkLibPath>
+    <SteamNetworkLibPath Condition="'$(SteamNetworkLibPath)' == ''">$(GameDirectory)/UserLibs/SteamNetworkLib.dll</SteamNetworkLibPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SteamNetworkLib">
-      <HintPath>$(GameDirectory)/UserLibs/SteamNetworkLib.dll</HintPath><Private>false</Private>
+      <HintPath>$(SteamNetworkLibPath)</HintPath><Private>false</Private>
     </Reference>
     <Compile Include="src/**/*.cs" />
     <Reference Include="MelonLoader">
@@ -29,7 +31,7 @@
     </Reference>
   </ItemGroup>
   <Target Name="CheckMelonLoaderReference" BeforeTargets="ResolveAssemblyReferences">
-    <Error Condition="!Exists('$(GameDirectory)/UserLibs/SteamNetworkLib.dll')" Text="SteamNetworkLib 1.6.0 IL2CPP fehlt: UserLibs/SteamNetworkLib.dll installieren (Nexus 1396)." />
+    <Error Condition="!Exists('$(SteamNetworkLibPath)')" Text="SteamNetworkLib 1.6.0 IL2CPP fehlt: SteamNetworkLib-IL2Cpp.dll oder SteamNetworkLib.dll im UserLibs-Ordner des angegebenen GameDirectory installieren (Nexus 1396)." />
     <Error Condition="!Exists('$(MelonLoaderDirectory)/MelonLoader.dll')" Text="MelonLoader.dll fehlt. Bitte -p:GameDirectory=&quot;/vollstaendiger/Pfad/Schedule I&quot; angeben." />
     <Error Condition="!Exists('$(GameAssembliesDirectory)/UnityEngine.CoreModule.dll')" Text="UnityEngine.CoreModule.dll fehlt in MelonLoader/Il2CppAssemblies. Bitte den Spielpfad pruefen und MelonLoader einmal starten." />
   </Target>
