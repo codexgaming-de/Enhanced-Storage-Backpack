@@ -1,5 +1,10 @@
-> **Experimental multiplayer beta — 0.2.0-beta.2.**
-> Core multiplayer tests passed with two accounts on one PC; wider community validation remains open.
+> **0.2.0-beta.3 — Schedule I 0.4.7f12 compatibility hotfix.**
+> Initialization was confirmed on the hotfix code before this version-only rebuild.
+> Transfers, rejoining and save/load on 0.4.7 await community testing.
+> Earlier two-client results below describe the previous 0.4.6 build, not this hotfix.
+
+> **Experimental multiplayer beta — 0.2.0-beta.3.**
+> Startup confirmed on 0.4.7f12; multiplayer testing of this hotfix is pending.
 > Host and clients require the identical beta and SteamNetworkLib 1.6.0 IL2CPP in `UserLibs`.
 > Stable singleplayer 0.1.6 remains on `main` and a separate Nexus download.
 > Read [beta installation and limitations](docs/MULTIPLAYER-BETA.md) and
@@ -10,9 +15,8 @@
 Storage- und Backpack-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Dieser Branch: 0.2.0-beta.2.** Die früher bestätigten Singleplayer-Tests von
-0.1.6 ersetzen keine Multiplayer-Prüfung dieser Beta. Die Host-/Client-Laufzeitprüfung
-wurde mit zwei Accounts auf einem PC durchgeführt. Weitere Umgebungen prüft die Community; bekannte Grenzen stehen in der Beta-Anleitung.
+**Dieser Branch: 0.2.0-beta.3.** Die früher bestätigten Singleplayer-Tests von
+0.1.6 ersetzen keine Multiplayer-Prüfung dieser Beta. Der Start des Hotfixes wurde auf 0.4.7f12 bestätigt. Multiplayer-Transfers, Wiederbeitritt und Speichern/Laden prüft die Community.
 
 ## Funktionen
 
@@ -131,7 +135,7 @@ Mit beendetem Spiel und installierter IL2CPP-Abhängigkeit:
 python3 scripts/package-release.py --beta --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
 ```
 
-Ergebnis: `dist/Enhanced-Storage-Backpack-0.2.0-beta.2.zip` und SHA-256-Datei.
+Ergebnis: `dist/Enhanced-Storage-Backpack-0.2.0-beta.3.zip` und SHA-256-Datei.
 Der Packager baut net6.0 neu, kopiert nur freigegebene Moddateien und legt die
 Beta-Anleitung/Rückmeldevorlage bei. Keine Spiel- oder SteamNetworkLib-DLL wird
 mitgeliefert. Vorhandene Archive werden nicht überschrieben.

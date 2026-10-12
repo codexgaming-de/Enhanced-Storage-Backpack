@@ -1,3 +1,15 @@
+# 0.2.0-beta.3 — 2026-10-12
+
+- Fix the ambiguous Harmony target for PlayerManager.TryGetPlayerData on Schedule I 0.4.7.
+- Adapt remote player restoration and inventory baseline reads to FullPlayerData.
+- Accept SteamNetworkLib.dll and SteamNetworkLib-IL2Cpp.dll during building and packaging.
+- Require identical beta.3 builds on host and clients through the existing version handshake.
+- Stable singleplayer 0.1.6 is unchanged.
+
+Initialization confirmed on 0.4.7f12 with the hotfix code before the version-only rebuild.
+Multiplayer transfers, rejoining and save/load after this hotfix await community testing.
+The project owner chose community validation after confirming successful initialization.
+
 # 0.2.0-beta.2 — 2026-10-01
 
 - Fix host/client handshake by reading the active Steam lobby service ID.

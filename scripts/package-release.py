@@ -29,7 +29,11 @@ def main():
         raise RuntimeError('Project and multiplayer protocol versions differ.')
     refs = ['MelonLoader/net6/MelonLoader.dll', 'MelonLoader/Il2CppAssemblies/Assembly-CSharp.dll']
     if args.beta:
-        refs.append('UserLibs/SteamNetworkLib.dll')
+        candidates = ['UserLibs/SteamNetworkLib-IL2Cpp.dll', 'UserLibs/SteamNetworkLib.dll']
+        dependency = next((name for name in candidates if (game / name).is_file()), None)
+        if dependency is None:
+            raise RuntimeError('Missing SteamNetworkLib IL2CPP in the game UserLibs folder (either supported filename).')
+        refs.append(dependency)
     for ref in refs:
         if not (game / ref).is_file():
             raise RuntimeError(f'Missing build reference: {game / ref}')
@@ -58,8 +62,8 @@ def main():
                 files[name] = (root / 'docs' / name).read_bytes()
         manifest = {'version': version, 'targetFramework': 'net6.0',
                     'channel': 'experimental-multiplayer-beta' if args.beta else 'stable',
-                    'nativeMultiplayerTested': True if args.beta else None,
-                    'nativeTestScope': 'Owner-confirmed two-client core tests on one PC; gameplay baseline fefe743' if args.beta else None,
+                    'nativeMultiplayerTested': False if args.beta else None,
+                    'nativeTestScope': '0.4.7f12 initialization confirmed before version-only rebuild; multiplayer community validation pending' if args.beta else None,
                     'exactPackagedDllTested': False,
                     'externalDependencies': ['SteamNetworkLib 1.6.0 IL2CPP (UserLibs)'] if args.beta else [],
                     'files': {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}}
@@ -80,7 +84,7 @@ def main():
             f.write(package_data)
         checksum.write_text(hashlib.sha256(package_data).hexdigest() + '  ' + archive.name + '\n')
     print(f'Package: {archive}\nSHA-256: {checksum}')
-    print('Test the DLL extracted from this ZIP in-game before uploading. Nothing was installed or published.')
+    print('Community-test beta: multiplayer validation pending. Nothing was installed or published.')
 
 
 if __name__ == '__main__':

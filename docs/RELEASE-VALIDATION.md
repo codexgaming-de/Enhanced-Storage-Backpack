@@ -1,3 +1,17 @@
+# 0.2.0-beta.3 — 2026-10-12
+
+- User logs reproduced beta.2 initialization failure on Schedule I 0.4.7f12.
+- Current Assembly-CSharp.dll confirms two TryGetPlayerData overloads and FullPlayerData.
+- Hotfix code: a7b6506; build filename support: 6141d54.
+- Latest(2).log confirms ESB_READY with the hotfix (still labelled beta.2), MelonLoader 0.7.0 Open-Beta.
+- Reference compilation against the uploaded game DLL succeeded.
+- Remote player journal: 50 assertions passed; native hooks are not simulated.
+- Beta.3 changes release identifiers and packaging; this exact release DLL is not yet runtime-tested.
+- Owner elected community testing for transfers, rejoining and save/load. These remain unverified on 0.4.7.
+- Previous 0.4.6 gameplay confirmations below do not validate this hotfix.
+
+---
+
 # Beta release validation — 0.2.0-beta.2, 2026-10-01
 
 Gameplay baseline: `fefe743c82e24f11f70f1d43adeba063a5db0acc` (tested as beta.1).

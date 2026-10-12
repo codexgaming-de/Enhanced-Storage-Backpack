@@ -1,7 +1,12 @@
+> **0.2.0-beta.3 — Schedule I 0.4.7f12 compatibility hotfix.**
+> Initialization was confirmed on the hotfix code before this version-only rebuild.
+> Transfers, rejoining and save/load on 0.4.7 await community testing.
+> Earlier two-client results below describe the previous 0.4.6 build, not this hotfix.
+
 > Historical stable singleplayer 0.1.6 material below.
-> For the additional 0.2.0-beta.2 multiplayer upload use MULTIPLAYER-BETA.md,
+> For the additional 0.2.0-beta.3 multiplayer upload use MULTIPLAYER-BETA.md,
 > BETA-FEEDBACK.md and the current CHANGELOG.md. Do not replace the stable file.
-> Mark the additional download experimental; two-client core tests passed; exact packaged-DLL smoke test remains required.
+> Mark the hotfix experimental; multiplayer validation on 0.4.7 remains pending.
 
 # Nexus-Veröffentlichung – Beschreibung für 0.1.6
 

@@ -1,4 +1,9 @@
-# Multiplayer implementation — 0.2.0-beta.2
+> **0.2.0-beta.3 — Schedule I 0.4.7f12 compatibility hotfix.**
+> Initialization was confirmed on the hotfix code before this version-only rebuild.
+> Transfers, rejoining and save/load on 0.4.7 await community testing.
+> Earlier two-client results below describe the previous 0.4.6 build, not this hotfix.
+
+# Multiplayer implementation — 0.2.0-beta.3
 
 Branch: `feature/0.2.0-multiplayer-beta`. Stable `main` remains 0.1.6.
 Date: 2026-09-28. Author/project lead: CoDeX-Gaming; Codex-assisted implementation.

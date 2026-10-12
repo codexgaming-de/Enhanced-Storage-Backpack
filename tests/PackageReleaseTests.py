@@ -57,11 +57,18 @@ class PackageTests(unittest.TestCase):
                 'CHANGELOG.md', 'PERMISSIONS.md', 'MULTIPLAYER-BETA.md', 'BETA-FEEDBACK.md', 'manifest.json'})
             manifest = json.loads(z.read('manifest.json'))
             self.assertEqual(manifest['channel'], 'experimental-multiplayer-beta')
-            self.assertTrue(manifest['nativeMultiplayerTested'])
+            self.assertFalse(manifest['nativeMultiplayerTested'])
             self.assertFalse(manifest['exactPackagedDllTested'])
-            self.assertIn('one PC', manifest['nativeTestScope'])
+            self.assertIn('community validation pending', manifest['nativeTestScope'])
+            self.assertEqual(manifest['version'], '0.2.0-beta.3')
             self.assertIsNone(z.testzip())
         self.assertTrue(Path(str(archive) + '.sha256').is_file())
+
+    def test_il2cpp_dependency_filename(self):
+        source = self.game / 'UserLibs/SteamNetworkLib.dll'
+        source.rename(self.game / 'UserLibs/SteamNetworkLib-IL2Cpp.dll')
+        self.run_package()
+        self.assertEqual(len(list((self.root / 'dist').glob('*.zip'))), 1)
 
     def test_beta_flag_required(self):
         with self.assertRaises(RuntimeError): self.run_package(beta=False)

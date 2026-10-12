@@ -1,4 +1,9 @@
-# Enhanced Storage with Backpack — 0.2.0-beta.2
+> **0.2.0-beta.3 — Schedule I 0.4.7f12 compatibility hotfix.**
+> Initialization was confirmed on the hotfix code before this version-only rebuild.
+> Transfers, rejoining and save/load on 0.4.7 await community testing.
+> Earlier two-client results below describe the previous 0.4.6 build, not this hotfix.
+
+# Enhanced Storage with Backpack — 0.2.0-beta.3
 
 By CoDeX-Gaming. Experimental community beta, 1 October 2026.
 Developed with OpenAI Codex assistance. Core multiplayer gameplay was tested by the project owner with two Steam accounts
@@ -9,7 +14,7 @@ with every game version, mod combination or disconnect timing.
 
 Die stabile Singleplayer-Version **0.1.6** bleibt separat erhältlich. Diese Beta
 ersetzt sie nicht. Für die Beta verwenden **Host und alle Mitspieler dieselbe
-0.2.0-beta.2** und **SteamNetworkLib 1.6.0 IL2CPP**. Eine Mischung mit der stabilen
+0.2.0-beta.3** und **SteamNetworkLib 1.6.0 IL2CPP**. Eine Mischung mit der stabilen
 Version oder unmodifizierten Clients wird nicht unterstützt. Nur IL2CPP, nicht Mono.
 
 ### Installation
