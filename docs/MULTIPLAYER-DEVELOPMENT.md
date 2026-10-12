@@ -8,6 +8,15 @@
 Branch: `feature/0.2.0-multiplayer-beta`. Stable `main` remains 0.1.6.
 Date: 2026-09-28. Author/project lead: CoDeX-Gaming; Codex-assisted implementation.
 
+## Next release — agreed 2026-10-12
+
+- Owner confirmed that 0.2.0-beta.3 was published on Nexus.
+- Integrate the Update Checker in the next mod update:
+  https://www.nexusmods.com/schedule1/mods/795
+- Check its current integration instructions and IL2CPP compatibility before implementation.
+- Verify version reporting and stable/multiplayer-beta channel handling before packaging.
+- This is an agreed next-release task; no integration is included in beta.3.
+
 ## Runtime connections
 
 `SteamHostSettings` authenticates Steam lobby membership, exact build, session and
