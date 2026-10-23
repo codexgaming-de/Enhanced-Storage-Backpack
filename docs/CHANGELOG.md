@@ -1,5 +1,15 @@
 # Enhanced Storage + Backpack
 
+## 0.1.7 — Singleplayer backpack loading fix
+- Fixed a reproduced backpack opening failure after loading a save with After Hours installed by restoring specialized item instances through the game's native deserializer.
+- Added checks that reject empty item save data and detectable loss of specialized item data during serialization.
+- Debug logging is now always enabled, including for existing configurations. The log retains up to three sessions, with an approximately 1 MiB limit per session.
+- Added automatic detection by the optional Updates Checker mod (install separately).
+- Removed temporary UI diagnostic retries.
+- Tested by the project owner: backpack opening, saving and full restart with 36 occupied slots; all logged item IDs, quantities, qualities and packaging values matched after reload. Updates Checker recognition also confirmed.
+- Existing damaged item data is not repaired. Reported storage item losses remain under investigation.
+- Singleplayer / IL2CPP only. This release does not update the multiplayer beta.
+
 ## 0.1.6 — initial public release
 
 - Nine independently configurable storage types and a backpack with 1–128 slots.
