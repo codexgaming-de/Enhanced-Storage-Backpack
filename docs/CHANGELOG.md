@@ -1,5 +1,16 @@
 # 0.2.0-beta.3 — 2026-10-12
 
+## 0.2.0-beta.4 — unpublished test build
+
+- Port native item deserialization to the local backpack and remote player item restoration.
+- Guard local saves and remote transfer snapshots against empty JSON and detectable serialized subtype loss.
+- Enable bounded diagnostic logging permanently, regardless of old DebugLogging settings.
+- Add NexusModID 2734 for optional Updates Checker recognition.
+- Host and clients must use this same build. Host/client runtime validation is pending.
+- No repair of already damaged item data; reported storage item loss remains unresolved.
+- Nexus publication is on hold until multiplayer validation is complete.
+
+
 - Fix the ambiguous Harmony target for PlayerManager.TryGetPlayerData on Schedule I 0.4.7.
 - Adapt remote player restoration and inventory baseline reads to FullPlayerData.
 - Accept SteamNetworkLib.dll and SteamNetworkLib-IL2Cpp.dll during building and packaging.
