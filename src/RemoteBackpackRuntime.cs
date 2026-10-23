@@ -91,17 +91,11 @@ internal sealed class RemoteBackpackRuntime : IDisposable
             prefix: new HarmonyMethod(typeof(RemoteBackpackRuntime), nameof(SaveStarting)));
     }
     private void ConfigurationChanged() => configurationPending = true;
-    private static string? Json(ItemSlot slot) => slot.ItemInstance?.GetItemData().GetJson(false);
-    private static string? Json(ItemInstance? item) => item?.GetItemData().GetJson(false);
+    private static string? Json(ItemSlot slot) => BackpackItemCodec.Serialize(slot.ItemInstance);
+    private static string? Json(ItemInstance? item) => BackpackItemCodec.Serialize(item);
     private static ItemSlot[] Inventory(Player player) => player._inventory.ToArray();
     private static ItemSlot[] Slots(BackpackOwner owner) => owner.ItemSlots.ToArray();
-    private static ItemInstance? Load(string? text)
-    {
-        if (text == null) return null;
-        using var doc = JsonDocument.Parse(text);
-        string type = doc.RootElement.GetProperty("DataType").GetString() ?? throw new InvalidDataException("Missing item type.");
-        return LoadManager.Instance.GetItemLoader(type)?.LoadItem(text) ?? throw new InvalidDataException("Item loader failed.");
-    }
+    private static ItemInstance? Load(string? text) => BackpackItemCodec.Load(text);
     private static BackpackOwner Restore(string?[] values)
     {
         if (values.Length < 1 || values.Length > 128) throw new InvalidDataException("Invalid backpack capacity.");
