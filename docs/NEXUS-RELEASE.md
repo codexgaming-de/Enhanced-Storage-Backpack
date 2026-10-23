@@ -1,4 +1,4 @@
-# Nexus-Veröffentlichung – Beschreibung für 0.1.6
+# Nexus-Veröffentlichung – Beschreibung für 0.1.7
 
 Noch nicht veröffentlicht. Normale Spieltests bestanden; Paketprüfung noch offen.
 Keine Behauptung einer vollständigen Fehlerfreiheit oder garantierten FPS.
@@ -37,9 +37,9 @@ die IL2CPP-Version des Spiels.
 - Rucksackinhalt wird mit dem regulären Spielstand gespeichert. Auch reguläre
   Spiel-Autosaves zählen dazu. Kein gesondertes Speichern bei Gegenstandsbewegungen.
 - Polizeidurchsuchungen ignorieren den Rucksackinhalt.
-- Optionales eigenes Diagnoseprotokoll mit den letzten drei protokollierten Sitzungen.
+- Immer aktives eigenes Diagnoseprotokoll mit den letzten drei protokollierten Sitzungen.
 
-Referenzumgebung: Schedule I 0.4.6f13, MelonLoader 0.7.3 und
+Referenzumgebung: Schedule I 0.4.7f12, MelonLoader 0.7.3 und
 Mod Manager & Phone App 2.2.4. Andere Versionen sind nicht bestätigt.
 DLL bei beendetem Spiel in Mods kopieren. Vor Deinstallation Rucksack und
 zusätzliche Lagerplätze leeren, Lager auf Original zurückstellen und speichern.
@@ -65,9 +65,9 @@ backpack to Schedule I. Designed for singleplayer and the IL2CPP game version.
 - Backpack contents are saved with the regular game save, including game
   autosaves. Moving items does not trigger an independent inventory save.
 - Police searches ignore backpack contents.
-- Optional diagnostic log containing the last three logged sessions.
+- Always-enabled diagnostic log containing the last three logged sessions.
 
-Reference environment: Schedule I 0.4.6f13, MelonLoader 0.7.3 and
+Reference environment: Schedule I 0.4.7f12, MelonLoader 0.7.3 and
 Mod Manager & Phone App 2.2.4. Other versions have not been confirmed.
 With the game closed, copy the DLL into Mods. Before uninstalling, empty the
 backpack and extra storage slots, restore original storage sizes and save.
@@ -89,19 +89,23 @@ Huge Storage Closet, Safe, Filing Cabinet.
 Quellcode / Source: https://github.com/codexgaming-de/Enhanced-Storage-Backpack
 Mod Manager & Phone App: https://www.nexusmods.com/schedule1/mods/397
 
-## Release notes
+## Release notes — copy to Nexus
 
-0.1.6: Backpack-Daten werden am nativen Inventory-Schreibaufruf ergänzt.
-Speichern/Laden über Hauptmenü und Neustart, Duplizierungsprüfung und
-Spielstandwechsel vom Projektbetreiber erfolgreich geprüft.
+## 0.1.7 — Singleplayer backpack loading fix
+- Fixed a reproduced backpack opening failure after loading a save with After Hours installed by restoring specialized item instances through the game's native deserializer.
+- Added checks that reject empty item save data and detectable loss of specialized item data during serialization.
+- Debug logging is now always enabled, including for existing configurations. The log retains up to three sessions, with an approximately 1 MiB limit per session.
+- Added automatic detection by the optional Updates Checker mod (install separately).
+- Removed temporary UI diagnostic retries.
+- Tested by the project owner: backpack opening, saving and full restart with 36 occupied slots; all logged item IDs, quantities, qualities and packaging values matched after reload. Updates Checker recognition also confirmed.
+- Existing damaged item data is not repaired. Reported storage item losses remain under investigation.
+- Singleplayer / IL2CPP only. This release does not update the multiplayer beta.
 
-0.1.6: Backpack data is attached at the native Inventory write boundary.
-Main-menu reload, full restart, unsaved moves without duplication and save-slot
-isolation have passed the project owner's gameplay tests.
+Updates Checker: https://www.nexusmods.com/schedule1/mods/795 (optional, separate download).
 
 ## Upload
 
-Dateiversion 0.1.6. Nur das geprüfte Paket aus dist/ verwenden.
+Dateiversion 0.1.7. Nur das geprüfte Paket aus dist/ verwenden.
 Checkliste: RELEASE-CHECKLIST.md. Keine generelle Fehlerfreiheit behaupten.
 
 ## Short description
