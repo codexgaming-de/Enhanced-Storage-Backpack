@@ -109,7 +109,7 @@ internal sealed class Backpack : IDisposable
         var items = savedPayload == null ? Array.Empty<string?>() : BackpackSave.Decode(savedPayload);
         var restored = new BackpackOwner();
         Grow(restored, Math.Max(Math.Clamp(settings.BackpackSlots.Value, 1, 128), items.Length));
-        settings.Trace("ESB_BACKPACK_LOADER | native-deserializer-saveguard.3");
+        settings.Trace("ESB_BACKPACK_LOADER | legacy-loader-comparison.1");
         for (int i = 0; i < items.Length; i++)
         {
             if (items[i] == null) continue;
@@ -120,10 +120,9 @@ internal sealed class Backpack : IDisposable
                 settings.Trace($"ESB_ITEM_SAVED | slot={i + 1} | {DescribeJson(items[i]!)}");
             var loader = LoadManager.Instance.GetItemLoader(type)
                 ?? throw new InvalidDataException($"No item loader for {type}.");
-            // Enter through the game's native dispatcher. Calling the managed
-            // base-loader wrapper directly also enters other mods' Harmony patches.
-            // Keep the loader existence check above so unsupported data fails closed.
-            var item = ItemDeserializer.LoadItem(items[i]!)
+            // Comparison only: original managed loader call, with identical diagnostics
+            // and save guards to the native-deserializer test build.
+            var item = loader.LoadItem(items[i]!)
                 ?? throw new InvalidDataException("Backpack item could not be restored.");
             TraceItem("restored", i, item);
             restored.ItemSlots[i].SetStoredItem(item, true);
