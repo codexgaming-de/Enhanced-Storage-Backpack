@@ -3,7 +3,7 @@
 Singleplayer-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Stand: 0.1.6, normale Spieltests bestanden; Release-Paket in Vorbereitung.**
+**Stand: Singleplayer-Fix auf Basis 0.1.6; Release-Vorbereitung, noch nicht veröffentlicht.**
 Bestätigt sind Speichern/Laden über Hauptmenü und vollständigen Neustart,
 ungespeicherte Bewegungen ohne Duplikate, getrennte Spielstände A → B → A
 und Polizeidurchsuchungen. Zusätzlich auf dem Hauptspielstand getestet.
@@ -29,7 +29,7 @@ Die Prüfung des tatsächlich verpackten Builds steht noch aus.
 - MelonPreferences; Einstellungen im Mod Manager & Phone App veränderbar.
   Änderungen wirken während der Sitzung; während Ziehen, Speichern oder Laden
   werden Größenänderungen zurückgestellt. Nur DLL-Updates brauchen einen Neustart.
-- Optional eine Debug-Datei mit den letzten drei protokollierten Spielsitzungen.
+- Immer aktive Debug-Datei mit den letzten drei protokollierten Spielsitzungen.
 
 Die sichtbare Gegenstandsdarstellung eines Regals ist durch dessen Stellfläche
 begrenzt; 128 Plätze bedeuten nicht 128 gleichzeitig sichtbare Gegenstandsmodelle.
@@ -83,11 +83,11 @@ zugesichert.
 
 ## Diagnose und Tests
 
-Optional: `UserData/Enhanced-Storage-Backpack-Debug.log`.
+Immer aktiv: `UserData/Enhanced-Storage-Backpack-Debug.log`.
+Alte `DebugLogging=false`-Einstellungen werden nicht mehr ausgewertet.
 Genau eine dauerhafte Logdatei, höchstens drei protokollierte Sitzungen,
 unterschieden durch `ESB_SESSION_START`; ungefähr 1 MiB pro Sitzung.
-Deaktivierte Sitzungen erzeugen keine Einträge. Ein-/Ausschalten innerhalb einer
-Sitzung beginnt keine neue Sitzung. Alte nummerierte Logs werden beim Umstieg
+Am Größenlimit endet die Protokollierung für diese Sitzung. Alte nummerierte Logs werden beim Umstieg
 übernommen und danach entfernt. Kein zyklisches Datei-Logging.
 
 ```bash
@@ -117,3 +117,27 @@ Siehe [Release-Checkliste](docs/RELEASE-CHECKLIST.md).
 Es gilt die [12-Monats-Regel von CoDeX-Gaming](PERMISSIONS.md). Maßgeblich ist
 das letzte veröffentlichte Mod-Update, nicht der letzte GitHub-Commit.
 GitHubs Plattformrechte zum Ansehen und Forken bleiben unberührt.
+
+## Aktuelle Fix-Vorbereitung
+
+- Rucksackdaten werden über den nativen ItemDeserializer geladen. Der bestätigte
+  Vergleichstest stellte damit spezialisierte Item-Instanzen wieder her; der alte
+  direkte Loader-Aufruf erzeugte bei denselben Daten generische Instanzen.
+- Der Speicherschutz gegen leere Daten und erkennbaren Subtypverlust bleibt aktiv.
+  Bereits beschädigte alte ItemData werden dadurch nicht repariert.
+- Lesende Item-Diagnosen bleiben erhalten. Die temporäre erneute Ausführung von
+  ItemSlotUI.UpdateUI nach einem Öffnungsfehler wurde entfernt.
+- Debug-Logging ist immer aktiv, unabhängig von alten Einstellungswerten.
+- Assembly-Metadatum NexusModID=2734 für den optionalen
+  [Updates Checker](https://www.nexusmods.com/schedule1/mods/795).
+  Dessen DLL separat installieren; sie wird nicht mitgeliefert.
+  Die Nexus-Seite führt Singleplayer und Multiplayer-Beta gemeinsam: Eine
+  Update-Meldung ersetzt nicht die Auswahl des passenden Downloads.
+
+Validierung: Der Nutzer bestätigte den nativen Loader im kontrollierten
+Alt/Neu-Vergleich und zuvor Erhalt von 37 belegten Slots nach Speichern/Neustart.
+Die anschließende Bereinigung kompiliert gegen die vorhandenen Spielreferenzen
+mit dem .NET-8-Referenzcompiler. Ein echter net6.0-Release-Build und ein Start
+mit Updates Checker stehen für diesen Stand noch aus.
+Gemeldete Regalverluste sind weiterhin ungeklärt. Diese Vorbereitung ist noch
+nicht auf den Multiplayer-Beta-Branch übertragen.
