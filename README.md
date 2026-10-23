@@ -3,7 +3,7 @@
 Singleplayer-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Stand: Singleplayer-Fix auf Basis 0.1.6; Release-Vorbereitung, noch nicht veröffentlicht.**
+**Stand: Singleplayer 0.1.7; Release-Vorbereitung, noch nicht veröffentlicht.**
 Bestätigt sind Speichern/Laden über Hauptmenü und vollständigen Neustart,
 ungespeicherte Bewegungen ohne Duplikate, getrennte Spielstände A → B → A
 und Polizeidurchsuchungen. Zusätzlich auf dem Hauptspielstand getestet.
@@ -137,7 +137,7 @@ GitHubs Plattformrechte zum Ansehen und Forken bleiben unberührt.
 Validierung: Der Nutzer bestätigte den nativen Loader im kontrollierten
 Alt/Neu-Vergleich und zuvor Erhalt von 37 belegten Slots nach Speichern/Neustart.
 Die anschließende Bereinigung kompiliert gegen die vorhandenen Spielreferenzen
-mit dem .NET-8-Referenzcompiler. Ein echter net6.0-Release-Build und ein Start
-mit Updates Checker stehen für diesen Stand noch aus.
+mit dem .NET-8-Referenzcompiler. Der Nutzer bestätigte anschließend den Spieltest mit dem bereinigten Stand: 36 belegte Slots nach Speichern/Neustart unverändert, Rucksack geöffnet; Updates Checker erkannt.
+Das finale 0.1.7-ZIP und dessen DLL müssen noch lokal gebaut und kurz geprüft werden.
 Gemeldete Regalverluste sind weiterhin ungeklärt. Diese Vorbereitung ist noch
 nicht auf den Multiplayer-Beta-Branch übertragen.
