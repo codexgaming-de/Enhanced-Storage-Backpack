@@ -117,7 +117,7 @@ internal sealed class SteamHostSettings : IDisposable
     // No Steam IDs, tokens, inventory contents or save paths are recorded.
     private void TraceHandshake(float now)
     {
-        if (!settings.DebugLogging.Value || now < nextTrace) return;
+        if (now < nextTrace) return;
         nextTrace = now + 15;
         try
         {
