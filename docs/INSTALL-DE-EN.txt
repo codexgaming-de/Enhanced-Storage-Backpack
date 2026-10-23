@@ -1,4 +1,4 @@
-Enhanced Storage + Backpack 0.1.6 — CoDeX-Gaming
+Enhanced Storage + Backpack 0.1.7 — CoDeX-Gaming
 
 DEUTSCH
 Voraussetzungen: Schedule I IL2CPP, MelonLoader. Nur Singleplayer.
@@ -32,7 +32,7 @@ Deinstallation: Rucksack sowie zusätzliche Lagerplätze leeren, Lagergrößen a
 Ohne Mod ist der Rucksack nicht zugänglich; Erhalt seiner Daten beim späteren
 Speichern ohne Mod ist nicht zugesichert.
 
-Diagnose: Optionales UserData/Enhanced-Storage-Backpack-Debug.log.
+Diagnose: Immer aktives UserData/Enhanced-Storage-Backpack-Debug.log.
 Eine dauerhafte Datei, letzte drei protokollierte Sitzungen. Bei Fehlern Version,
 Reproduktionsschritte und dieses Log angeben. Vor dem Teilen persönliche Angaben prüfen.
 
@@ -67,7 +67,7 @@ Uninstall: Empty the backpack and extra storage slots, set storage sizes to 0,
 and save in-game. Close the game and remove the DLL. The backpack is inaccessible
 without this mod; preservation of its data when saving without the mod is not assured.
 
-Diagnostics: Optional UserData/Enhanced-Storage-Backpack-Debug.log.
+Diagnostics: Always enabled UserData/Enhanced-Storage-Backpack-Debug.log.
 One persistent file, last three logged sessions. Include version, reproduction
 steps and this log in bug reports. Check for personal information before sharing.
 
@@ -81,3 +81,11 @@ Source / Quellcode:
 https://github.com/codexgaming-de/Enhanced-Storage-Backpack
 Mod Manager & Phone App:
 https://www.nexusmods.com/schedule1/mods/397
+
+Updates Checker (optional, separat installieren / install separately):
+https://www.nexusmods.com/schedule1/mods/795
+NexusModID: 2734. Singleplayer und Multiplayer-Beta teilen eine Nexus-Seite;
+passenden Download waehlen / choose the correct singleplayer download.
+
+0.1.7 repairs backpack loading, not already damaged item data.
+Reported storage item losses remain under investigation.
