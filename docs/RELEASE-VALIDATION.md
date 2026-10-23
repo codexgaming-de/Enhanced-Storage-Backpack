@@ -1,3 +1,20 @@
+# Validation — 0.1.7 preparation
+
+Tested gameplay baseline: 1abcfb5afdf3dac169790263629a11a400c49b83.
+User logs dated 2026-10-23 13:40–13:43 show marker native-deserializer-release-prep.1,
+36 occupied slots saved and reloaded, identical logged ID/type/quantity/quality/packaging,
+and successful opening after restart. No ESB errors. Other Interop and translation
+errors remain in Latest.log; the whole mod environment is not error-free.
+Updates Checker recognition confirmed separately by the user.
+
+0.1.7 preparation changes version strings and documentation only.
+Reference compilation passes; actual net6.0 packaging and a smoke test of the
+DLL extracted from that archive remain pending on the user's game installation.
+Storage item loss reports and already damaged saves are not resolved by this release.
+No multiplayer validation or beta port is included.
+
+## Historical validation (0.1.6)
+
 # Validation — 0.1.6
 
 Updated 27 September 2026. Runtime code baseline:
