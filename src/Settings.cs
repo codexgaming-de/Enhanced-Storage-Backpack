@@ -167,7 +167,7 @@ internal sealed class Settings : IDisposable
 
     private void WriteDiagnosticSnapshot()
     {
-        Trace("ESB_SETTINGS_SNAPSHOT | 0.1.6");
+        Trace("ESB_SETTINGS_SNAPSHOT | 0.1.7");
         foreach (var (entry, _) in subscriptions)
             Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
     }
