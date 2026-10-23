@@ -14,6 +14,7 @@ using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
 [assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.6", "CoDeX-Gaming")]
+[assembly: System.Reflection.AssemblyMetadata("NexusModID", "2734")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -182,7 +183,7 @@ public sealed class Mod : MelonMod
         // Diagnostics must never interrupt the game's save pipeline.
         try
         {
-            if (instance?.settings == null || !instance.settings.DebugLogging.Value) return;
+            if (instance?.settings == null) return;
             instance.settings.Trace($"ESB_SAVE_PATH | stage={stage} | disabled={instance.disabled} | clientOnly={InstanceFinder.IsClientOnly} | playerPresent={player != null} | local={(player != null && LocalPlayer(player))} | backpack={instance.backpack?.DiagnosticState ?? "missing"}");
         }
         catch (Exception) { /* Diagnostic observation only; no persistence action. */ }
