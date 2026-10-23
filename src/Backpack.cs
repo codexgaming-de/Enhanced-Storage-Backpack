@@ -65,7 +65,14 @@ internal sealed class Backpack : IDisposable
         {
             var items = new string?[owner.ItemSlots.Count];
             for (int i = 0; i < items.Length; i++)
+            {
                 items[i] = owner.ItemSlots[i].ItemInstance?.GetItemData().GetJson(false);
+                if (settings.DebugLogging.Value && items[i] != null)
+                {
+                    try { settings.Trace($"ESB_ITEM_SERIALIZED | slot={i + 1} | {DescribeJson(items[i]!)}"); }
+                    catch (Exception ex) { settings.Error($"ESB_ITEM_DIAGNOSTIC | stage=serialize | slot={i + 1}", ex); }
+                }
+            }
             payload = BackpackSave.Encode(items);
         }
         if (payload == null) return inventory;
@@ -92,13 +99,15 @@ internal sealed class Backpack : IDisposable
         var items = savedPayload == null ? Array.Empty<string?>() : BackpackSave.Decode(savedPayload);
         var restored = new BackpackOwner();
         Grow(restored, Math.Max(Math.Clamp(settings.BackpackSlots.Value, 1, 128), items.Length));
-        settings.Trace("ESB_BACKPACK_LOADER | native-deserializer-test.1");
+        settings.Trace("ESB_BACKPACK_LOADER | native-deserializer-diagnostics.2");
         for (int i = 0; i < items.Length; i++)
         {
             if (items[i] == null) continue;
             using var json = JsonDocument.Parse(items[i]!);
             string type = json.RootElement.GetProperty("DataType").GetString()
                 ?? throw new InvalidDataException("Item has no data type.");
+            if (settings.DebugLogging.Value)
+                settings.Trace($"ESB_ITEM_SAVED | slot={i + 1} | {DescribeJson(items[i]!)}");
             var loader = LoadManager.Instance.GetItemLoader(type)
                 ?? throw new InvalidDataException($"No item loader for {type}.");
             // Enter through the game's native dispatcher. Calling the managed
@@ -106,12 +115,64 @@ internal sealed class Backpack : IDisposable
             // Keep the loader existence check above so unsupported data fails closed.
             var item = ItemDeserializer.LoadItem(items[i]!)
                 ?? throw new InvalidDataException("Backpack item could not be restored.");
+            TraceItem("restored", i, item);
             restored.ItemSlots[i].SetStoredItem(item, true);
         }
         owner = restored;
         ready = true;
         pending = true;
         settings.Trace($"ESB_BACKPACK_READY | slots={owner.ItemSlots.Count} | occupied={owner.GetNonEmptySlotCount()}");
+    }
+    // Temporary, opt-in diagnostics. Never create replacement items or rewrite saves.
+    private static string DescribeJson(string value)
+    {
+        using var json = JsonDocument.Parse(value);
+        var root = json.RootElement;
+        string Field(string key) => root.TryGetProperty(key, out var field)
+            ? field.ToString().Replace("\r", " ").Replace("\n", " ") : "<missing>";
+        return $"id={Field("ID")} | dataType={Field("DataType")} | quantity={Field("Quantity")} | quality={Field("Quality")} | packaging={Field("PackagingID")}";
+    }
+    private void TraceItem(string stage, int index, ItemInstance item)
+    {
+        if (!settings.DebugLogging.Value) return;
+        try
+        {
+            var definition = item.Definition;
+            settings.Trace($"ESB_ITEM_RUNTIME | stage={stage} | slot={index + 1} | nativeType={item.GetIl2CppType().FullName} | definitionType={definition?.GetIl2CppType().FullName ?? "<null>"}");
+        }
+        catch (Exception ex) { settings.Error($"ESB_ITEM_DIAGNOSTIC | stage={stage} | slot={index + 1}", ex); }
+    }
+    private void DiagnoseFailedOpen()
+    {
+        if (!settings.DebugLogging.Value || owner == null) return;
+        try
+        {
+            settings.Trace("ESB_UI_PROBE_BEGIN | already-bound slots only; original open failed");
+            for (int i = 0; i < owner.ItemSlots.Count; i++)
+            {
+                var item = owner.ItemSlots[i].ItemInstance;
+                if (item != null) TraceItem("open-failed", i, item);
+            }
+            var uis = StorageMenu.Instance.SlotsUIs;
+            for (int u = 0; u < uis.Length; u++)
+            {
+                var ui = uis[u];
+                if (ui == null || ui.assignedSlot == null) continue;
+                int slot = -1;
+                for (int i = 0; i < owner.ItemSlots.Count; i++)
+                    if (owner.ItemSlots[i].Pointer == ui.assignedSlot.Pointer) { slot = i; break; }
+                if (slot < 0) continue;
+                try
+                {
+                    settings.Trace($"ESB_UI_PROBE | slot={slot + 1} | ui={u + 1} | itemUI={ui.ItemUI?.GetIl2CppType().FullName ?? "<null>"}");
+                    ui.UpdateUI();
+                    settings.Trace($"ESB_UI_PROBE_OK | slot={slot + 1}");
+                }
+                catch (Exception ex) { settings.Error($"ESB_UI_PROBE_FAILED | slot={slot + 1} | ui={u + 1}", ex); }
+            }
+            settings.Trace("ESB_UI_PROBE_END | unbound slots were not tested");
+        }
+        catch (Exception ex) { settings.Error("ESB_UI_DIAGNOSTIC_FAILED", ex); }
     }
     private static bool Protected(ItemSlot slot) => slot.IsLocked || slot.IsAddLocked || slot.IsRemovalLocked ||
         slot.SiblingSet != null || (slot.PlayerFilter != null && !slot.PlayerFilter.IsDefault());
@@ -170,7 +231,12 @@ internal sealed class Backpack : IDisposable
             if (Cursor.visible || player.IsArrested || player.IsUnconscious || player.IsSleeping ||
                 player.IsTased || player.IsRagdolled || player.IsInVehicle ||
                 !StorageMenu.InstanceExists || StorageMenu.Instance.IsOpen) return;
-            menu.Open(owner!);
+            try { menu.Open(owner!); }
+            catch
+            {
+                DiagnoseFailedOpen();
+                throw;
+            }
             settings.Trace("ESB_BACKPACK_OPEN");
         }
         catch (Exception ex)
