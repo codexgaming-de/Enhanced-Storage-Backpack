@@ -15,7 +15,6 @@ internal sealed class Settings : IDisposable
     private readonly DiagnosticLog diagnostics;
 
     public MelonPreferences_Entry<ModLanguage> Language { get; }
-    public MelonPreferences_Entry<bool> DebugLogging { get; }
     public MelonPreferences_Entry<int> BackpackSlots { get; }
     public MelonPreferences_Entry<KeyCode> BackpackHotkey { get; }
     public MelonPreferences_Entry<int> SmallRackSlots { get; private set; } = null!;
@@ -46,7 +45,6 @@ internal sealed class Settings : IDisposable
         diagnostics = new DiagnosticLog(logger);
         var general = Category("01_General", "Allgemein", "General");
         Language = Entry(general, "Language", ModLanguage.Deutsch, "Sprache", "Language");
-        DebugLogging = Entry(general, "DebugLogging", false, "Diagnoseprotokoll", "Debug logging");
         var backpack = Category("02_Backpack", "Rucksack", "Backpack");
         BackpackSlots = Entry(backpack, "Slots", 40, "Plätze (1–128)", "Slots (1–128)", 1, 128);
         BackpackHotkey = Entry(backpack, "Hotkey", KeyCode.B, "Taste zum Öffnen", "Open key");
@@ -111,7 +109,6 @@ internal sealed class Settings : IDisposable
     private static (string German, string English) Describe(string category, string id)
     {
         if (id == "Language") return ("Wählt die Sprache der Einstellungen dieses Plugins.", "Selects the language of this plugin's settings.");
-        if (id == "DebugLogging") return ("Schreibt Diagnosemeldungen nach UserData/Enhanced-Storage-Backpack-Debug.log.", "Writes diagnostics to UserData/Enhanced-Storage-Backpack-Debug.log.");
         if (id == "Hotkey") return ("Öffnet oder schließt den Rucksack während des Spiels.", "Opens or closes the backpack during gameplay.");
         if (category.EndsWith("_Backpack")) return ("Rucksackgröße: 1 bis 128 Plätze, 40 pro Seite. Belegte Plätze bleiben beim Verkleinern geschützt.", "Backpack capacity: 1 to 128 slots, 40 per page. Occupied slots remain protected when shrinking.");
         bool implemented = category.EndsWith("_SmallStorageRack") || category.EndsWith("_MediumStorageRack") || category.EndsWith("_LargeStorageRack") ||
@@ -137,7 +134,7 @@ internal sealed class Settings : IDisposable
     }
 
     public string Text(string german, string english) => Language.Value == ModLanguage.English ? english : german;
-    public void Trace(string message) => diagnostics.Write(DebugLogging.Value, message);
+    public void Trace(string message) => diagnostics.Write(true, message);
     public void Error(string context, Exception exception)
     {
         logger.Error($"{context}: {exception.Message}");
@@ -166,12 +163,10 @@ internal sealed class Settings : IDisposable
             ReferenceEquals(entry, SafeSlots) || ReferenceEquals(entry, SafeRows) ||
             ReferenceEquals(entry, FilingCabinetSlots) || ReferenceEquals(entry, FilingCabinetRows)) RackChanged?.Invoke();
         if (ReferenceEquals(entry, BackpackSlots)) BackpackChanged?.Invoke();
-        if (ReferenceEquals(entry, DebugLogging) && DebugLogging.Value) WriteDiagnosticSnapshot();
     }
 
     private void WriteDiagnosticSnapshot()
     {
-        if (!DebugLogging.Value) return;
         Trace("ESB_SETTINGS_SNAPSHOT | 0.1.6");
         foreach (var (entry, _) in subscriptions)
             Trace($"ESB_SETTING_CURRENT | {entry.Category.Identifier}/{entry.Identifier} = {entry.GetValueAsString()}");
