@@ -66,7 +66,17 @@ internal sealed class Backpack : IDisposable
             var items = new string?[owner.ItemSlots.Count];
             for (int i = 0; i < items.Length; i++)
             {
-                items[i] = owner.ItemSlots[i].ItemInstance?.GetItemData().GetJson(false);
+                var item = owner.ItemSlots[i].ItemInstance;
+                if (item == null) continue;
+                var data = item.GetItemData()
+                    ?? throw new InvalidDataException($"Backpack slot {i + 1}: occupied item returned no save data.");
+                string dataType = data.DataType;
+                string nativeDataType = data.GetIl2CppType().Name;
+                TraceItem("serialize", i, item);
+                settings.Trace($"ESB_ITEM_DATA | slot={i + 1} | nativeDataType={nativeDataType} | dataType={dataType}");
+                string serialized = data.GetJson(false);
+                ValidateSerializedItem(serialized, dataType, nativeDataType, i + 1);
+                items[i] = serialized;
                 if (settings.DebugLogging.Value && items[i] != null)
                 {
                     try { settings.Trace($"ESB_ITEM_SERIALIZED | slot={i + 1} | {DescribeJson(items[i]!)}"); }
@@ -99,7 +109,7 @@ internal sealed class Backpack : IDisposable
         var items = savedPayload == null ? Array.Empty<string?>() : BackpackSave.Decode(savedPayload);
         var restored = new BackpackOwner();
         Grow(restored, Math.Max(Math.Clamp(settings.BackpackSlots.Value, 1, 128), items.Length));
-        settings.Trace("ESB_BACKPACK_LOADER | native-deserializer-diagnostics.2");
+        settings.Trace("ESB_BACKPACK_LOADER | native-deserializer-saveguard.3");
         for (int i = 0; i < items.Length; i++)
         {
             if (items[i] == null) continue;
@@ -122,6 +132,21 @@ internal sealed class Backpack : IDisposable
         ready = true;
         pending = true;
         settings.Trace($"ESB_BACKPACK_READY | slots={owner.ItemSlots.Count} | occupied={owner.GetNonEmptySlotCount()}");
+    }
+    // Refuse an incomplete snapshot before handing it to the native inventory writer.
+    // This is a narrow guard against subtype loss, not a repair for old ItemData.
+    private static void ValidateSerializedItem(string serialized, string dataType, string nativeDataType, int slot)
+    {
+        if (string.IsNullOrWhiteSpace(serialized))
+            throw new InvalidDataException($"Backpack slot {slot}: occupied item returned empty JSON.");
+        using var json = JsonDocument.Parse(serialized);
+        if (json.RootElement.ValueKind != JsonValueKind.Object ||
+            !json.RootElement.TryGetProperty("DataType", out var type) ||
+            type.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(type.GetString()))
+            throw new InvalidDataException($"Backpack slot {slot}: item JSON has no valid DataType.");
+        if (type.GetString() == "ItemData" &&
+            (dataType != "ItemData" || nativeDataType != "ItemData"))
+            throw new InvalidDataException($"Backpack slot {slot}: refusing subtype loss ({nativeDataType}/{dataType} -> ItemData).");
     }
     // Temporary, opt-in diagnostics. Never create replacement items or rewrite saves.
     private static string DescribeJson(string value)
