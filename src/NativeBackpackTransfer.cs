@@ -14,7 +14,7 @@ internal sealed class NativeBackpackTransfer
     private bool used;
     private readonly bool cash;
     internal BackpackTransferRules.Plan Plan { get; }
-    private static string? Json(ItemSlot slot) => slot.ItemInstance?.GetItemData().GetJson(false);
+    private static string? Json(ItemSlot slot) => BackpackItemCodec.Serialize(slot.ItemInstance);
     private static BackpackTransferRules.Slot Describe(ItemSlot slot) => new(
         slot.Quantity, slot.ItemInstance != null, slot.IsLocked, slot.IsAddLocked, slot.IsRemovalLocked);
     private static bool Unsupported(ItemSlot slot) => slot.SiblingSet != null || slot.TryCast<CashSlot>() != null ||
@@ -42,8 +42,8 @@ internal sealed class NativeBackpackTransfer
             var addition = (destination ?? item).GetCopy().Cast<CashInstance>(); addition.SetBalance(balance + moved);
             nextSource = remainder.Balance <= 0 && !sourceWallet ? null : remainder;
             nextTarget = addition;
-            nextSourceJson = nextSource?.GetItemData().GetJson(false);
-            nextTargetJson = nextTarget.GetItemData().GetJson(false);
+            nextSourceJson = BackpackItemCodec.Serialize(nextSource);
+            nextTargetJson = BackpackItemCodec.Serialize(nextTarget);
             Plan = new(destination == null ? BackpackTransferRules.Kind.Move : BackpackTransferRules.Kind.Merge, 1);
             return;
         }
@@ -69,8 +69,8 @@ internal sealed class NativeBackpackTransfer
         if (oldSource == null || (destination != null && oldTarget == null) || nextTarget == null ||
             ((Plan.Kind == BackpackTransferRules.Kind.Swap || source.Quantity != Plan.Amount) && nextSource == null))
             throw new InvalidOperationException("Native item copy failed before transfer.");
-        nextSourceJson = nextSource?.GetItemData().GetJson(false);
-        nextTargetJson = nextTarget?.GetItemData().GetJson(false);
+        nextSourceJson = BackpackItemCodec.Serialize(nextSource);
+        nextTargetJson = BackpackItemCodec.Serialize(nextTarget);
     }
     // This is the single native commit entry point for a validated host session.
     // The caller supplies arrays from the authenticated player's native owners.
