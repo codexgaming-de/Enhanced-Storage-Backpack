@@ -65,7 +65,7 @@ internal sealed class Backpack : IDisposable
         {
             var items = new string?[owner.ItemSlots.Count];
             for (int i = 0; i < items.Length; i++)
-                items[i] = owner.ItemSlots[i].ItemInstance?.GetItemData().GetJson(false);
+                items[i] = BackpackItemCodec.Serialize(owner.ItemSlots[i].ItemInstance);
             payload = BackpackSave.Encode(items);
         }
         if (payload == null) return inventory;
@@ -92,16 +92,13 @@ internal sealed class Backpack : IDisposable
         var items = savedPayload == null ? Array.Empty<string?>() : BackpackSave.Decode(savedPayload);
         var restored = new BackpackOwner();
         Grow(restored, Math.Max(Math.Clamp(settings.EffectiveBackpackSlots, 1, 128), items.Length));
+        settings.Trace("ESB_BACKPACK_LOADER | native-deserializer-beta.4");
         for (int i = 0; i < items.Length; i++)
         {
             if (items[i] == null) continue;
-            using var json = JsonDocument.Parse(items[i]!);
-            string type = json.RootElement.GetProperty("DataType").GetString()
-                ?? throw new InvalidDataException("Item has no data type.");
-            var loader = LoadManager.Instance.GetItemLoader(type)
-                ?? throw new InvalidDataException($"No item loader for {type}.");
-            var item = loader.LoadItem(items[i]!)
+            var item = BackpackItemCodec.Load(items[i]!)
                 ?? throw new InvalidDataException("Backpack item could not be restored.");
+            settings.Trace($"ESB_ITEM_RESTORED | slot={i + 1} | nativeType={item.GetIl2CppType().FullName}");
             restored.ItemSlots[i].SetStoredItem(item, true);
         }
         owner = restored;
@@ -182,5 +179,44 @@ internal sealed class Backpack : IDisposable
         settings.LanguageChanged -= RefreshLanguage;
         menu.Dispose();
         owner = null;
+    }
+}
+
+
+// Shared by local saves and remote item restoration/transfer snapshots.
+internal static class BackpackItemCodec
+{
+    internal static ItemInstance? Load(string? text)
+    {
+        if (text == null) return null;
+        using var doc = JsonDocument.Parse(text);
+        string type = doc.RootElement.GetProperty("DataType").GetString()
+            ?? throw new InvalidDataException("Missing item type.");
+        if (LoadManager.Instance.GetItemLoader(type) == null)
+            throw new InvalidDataException($"No item loader for {type}.");
+        return ItemDeserializer.LoadItem(text)
+            ?? throw new InvalidDataException("Item loader failed.");
+    }
+    internal static string? Serialize(ItemInstance? item)
+    {
+        if (item == null) return null;
+        var data = item.GetItemData()
+            ?? throw new InvalidDataException("Occupied item returned no save data.");
+        string serialized = data.GetJson(false);
+        ValidateSerializedItem(serialized, data.DataType, data.GetIl2CppType().Name, 0);
+        return serialized;
+    }
+    internal static void ValidateSerializedItem(string serialized, string dataType, string nativeDataType, int slot)
+    {
+        if (string.IsNullOrWhiteSpace(serialized))
+            throw new InvalidDataException($"Backpack slot {slot}: occupied item returned empty JSON.");
+        using var json = JsonDocument.Parse(serialized);
+        if (json.RootElement.ValueKind != JsonValueKind.Object ||
+            !json.RootElement.TryGetProperty("DataType", out var type) ||
+            type.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(type.GetString()))
+            throw new InvalidDataException($"Backpack slot {slot}: item JSON has no valid DataType.");
+        if (type.GetString() == "ItemData" &&
+            (dataType != "ItemData" || nativeDataType != "ItemData"))
+            throw new InvalidDataException($"Backpack slot {slot}: refusing subtype loss ({nativeDataType}/{dataType} -> ItemData).");
     }
 }
