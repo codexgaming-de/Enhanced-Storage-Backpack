@@ -53,7 +53,6 @@ internal sealed class MultiplayerDiagnostics
 
     internal void Observe(string stage, Player? player, int characters = -1)
     {
-        if (!settings.DebugLogging.Value) return;
         try
         {
             int label = 0;
