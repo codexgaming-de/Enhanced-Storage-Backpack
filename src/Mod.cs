@@ -14,6 +14,7 @@ using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
 [assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", EnhancedStorageBackpack.MultiplayerProtocol.Build, "CoDeX-Gaming")]
+[assembly: System.Reflection.AssemblyMetadata("NexusModID", "2734")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
 namespace EnhancedStorageBackpack;
@@ -76,8 +77,8 @@ public sealed class Mod : MelonMod
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-beta.3 | Experimentelle Multiplayer-Beta.", "ESB_READY | 0.2.0-beta.3 | Experimental multiplayer beta."));
-            settings.Trace("ESB_READY | 0.2.0-beta.3 | experimental; 0.4.7 hotfix; multiplayer community validation pending");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-beta.4 | Experimentelle Multiplayer-Beta.", "ESB_READY | 0.2.0-beta.4 | Experimental multiplayer beta."));
+            settings.Trace("ESB_READY | 0.2.0-beta.4 | experimental; native item loading fix; host/client validation pending");
         }
         catch (Exception ex)
         {
@@ -234,7 +235,7 @@ public sealed class Mod : MelonMod
         // Diagnostics must never interrupt the game's save pipeline.
         try
         {
-            if (instance?.settings == null || !instance.settings.DebugLogging.Value) return;
+            if (instance?.settings == null) return;
             instance.settings.Trace($"ESB_SAVE_PATH | stage={stage} | disabled={instance.disabled} | clientOnly={InstanceFinder.IsClientOnly} | playerPresent={player != null} | local={(player != null && LocalPlayer(player))} | backpack={instance.backpack?.DiagnosticState ?? "missing"}");
         }
         catch (Exception) { /* Diagnostic observation only; no persistence action. */ }
