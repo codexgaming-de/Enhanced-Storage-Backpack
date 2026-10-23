@@ -72,7 +72,7 @@ internal sealed class NativeInventoryChannel : IDisposable
     }
     private void TraceReceive(string detail)
     {
-        if (!settings.DebugLogging.Value || receiveTraces >= 12) return;
+        if (receiveTraces >= 12) return;
         receiveTraces++;
         settings.Trace("ESB_NATIVE_RECEIVE_TRACE_V1 | " + detail);
     }
