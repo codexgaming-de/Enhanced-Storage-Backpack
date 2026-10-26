@@ -60,10 +60,11 @@ def main():
         if args.beta:
             for name in ('MULTIPLAYER-BETA.md', 'BETA-FEEDBACK.md'):
                 files[name] = (root / 'docs' / name).read_bytes()
+        validated_beta = args.beta and version == '0.2.0-beta.4'
         manifest = {'version': version, 'targetFramework': 'net6.0',
                     'channel': 'experimental-multiplayer-beta' if args.beta else 'stable',
-                    'nativeMultiplayerTested': False if args.beta else None,
-                    'nativeTestScope': '0.4.7f12 initialization confirmed before version-only rebuild; multiplayer community validation pending' if args.beta else None,
+                    'nativeMultiplayerTested': validated_beta if args.beta else None,
+                    'nativeTestScope': ('Owner-confirmed host + one client, two Steam accounts on one Nobara PC with Wolf/Moonlight; Schedule I 0.4.7f12, MelonLoader 0.7.3, SteamNetworkLib 1.6.0 IL2CPP; backpack transfers, quantities/quality, rejoin, world save/full restart and Large Storage Rack 128 slots; sessions 2026-10-26/27. Exact packaged DLL pending.' if validated_beta else 'Native multiplayer validation pending' if args.beta else None),
                     'exactPackagedDllTested': False,
                     'externalDependencies': ['SteamNetworkLib 1.6.0 IL2CPP (UserLibs)'] if args.beta else [],
                     'files': {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}}
@@ -84,7 +85,7 @@ def main():
             f.write(package_data)
         checksum.write_text(hashlib.sha256(package_data).hexdigest() + '  ' + archive.name + '\n')
     print(f'Package: {archive}\nSHA-256: {checksum}')
-    print('Community-test beta: multiplayer validation pending. Nothing was installed or published.')
+    print('Test the DLL extracted from this ZIP in-game before uploading. Nothing was installed or published.')
 
 
 if __name__ == '__main__':
