@@ -1,12 +1,36 @@
-> **0.2.0-beta.3 — Schedule I 0.4.7f12 compatibility hotfix.**
-> Initialization was confirmed on the hotfix code before this version-only rebuild.
-> Transfers, rejoining and save/load on 0.4.7 await community testing.
-> Earlier two-client results below describe the previous 0.4.6 build, not this hotfix.
+# Nexus draft — 0.2.0-beta.4 multiplayer beta
 
-> Historical stable singleplayer 0.1.6 material below.
-> For the additional 0.2.0-beta.3 multiplayer upload use MULTIPLAYER-BETA.md,
-> BETA-FEEDBACK.md and the current CHANGELOG.md. Do not replace the stable file.
-> Mark the hotfix experimental; multiplayer validation on 0.4.7 remains pending.
+Status: unpublished release candidate. Owner-confirmed gameplay tests passed;
+release ZIP build and exact packaged DLL smoke test remain pending.
+Upload as an experimental multiplayer beta; preserve the separate stable download.
+
+File title: Enhanced Storage + Backpack — Multiplayer Beta 0.2.0-beta.4
+Version: 0.2.0-beta.4
+Required: IL2CPP, MelonLoader, SteamNetworkLib 1.6.0 IL2CPP.
+Host and every client must use the same beta.4.
+
+## English changelog for Nexus
+
+- Improved backpack item loading using the game's native item deserialization.
+- Added checks against empty item data and detectable item-type loss during saves and multiplayer transfers.
+- Diagnostic logging is now always enabled and retains the last three sessions.
+- Added recognition metadata for the optional Updates Checker.
+- Host/client tests passed for backpack transfers, item quantities and quality, rejoining, saving/full restart, and a shared Large Storage Rack with 128 slots.
+
+Tested on Schedule I 0.4.7f12 with MelonLoader 0.7.3 and SteamNetworkLib 1.6.0 IL2CPP,
+using two Steam accounts on one Nobara PC with Wolf/Moonlight.
+This remains an experimental beta. Separate-PC/WAN play, 3–4 players, cash edge
+cases, forced crashes and other mod combinations are not covered by these tests.
+Already damaged items are not restored, and not every reported storage-loss case
+has been reproduced or proven fixed. Please include both peers' Latest.log and
+Enhanced-Storage-Backpack-Debug.log when reporting issues.
+
+Developed with OpenAI Codex assistance; requirements and manual testing by CoDeX-Gaming.
+Dependencies are installed separately and are not included in the ZIP.
+
+---
+
+# Archived singleplayer release material — not for the beta upload
 
 # Nexus-Veröffentlichung – Beschreibung für 0.1.6
 
