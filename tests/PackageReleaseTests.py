@@ -57,12 +57,23 @@ class PackageTests(unittest.TestCase):
                 'CHANGELOG.md', 'PERMISSIONS.md', 'MULTIPLAYER-BETA.md', 'BETA-FEEDBACK.md', 'manifest.json'})
             manifest = json.loads(z.read('manifest.json'))
             self.assertEqual(manifest['channel'], 'experimental-multiplayer-beta')
-            self.assertFalse(manifest['nativeMultiplayerTested'])
+            self.assertTrue(manifest['nativeMultiplayerTested'])
             self.assertFalse(manifest['exactPackagedDllTested'])
-            self.assertIn('community validation pending', manifest['nativeTestScope'])
-            self.assertEqual(manifest['version'], '0.2.0-beta.3')
+            self.assertIn('host + one client', manifest['nativeTestScope'])
+            self.assertEqual(manifest['version'], '0.2.0-beta.4')
             self.assertIsNone(z.testzip())
         self.assertTrue(Path(str(archive) + '.sha256').is_file())
+
+    def test_future_beta_does_not_inherit_validation(self):
+        for name in ('EnhancedStorageBackpack.csproj', 'src/MultiplayerProtocol.cs'):
+            path = self.root / name
+            path.write_text(path.read_text().replace('0.2.0-beta.4', '0.2.0-beta.999'))
+        self.run_package()
+        with ZipFile(next((self.root / 'dist').glob('*.zip'))) as z:
+            manifest = json.loads(z.read('manifest.json'))
+            self.assertFalse(manifest['nativeMultiplayerTested'])
+            self.assertFalse(manifest['exactPackagedDllTested'])
+            self.assertEqual(manifest['nativeTestScope'], 'Native multiplayer validation pending')
 
     def test_il2cpp_dependency_filename(self):
         source = self.game / 'UserLibs/SteamNetworkLib.dll'
