@@ -1,12 +1,13 @@
-> **0.2.0-beta.3 — Schedule I 0.4.7f12 compatibility hotfix.**
-> Initialization was confirmed on the hotfix code before this version-only rebuild.
-> Transfers, rejoining and save/load on 0.4.7 await community testing.
-> Earlier two-client results below describe the previous 0.4.6 build, not this hotfix.
+> **0.2.0-beta.4 — experimental multiplayer release candidate (unpublished).**
+> Owner-confirmed host + one client tests passed on Schedule I 0.4.7f12,
+> MelonLoader 0.7.3 and SteamNetworkLib 1.6.0 IL2CPP, using two Steam accounts
+> on one Nobara PC with Wolf/Moonlight. The exact release ZIP still needs its smoke test.
+> Host and every client must use the same beta. See RELEASE-VALIDATION.md for scope.
 
-# Enhanced Storage with Backpack — 0.2.0-beta.3
+# Enhanced Storage with Backpack — 0.2.0-beta.4
 
-By CoDeX-Gaming. Experimental community beta, 1 October 2026.
-Developed with OpenAI Codex assistance. Core multiplayer gameplay was tested by the project owner with two Steam accounts
+By CoDeX-Gaming. Experimental community beta; release candidate after the 26/27 October 2026 test sessions.
+Developed with OpenAI Codex assistance. Core multiplayer gameplay was tested by the project owner with a host and one client, using two Steam accounts
 on one Nobara PC (main client and Wolf/Moonlight client). Automated tests do not establish compatibility
 with every game version, mod combination or disconnect timing.
 
@@ -14,7 +15,7 @@ with every game version, mod combination or disconnect timing.
 
 Die stabile Singleplayer-Version **0.1.6** bleibt separat erhältlich. Diese Beta
 ersetzt sie nicht. Für die Beta verwenden **Host und alle Mitspieler dieselbe
-0.2.0-beta.3** und **SteamNetworkLib 1.6.0 IL2CPP**. Eine Mischung mit der stabilen
+0.2.0-beta.4** und **SteamNetworkLib 1.6.0 IL2CPP**. Eine Mischung mit der stabilen
 Version oder unmodifizierten Clients wird nicht unterstützt. Nur IL2CPP, nicht Mono.
 
 ### Installation
@@ -26,14 +27,14 @@ Version oder unmodifizierten Clients wird nicht unterstützt. Nur IL2CPP, nicht 
    `UserLibs/SteamNetworkLib.dll` installieren. Die Abhängigkeit ist nicht im ZIP.
 4. MelonLoader ist erforderlich. Referenzen: MelonLoader 0.7.3,
    Mod Manager & Phone App 2.2.4. Andere Versionen sind nicht zugesichert.
-5. Für Rückmeldungen das eigene Debug-Logging aktivieren. Die Datei heißt
+5. Das eigene Debug-Logging ist immer aktiv. Die Datei heißt
    `UserData/Enhanced-Storage-Backpack-Debug.log`; sie enthält die letzten drei
    protokollierten Sitzungen in einer Datei.
 
 ### Implementiertes Verhalten
 
 - Der Host bestimmt Rucksackplätze sowie Plätze/Reihen aller neun Lagertypen.
-  Sprache, Öffnungstaste und Logging bleiben lokal.
+  Sprache und Öffnungstaste bleiben lokal. Diagnose-Logging ist immer aktiv.
 - Clients öffnen den Rucksack über dieselbe native Menüoberfläche. Gegenstände
   werden erst nach Host-Prüfung und geordneter Bestätigung übertragen.
 - Verschieben, Teilen, Zusammenführen, Tauschen und schrittweises Quick-Move
@@ -57,9 +58,11 @@ Version oder unmodifizierten Clients wird nicht unterstützt. Nur IL2CPP, nicht 
 
 ### Grenzen dieser ersten Beta
 
-Zwei-Client-Kerntests mit gewöhnlichen Items, Speichern/Laden, Wiederbeitritt,
-sicherer Größenänderung und gemeinsamer Lagerbedienung wurden vom Projektbetreiber
-bestätigt. Cash-Sonderfälle, getrennte PCs/WAN, 3–4 Spieler und erzwungene Abbrüche
+Host-/Client-Tests mit zwei Accounts auf einem Nobara-PC sind bestätigt:
+Rucksacktransfers, Mengen und Qualität, Wiederbeitritt, Speichern/vollständiger
+Neustart, Übernahme der Host-Rucksackgröße (128 auf 50) und ein gemeinsam
+verwendetes Large Storage Rack mit 128 Plätzen. Die genaue ZIP-DLL muss noch
+abschließend getestet werden. Cash-Sonderfälle, getrennte PCs/WAN, 3–4 Spieler und erzwungene Abbrüche
 sind noch nicht validiert. Der native Welt-Speichervorgang besteht aus mehreren Dateien;
 der Mod macht ihn nicht atomar gegen Prozessabbruch oder Stromausfall.
 
@@ -87,8 +90,7 @@ The host and every client need the **same beta build**, MelonLoader and
 downloaded dependency in `UserLibs/SteamNetworkLib.dll`. Do not install two ESB
 versions together. Mono and mixed stable/beta/unmodded parties are unsupported.
 
-The host controls all capacities and storage rows; language, hotkey and logging
-remain local. Backpack moves are prepared by the host and committed after native
+The host controls all capacities and storage rows; language and hotkey remain local. Diagnostic logging is always enabled. Backpack moves are prepared by the host and committed after native
 owner acknowledgements. Normal-item quick moves proceed across suitable visible
 slots; cash quick moves use one suitable destination per click. Money uses native
 cash data and its wallet, with rejection of unsafe floating-point amounts.
@@ -104,7 +106,7 @@ a failed/deferred save request, not a successful save. Check the dedicated debug
 log. A synchronization fault can keep interaction blocked until the save is
 reloaded. The game's multi-file save is not made crash-atomic by this mod.
 
-**Core two-client gameplay passed on the baseline used for this release.**
+**Host + one client gameplay passed for beta.4 in the scope listed above.**
 Cash-specific cases, separate-PC/WAN play, 3–4 players and forced crashes remain
 unverified. The exact packaged DLL still requires its final smoke test. Use a
 separate test save/copy. Game versions and inventory/network/save mods can affect
@@ -114,12 +116,12 @@ beta save is unverified. See BETA-FEEDBACK.md for the community report template.
 
 ## Diagnostic notes / Diagnosehinweise
 
-The optional connection and transfer traces remain enabled only with DebugLogging.
+Connection and transfer traces are always enabled, regardless of old DebugLogging settings.
 The log may show `ESB_MP_host-offer-rejected` for an empty native inventory during
 join; this legacy diagnostic is separate from the Steam handshake. Include the
 full session log rather than interpreting that line alone.
 
-Die optionale Verbindungs- und Transferdiagnose bleibt für die Beta erhalten.
+Die Verbindungs- und Transferdiagnose ist immer aktiv.
 `ESB_MP_host-offer-rejected` kann beim Beitritt für ein leeres natives Inventar
 erscheinen; diese alte Diagnose ist nicht das Ergebnis des Steam-Verbindungsaufbaus.
 Bitte bei Problemen den vollständigen Sitzungslog beilegen.
