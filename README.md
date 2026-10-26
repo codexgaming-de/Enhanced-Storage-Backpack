@@ -1,22 +1,18 @@
-> **0.2.0-beta.3 — Schedule I 0.4.7f12 compatibility hotfix.**
-> Initialization was confirmed on the hotfix code before this version-only rebuild.
-> Transfers, rejoining and save/load on 0.4.7 await community testing.
-> Earlier two-client results below describe the previous 0.4.6 build, not this hotfix.
-
-> **Experimental multiplayer beta — 0.2.0-beta.3.**
-> Startup confirmed on 0.4.7f12; multiplayer testing of this hotfix is pending.
-> Host and clients require the identical beta and SteamNetworkLib 1.6.0 IL2CPP in `UserLibs`.
-> Stable singleplayer 0.1.6 remains on `main` and a separate Nexus download.
-> Read [beta installation and limitations](docs/MULTIPLAYER-BETA.md) and
-> [community feedback](docs/BETA-FEEDBACK.md).
+> **0.2.0-beta.4 — experimental multiplayer release candidate (unpublished).**
+> Owner-confirmed host + one client tests passed on Schedule I 0.4.7f12,
+> MelonLoader 0.7.3 and SteamNetworkLib 1.6.0 IL2CPP, using two Steam accounts
+> on one Nobara PC with Wolf/Moonlight. The exact release ZIP still needs its smoke test.
+> Host and every client must use the same beta. See docs/RELEASE-VALIDATION.md for scope.
 
 # Enhanced Storage + Backpack
 
 Storage- und Backpack-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Dieser Branch: 0.2.0-beta.3.** Die früher bestätigten Singleplayer-Tests von
-0.1.6 ersetzen keine Multiplayer-Prüfung dieser Beta. Der Start des Hotfixes wurde auf 0.4.7f12 bestätigt. Multiplayer-Transfers, Wiederbeitritt und Speichern/Laden prüft die Community.
+**Dieser Branch: 0.2.0-beta.4.** Bestätigt sind Rucksacktransfers mit korrekter
+Menge und Qualität, Wiederbeitritt, Speichern mit vollständigem Neustart sowie
+ein Large Storage Rack mit 128 Plätzen. Das ersetzt keine Prüfung aller
+Modkombinationen oder von getrennten PCs/WAN.
 
 ## Funktionen
 
@@ -38,7 +34,7 @@ Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbe
 - MelonPreferences; Einstellungen im Mod Manager & Phone App veränderbar.
   Änderungen wirken während der Sitzung; während Ziehen, Speichern oder Laden
   werden Größenänderungen zurückgestellt. Nur DLL-Updates brauchen einen Neustart.
-- Optional eine Debug-Datei mit den letzten drei protokollierten Spielsitzungen.
+- Dauerhaft eine begrenzte Debug-Datei mit den letzten drei protokollierten Spielsitzungen.
 
 Die sichtbare Gegenstandsdarstellung eines Regals ist durch dessen Stellfläche
 begrenzt; 128 Plätze bedeuten nicht 128 gleichzeitig sichtbare Gegenstandsmodelle.
@@ -60,7 +56,7 @@ Der Nutzer hat bestätigt, dass Polizeidurchsuchungen den Backpack ignorieren.
 
 ## Bauen und aktualisieren
 
-Referenzumgebung aus den bisherigen Tests: Spiel 0.4.6f13, MelonLoader 0.7.3,
+Referenzumgebung aus den bisherigen Tests: Spiel 0.4.7f12, MelonLoader 0.7.3,
 Mod Manager & Phone App 2.2.4; Nutzertests unter Nobara/Wine/Proton.
 Das ist keine Zusage für andere Spiel- oder Manager-Versionen.
 Zum Bauen: .NET SDK 8 mit Wiederherstellung der net6.0-Referenzen.
@@ -92,12 +88,11 @@ zugesichert.
 
 ## Diagnose und Tests
 
-Optional: `UserData/Enhanced-Storage-Backpack-Debug.log`.
-Genau eine dauerhafte Logdatei, höchstens drei protokollierte Sitzungen,
-unterschieden durch `ESB_SESSION_START`; ungefähr 1 MiB pro Sitzung.
-Deaktivierte Sitzungen erzeugen keine Einträge. Ein-/Ausschalten innerhalb einer
-Sitzung beginnt keine neue Sitzung. Alte nummerierte Logs werden beim Umstieg
-übernommen und danach entfernt. Kein zyklisches Datei-Logging.
+Immer aktiv: `UserData/Enhanced-Storage-Backpack-Debug.log`.
+Die Datei hält höchstens drei Sitzungen mit ungefähr 1 MiB pro Sitzung vor;
+`ESB_SESSION_START` trennt die Sitzungen. Alte DebugLogging-Einstellungen
+schalten die Diagnose nicht mehr aus. Bei Fehlern beide Logs (Latest.log und
+Debug.log) von Host und Client aus derselben Testsitzung beilegen.
 
 ```bash
 dotnet run --project tests/StorageRulesTests.csproj -c Release
@@ -135,7 +130,7 @@ Mit beendetem Spiel und installierter IL2CPP-Abhängigkeit:
 python3 scripts/package-release.py --beta --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
 ```
 
-Ergebnis: `dist/Enhanced-Storage-Backpack-0.2.0-beta.3.zip` und SHA-256-Datei.
+Ergebnis: `dist/Enhanced-Storage-Backpack-0.2.0-beta.4.zip` und SHA-256-Datei.
 Der Packager baut net6.0 neu, kopiert nur freigegebene Moddateien und legt die
 Beta-Anleitung/Rückmeldevorlage bei. Keine Spiel- oder SteamNetworkLib-DLL wird
 mitgeliefert. Vorhandene Archive werden nicht überschrieben.
