@@ -1,15 +1,15 @@
+# 0.2.0-beta.4 — release candidate (unpublished)
+
+- Use native item deserialization for local backpacks and remote player restoration, preserving specialized item types.
+- Reject empty item JSON and detectable serialized subtype loss before local saves or remote transfer snapshots.
+- Keep bounded diagnostics permanently enabled, including with old DebugLogging settings.
+- Add NexusModID 2734 metadata for optional Updates Checker recognition.
+- Owner-confirmed host + one client tests: backpack opening/transfers, item quantities and quality, rejoin, world save/full restart, and a shared Large Storage Rack with 128 slots.
+- Test environment: Schedule I 0.4.7f12, MelonLoader 0.7.3, SteamNetworkLib 1.6.0 IL2CPP; two accounts on one Nobara PC with Wolf/Moonlight.
+- All peers require beta.4. The final packaged DLL still needs a smoke test before upload.
+- Already damaged item data is not repaired. These tests do not establish that every previously reported storage-loss scenario or mod conflict is resolved.
+
 # 0.2.0-beta.3 — 2026-10-12
-
-## 0.2.0-beta.4 — unpublished test build
-
-- Port native item deserialization to the local backpack and remote player item restoration.
-- Guard local saves and remote transfer snapshots against empty JSON and detectable serialized subtype loss.
-- Enable bounded diagnostic logging permanently, regardless of old DebugLogging settings.
-- Add NexusModID 2734 for optional Updates Checker recognition.
-- Host and clients must use this same build. Host/client runtime validation is pending.
-- No repair of already damaged item data; reported storage item loss remains unresolved.
-- Nexus publication is on hold until multiplayer validation is complete.
-
 
 - Fix the ambiguous Harmony target for PlayerManager.TryGetPlayerData on Schedule I 0.4.7.
 - Adapt remote player restoration and inventory baseline reads to FullPlayerData.
