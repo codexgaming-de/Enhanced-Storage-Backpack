@@ -1,95 +1,61 @@
-MULTIPLAYER BETA 0.2.0-beta.1 / EXPERIMENTELL
-
-Diese Beta benötigt dieselbe Version auf Host und allen Clients sowie separat
-SteamNetworkLib 1.6.0 IL2CPP in UserLibs/SteamNetworkLib.dll. Nur eine ESB-DLL in Mods.
-Bitte MULTIPLAYER-BETA.md und BETA-FEEDBACK.md im Archiv lesen. Die nachfolgenden
-Singleplayer-Grundschritte ersetzen nicht die Beta-Abhängigkeit und Beta-Hinweise.
-
-This beta requires the same version on host and all clients, plus separately
-installed SteamNetworkLib 1.6.0 IL2CPP in UserLibs/SteamNetworkLib.dll. One ESB DLL only.
-Read MULTIPLAYER-BETA.md and BETA-FEEDBACK.md first. The singleplayer basics below
-do not replace the beta dependency and limitations above.
-
-Enhanced Storage + Backpack 0.1.6 — CoDeX-Gaming
+Enhanced Storage + Backpack 0.2.0-beta.4 — CoDeX-Gaming
+Experimental multiplayer beta / Experimentelle Multiplayer-Beta
 
 DEUTSCH
-Voraussetzungen: Schedule I IL2CPP, MelonLoader. Nur Singleplayer.
-Referenzumgebung: Spiel 0.4.6f13, MelonLoader 0.7.3; Einstellungen im Spiel
-mit Mod Manager & Phone App 2.2.4 (separat installieren).
-Andere Versionen sowie Mono/Multiplayer sind nicht bestätigt/unterstützt.
+Getestete Umgebung: Schedule I 0.4.7f12 IL2CPP, MelonLoader 0.7.3,
+SteamNetworkLib 1.6.0 IL2CPP. Host und alle Clients benötigen dieselbe beta.4.
+Mono und gemischte ESB-Versionen werden nicht unterstützt.
 
-Installation / Update:
-1. Spiel vollständig beenden und Spielstand sichern.
-2. Mods/EnhancedStorageBackpack.dll aus diesem Paket in den Mods-Ordner
-   des Spiels kopieren. Bei Update die bisherige DLL ersetzen, keine zweite
-   Kopie installieren. Andere Storage-/Backpack-Mods sind nicht gemeinsam getestet.
-3. Spiel starten. B öffnet den Rucksack (Taste konfigurierbar).
-4. Einstellungen unter Enhanced Storage + Backpack im Mod Manager ändern.
-   Sprache Deutsch/English wählbar. Einstellungen wirken ohne Spielneustart;
-   während Ziehen, Speichern und Laden werden Größenänderungen zurückgestellt.
+1. Spiel beenden und Spielstand sichern; Beta-Spielstand separat aufbewahren.
+2. Mods/EnhancedStorageBackpack.dll aus dem ZIP in den Spielordner kopieren.
+   Vorhandene ESB-DLL ersetzen; nur eine ESB-DLL laden.
+3. SteamNetworkLib 1.6.0 IL2CPP separat installieren:
+   UserLibs/SteamNetworkLib.dll oder UserLibs/SteamNetworkLib-IL2Cpp.dll.
+   Download: https://www.nexusmods.com/schedule1/mods/1396
+4. Spiel starten. B öffnet den Rucksack. Mod Manager & Phone App stellt die
+   Einstellungsoberfläche bereit. Der Host bestimmt Rucksack- und Lagergrößen.
+5. Regulär im Spiel speichern. Gegenstandsbewegungen allein speichern nicht.
+   Wiederbeitritt nutzt den Host-Sitzungsstand; Neustart den letzten Spielsave.
 
-Backpack: 1–128 Plätze, Standard 40, bis 40 je Seite.
-Lager: neun getrennte Typen, 1–128 Plätze; 0 = Spielvorgabe.
-Pro Lagerseite maximal 40 Plätze / 5 sichtbare Reihen / 10 Spalten.
-Beim Verkleinern werden Items umgeräumt. Können sie nicht sicher untergebracht
-werden, bleiben die erforderlichen Zusatzplätze erhalten.
+Diagnose ist immer aktiv: UserData/Enhanced-Storage-Backpack-Debug.log,
+begrenzt auf die letzten drei Sitzungen. Bei Fehlern Latest.log und Debug.log
+von Host und Client aus derselben Sitzung beilegen.
+Optionaler Updates Checker erkennt die Mod über NexusModID 2734.
+Er ist separat erhältlich: https://www.nexusmods.com/schedule1/mods/795
 
-Speichern: Regulär im Spiel speichern. Spiel-Autosaves zählen ebenfalls.
-Gegenstände verschieben oder Einstellungen speichern speichert den Inhalt nicht
-separat. Laden ohne zwischenzeitlichen Spiel-Save stellt den alten Stand wieder her.
-Polizeidurchsuchungen ignorieren den Rucksack.
-
-Deinstallation: Rucksack sowie zusätzliche Lagerplätze leeren, Lagergrößen auf
-0 zurückstellen und im Spiel speichern. Spiel beenden, Mod-DLL entfernen.
-Ohne Mod ist der Rucksack nicht zugänglich; Erhalt seiner Daten beim späteren
-Speichern ohne Mod ist nicht zugesichert.
-
-Diagnose: Optionales UserData/Enhanced-Storage-Backpack-Debug.log.
-Eine dauerhafte Datei, letzte drei protokollierte Sitzungen. Bei Fehlern Version,
-Reproduktionsschritte und dieses Log angeben. Vor dem Teilen persönliche Angaben prüfen.
+Bestätigt: Host + ein Client mit zwei Steam-Accounts auf einem Nobara-PC
+(Wolf/Moonlight), Rucksacktransfers, Mengen/Qualität, Wiederbeitritt,
+Speichern/vollständiger Neustart und Large Storage Rack mit 128 Plätzen.
+Kein Nachweis für alle Modkombinationen, getrennte PCs/WAN, 3–4 Spieler,
+Cash-Sonderfälle oder erzwungene Abstürze. Alte beschädigte Items werden
+nicht wiederhergestellt. Details: MULTIPLAYER-BETA.md und BETA-FEEDBACK.md.
+Vor Rückkehr zur stabilen Version den gesicherten vorherigen Spielstand nutzen.
+Ein Downgrade des veränderten Beta-Spielstands ist nicht validiert.
 
 ENGLISH
-Requires Schedule I IL2CPP and MelonLoader. Singleplayer only.
-Reference environment: game 0.4.6f13, MelonLoader 0.7.3; in-game configuration
-with Mod Manager & Phone App 2.2.4 (install separately).
-Other versions are unverified. Mono and multiplayer are unsupported.
+Tested environment: Schedule I 0.4.7f12 IL2CPP, MelonLoader 0.7.3,
+SteamNetworkLib 1.6.0 IL2CPP. Host and every client require the same beta.4.
+Mono and mixed ESB versions are unsupported.
 
-Install / update:
-1. Close the game completely and back up your save.
-2. Copy Mods/EnhancedStorageBackpack.dll into the game's Mods directory.
-   Replace the previous DLL when updating; do not keep duplicate copies.
-   Combined use with other storage/backpack mods has not been tested.
-3. Start the game. B opens the backpack (configurable).
-4. Adjust settings under Enhanced Storage + Backpack in Mod Manager.
-   German/English selectable. Settings apply without restarting the game;
-   resizing waits while dragging items, saving or loading.
+1. Close the game and back up the save; keep the beta save separate.
+2. Copy Mods/EnhancedStorageBackpack.dll from this ZIP into the game folder.
+   Replace the previous ESB DLL; load only one ESB DLL.
+3. Install SteamNetworkLib 1.6.0 IL2CPP separately into UserLibs using either
+   SteamNetworkLib.dll or SteamNetworkLib-IL2Cpp.dll (Nexus 1396, link above).
+4. Start the game. B opens the backpack. Mod Manager & Phone App provides
+   the settings UI. The host controls backpack and storage capacities.
+5. Save normally in-game. Item moves alone do not persist the world.
+   Rejoining uses host session state; a restart uses the last world save.
 
-Backpack: 1–128 slots, default 40, up to 40 per page.
-Storage: nine independent types, 1–128 slots; 0 restores the game default.
-Storage pages show at most 40 slots / 5 rows / 10 columns.
-Shrinking moves items into suitable empty slots. Required extra slots remain
-available when items cannot safely fit into the requested size.
+Diagnostics are always enabled in UserData/Enhanced-Storage-Backpack-Debug.log,
+retaining three sessions. Report both Latest.log and Debug.log from both peers.
+Optional Updates Checker recognition uses NexusModID 2734; install it separately.
+Host + one client tests passed in the scope described above. Other mod combinations,
+separate-PC/WAN play, 3–4 players, cash edge cases and forced crashes remain unverified.
+Already damaged items are not repaired. Restore the pre-beta save when rolling back;
+downgrading a modified beta save is unverified.
 
-Saving: Use the game's regular save. Game autosaves also count.
-Moving items or saving preferences does not independently save backpack contents.
-Loading without another game save restores the previous saved state.
-Police searches ignore backpack contents.
-
-Uninstall: Empty the backpack and extra storage slots, set storage sizes to 0,
-and save in-game. Close the game and remove the DLL. The backpack is inaccessible
-without this mod; preservation of its data when saving without the mod is not assured.
-
-Diagnostics: Optional UserData/Enhanced-Storage-Backpack-Debug.log.
-One persistent file, last three logged sessions. Include version, reproduction
-steps and this log in bug reports. Check for personal information before sharing.
-
-AI TRANSPARENCY / KI-TRANSPARENZ
-Substantial portions of the code and documentation were generated with OpenAI
-Codex. Requirements, project direction and manual gameplay tests: CoDeX-Gaming.
-Wesentliche Teile von Code und Dokumentation wurden mit OpenAI Codex erzeugt.
-Anforderungen, Projektleitung und manuelle Spieltests: CoDeX-Gaming.
-
-Source / Quellcode:
-https://github.com/codexgaming-de/Enhanced-Storage-Backpack
-Mod Manager & Phone App:
-https://www.nexusmods.com/schedule1/mods/397
+No game, loader or third-party mod DLLs are bundled.
+Developed with OpenAI Codex assistance; requirements and manual tests by CoDeX-Gaming.
+Permissions: PERMISSIONS.md
+Source: https://github.com/codexgaming-de/Enhanced-Storage-Backpack
