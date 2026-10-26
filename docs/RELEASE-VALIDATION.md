@@ -1,3 +1,54 @@
+# 0.2.0-beta.4 — release candidate validation
+
+Evidence: project-owner reports and supplied host/client logs from sessions on
+26 October UTC / 27 October 2026 local time. These are owner-run native tests,
+not game executions performed by the packaging test suite.
+
+Environment: Schedule I 0.4.7f12 IL2CPP; MelonLoader 0.7.3;
+SteamNetworkLib 1.6.0 IL2CPP; identical beta.4 on host and one client.
+Two Steam accounts on one Nobara PC, with Wolf/Moonlight for the client.
+
+## Passed scope
+
+- Host and client backpack operation and transfers; owner confirmed correct
+  quantities, no missing items and preserved quality.
+- Rejoin and restoration from host session state.
+- Regular world save, full game restart and client rejoin; owner confirmed contents.
+- Host backpack setting propagation from 128 to 50 slots.
+- Shared Large Storage Rack with 128 slots, including later pages;
+  save/full restart/rejoin test confirmed by owner: “Test bestanden.”
+
+Evidence groups: Debug logs with suffixes 20261026-230836 / 230923,
+20261026-232311 / 232312 and 20261026-234336 / 234344, with corresponding
+Latest logs. Logs establish sessions, snapshots, saves and storage openings;
+the item quantity/quality comparison is the owner's visual confirmation.
+No ESB errors were identified in those successful sessions. Unrelated
+AutoTranslator/interop errors were present; this is not an error-free full mod stack.
+
+## Release preparation
+
+Runtime source and version are unchanged by this preparation.
+Packaging checks use simulated build output and do not compile or validate the
+native net6.0 DLL. Eight packaging tests pass, including archive allowlist,
+dependency checks, overwrite protection, build failure, version mismatch and
+preventing a later beta from inheriting beta.4's validation status.
+The manifest records native beta.4 test scope but keeps exactPackagedDllTested=false.
+
+Required before upload: build the release ZIP on the game-equipped PC, verify
+SHA-256, install its extracted DLL on both peers, then perform a short
+open/transfer/save/reload smoke test. Nothing has been published by this preparation.
+
+## Limits
+
+Separate PCs/WAN, 3–4 players, cash edge cases, forced crashes and broad mod
+combinations remain unverified. The successful multiplayer scope does not establish
+After Hours compatibility. Prior community storage-loss reports are not all
+reproduced or proven resolved. Already damaged items are not repaired.
+
+---
+
+## Historical validation records
+
 # 0.2.0-beta.3 — 2026-10-12
 
 - User logs reproduced beta.2 initialization failure on Schedule I 0.4.7f12.
