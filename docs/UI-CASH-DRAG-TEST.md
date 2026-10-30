@@ -51,4 +51,7 @@ No synthetic test is presented as proof of native drag lifecycle behavior.
 9. Provide Latest.log plus the ESB debug log. If the stale-cash diagnostic appears
    followed immediately by ESB_RACK_MENU, the intended path was exercised.
 
-Status: targeted test candidate; native confirmation pending.
+Status: owner-confirmed reproduction test passed on 2026-10-30 with 0.1.8-test.1.
+Logs 20261030-122107 (ESB) and 122110 (Latest) confirm two stale-cash cases,
+layout after 42/15 ms, final 8-slot page and B opening, without errors in the session.
+Release 0.1.8 changes version metadata only; exact packaged DLL smoke test pending.
