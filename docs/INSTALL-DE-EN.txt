@@ -1,9 +1,11 @@
-Enhanced Storage + Backpack 0.2.0-beta.4 — CoDeX-Gaming
+> **Current: 0.2.0-beta.5 — community-test beta.** Cash-drag UI correction ported from the owner-tested singleplayer fix. Host/client validation of this update is pending; earlier beta.4 results do not validate beta.5. All peers need beta.5 and SteamNetworkLib 1.6.0 IL2CPP.
+
+Enhanced Storage + Backpack 0.2.0-beta.5 — CoDeX-Gaming
 Experimental multiplayer beta / Experimentelle Multiplayer-Beta
 
 DEUTSCH
 Getestete Umgebung: Schedule I 0.4.7f12 IL2CPP, MelonLoader 0.7.3,
-SteamNetworkLib 1.6.0 IL2CPP. Host und alle Clients benötigen dieselbe beta.4.
+SteamNetworkLib 1.6.0 IL2CPP. Host und alle Clients benötigen dieselbe beta.5.
 Mono und gemischte ESB-Versionen werden nicht unterstützt.
 
 1. Spiel beenden und Spielstand sichern; Beta-Spielstand separat aufbewahren.
@@ -23,7 +25,7 @@ von Host und Client aus derselben Sitzung beilegen.
 Optionaler Updates Checker erkennt die Mod über NexusModID 2734.
 Er ist separat erhältlich: https://www.nexusmods.com/schedule1/mods/795
 
-Bestätigt: Host + ein Client mit zwei Steam-Accounts auf einem Nobara-PC
+Für den vorherigen Stand beta.4 bestätigt: Host + ein Client mit zwei Steam-Accounts auf einem Nobara-PC
 (Wolf/Moonlight), Rucksacktransfers, Mengen/Qualität, Wiederbeitritt,
 Speichern/vollständiger Neustart und Large Storage Rack mit 128 Plätzen.
 Kein Nachweis für alle Modkombinationen, getrennte PCs/WAN, 3–4 Spieler,
@@ -34,7 +36,7 @@ Ein Downgrade des veränderten Beta-Spielstands ist nicht validiert.
 
 ENGLISH
 Tested environment: Schedule I 0.4.7f12 IL2CPP, MelonLoader 0.7.3,
-SteamNetworkLib 1.6.0 IL2CPP. Host and every client require the same beta.4.
+SteamNetworkLib 1.6.0 IL2CPP. Host and every client require the same beta.5.
 Mono and mixed ESB versions are unsupported.
 
 1. Close the game and back up the save; keep the beta save separate.
@@ -50,7 +52,7 @@ Mono and mixed ESB versions are unsupported.
 Diagnostics are always enabled in UserData/Enhanced-Storage-Backpack-Debug.log,
 retaining three sessions. Report both Latest.log and Debug.log from both peers.
 Optional Updates Checker recognition uses NexusModID 2734; install it separately.
-Host + one client tests passed in the scope described above. Other mod combinations,
+Host + one client tests passed on the previous beta.4, in the scope described above. Beta.5 awaits community validation. Other mod combinations,
 separate-PC/WAN play, 3–4 players, cash edge cases and forced crashes remain unverified.
 Already damaged items are not repaired. Restore the pre-beta save when rolling back;
 downgrading a modified beta save is unverified.
