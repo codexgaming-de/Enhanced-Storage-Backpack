@@ -123,6 +123,23 @@ internal sealed class RackStorage : IDisposable
         Request();
     }
 
+    public void BeforeItemSetLoad(Il2CppSystem.Collections.Generic.List<ItemSlot> slots, int serializedSlots)
+    {
+        if (slots == null || slots.Count == 0 || serializedSlots == 0) return;
+        // Only resize the actual inventory of a supported placeable storage.
+        // Employee, station, backpack and copied/subset lists remain untouched.
+        var entity = slots[0]?.SlotOwner?.TryCast<StorageEntity>();
+        if (entity == null || entity.ItemSlots == null || entity.ItemSlots.Pointer != slots.Pointer) return;
+        var rack = Track(entity);
+        if (rack == null || rack.Failed) return;
+        int before = slots.Count;
+        // Preserve every saved slot, even when the configured capacity is lower.
+        // Compaction/shrinking remains deferred until native restoration finishes.
+        Grow(entity, Math.Max(before, serializedSlots));
+        settings.Trace($"ESB_RACK_ITEMSET_LOAD | id={rack.ItemId} | serializedSlots={serializedSlots} | before={before} | availableSlots={slots.Count}");
+        Request();
+    }
+
     private static void Grow(StorageEntity entity, int size)
     {
         var slots = entity.ItemSlots;
