@@ -233,6 +233,36 @@ internal sealed class RackStorage : IDisposable
         }
     }
 
+    private void SyncTransitSlots(Rack rack)
+    {
+        var entity = rack.Entity;
+        var placeable = entity.GetComponentInParent<PlaceableStorageEntity>();
+        if (placeable == null || placeable.StorageEntity == null ||
+            placeable.StorageEntity.Pointer != entity.Pointer) return;
+        var owned = entity.ItemSlots;
+        bool Sync(Il2CppSystem.Collections.Generic.List<ItemSlot> transit)
+        {
+            if (transit == null) throw new InvalidOperationException("Storage transit slot list is missing.");
+            // Never clear the inventory if a native implementation shares lists.
+            if (transit.Pointer == owned.Pointer) return false;
+            bool same = transit.Count == owned.Count;
+            if (same)
+                for (int i = 0; i < owned.Count; i++)
+                    if (transit[i] == null || transit[i].Pointer != owned[i].Pointer)
+                    { same = false; break; }
+            if (same) return false;
+            // Keep list identity for native consumers; use the existing slot objects,
+            // including their filters, locks and ownership. Never copy item contents.
+            transit.Clear();
+            foreach (var slot in owned) transit.Add(slot);
+            return true;
+        }
+        bool inputChanged = Sync(placeable.InputSlots);
+        bool outputChanged = Sync(placeable.OutputSlots);
+        if (inputChanged || outputChanged)
+            settings.Trace($"ESB_RACK_TRANSIT_SYNC | id={rack.ItemId} | inventory={owned.Count} | input={placeable.InputSlots.Count} | output={placeable.OutputSlots.Count}");
+    }
+
     private void Apply(Rack rack)
     {
         var entity = rack.Entity;
@@ -290,6 +320,7 @@ internal sealed class RackStorage : IDisposable
                 slot._SlotOwner_k__BackingField = null!;
             }
             entity.SlotCount = slots.Count;
+            SyncTransitSlots(rack);
             if (before != slots.Count) entity.ContentsChanged();
             int rows = StorageRules.Rows(ConfiguredRows(rack), rack.OriginalRows, target);
             if (slots.Count > target)
