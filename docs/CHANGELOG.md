@@ -1,3 +1,12 @@
+# 0.2.0-beta.5 — 2026-10-30 (community-test beta)
+
+- Correct the drag-state check used by storage and backpack UI after cash transfers. A completed cash drag could leave pagination/layout blocked until another ordinary item was moved.
+- Keep actual cash and item drags protected; retain host authority and synchronization guards.
+- Add a targeted diagnostic when a stale cash-type flag is ignored on storage opening.
+- The equivalent singleplayer fix passed the owner's reproduction test. This multiplayer update still requires community host/client testing.
+- Host and every client must use beta.5 with SteamNetworkLib 1.6.0 IL2CPP.
+- No save-format changes or recovery of previously lost items.
+
 # 0.2.0-beta.4 — release candidate (unpublished)
 
 - Use native item deserialization for local backpacks and remote player restoration, preserving specialized item types.
