@@ -13,7 +13,7 @@ using MelonLoader;
 using Il2CppScheduleOne.PlayerScripts;
 using Il2CppScheduleOne.Persistence;
 
-[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.9-test.1", "CoDeX-Gaming")]
+[assembly: MelonInfo(typeof(EnhancedStorageBackpack.Mod), "Enhanced Storage + Backpack", "0.1.9-test.2", "CoDeX-Gaming")]
 [assembly: System.Reflection.AssemblyMetadata("NexusModID", "2734")]
 [assembly: MelonGame("TVGS", "Schedule I")]
 
@@ -57,11 +57,17 @@ public sealed class Mod : MelonMod
             Patch(typeof(StorageEntity), "OnDestroy", prefix: nameof(Destroyed));
             Patch(typeof(StorageEntity), "ContentsChanged", postfix: nameof(ContentsChanged));
             Patch(typeof(StorageEntity), "LoadFromItemSet", prefix: nameof(Loading));
+            // 0.4.7 placeable loaders restore through ItemSet.LoadTo, bypassing
+            // StorageEntity.LoadFromItemSet. Select the list overload explicitly.
+            var loadTo = AccessTools.Method(typeof(Il2CppScheduleOne.Persistence.Datas.ItemSet), "LoadTo",
+                new[] { typeof(Il2CppSystem.Collections.Generic.List<ItemSlot>) })
+                ?? throw new MissingMethodException("ItemSet.LoadTo(List<ItemSlot>)");
+            HarmonyInstance.Patch(loadTo, prefix: new HarmonyMethod(typeof(Mod), nameof(ItemSetLoading)));
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.9-test.1 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.9-test.1 | Nine storage types and backpack enabled."));
-            settings.Trace("ESB_READY | 0.1.9-test.1");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.1.9-test.2 | Neun Lagertypen und Rucksack aktiviert.", "ESB_READY | 0.1.9-test.2 | Nine storage types and backpack enabled."));
+            settings.Trace("ESB_READY | 0.1.9-test.2");
         }
         catch (Exception ex)
         {
@@ -239,6 +245,18 @@ public sealed class Mod : MelonMod
             throw;
         }
     }
+    private static void ItemSetLoading(Il2CppScheduleOne.Persistence.Datas.ItemSet __instance,
+        Il2CppSystem.Collections.Generic.List<ItemSlot> __0)
+    {
+        if (!Active) return;
+        try { instance!.storage!.BeforeItemSetLoad(__0, __instance.Items?.Length ?? 0); }
+        catch (Exception ex)
+        {
+            instance!.settings!.Error("ESB_STORAGE_ITEMSET_LOAD", ex);
+            throw;
+        }
+    }
+
     private static void Loading(StorageEntity __instance, Il2CppReferenceArray<ItemInstance> __0)
     {
         if (!Active) return;
