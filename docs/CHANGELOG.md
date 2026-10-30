@@ -1,3 +1,10 @@
+# 0.1.9-test.1 — 2026-10-31 (singleplayer test)
+
+- Synchronize supported storage employee input/output slot lists with the actual inventory after resizing or compaction.
+- Request synchronization after native placeable-storage initialization; preserve native list identity and existing slot objects, filters and locks.
+- Add ESB_RACK_TRANSIT_SYNC diagnostics. Native employee harvesting/delivery validation pending.
+- Includes the 0.1.8 cash-drag UI fix; no save format changes.
+
 # 0.1.8 — 2026-10-30
 
 - Fix oversized storage grids and missing page navigation after moving cash, including employee locker payments.
