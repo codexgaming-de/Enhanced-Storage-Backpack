@@ -1,3 +1,10 @@
+# 0.1.8 — 2026-10-30
+
+- Fix oversized storage grids and missing page navigation after moving cash, including employee locker payments.
+- Correct the active-drag check so a stale cash-type flag no longer blocks storage/backpack UI or pending settings changes.
+- Keep real cash and item drags protected; no save-format changes.
+- Owner-confirmed reproduction test passed on 0.1.8-test.1: immediate rack layout after cash transfers, all pages and backpack opening. Version 0.1.8 changes release metadata only; exact packaged DLL smoke test remains pending.
+
 # 0.1.8-test.1 — 2026-10-30 (unpublished singleplayer test)
 
 - Fix the drag guard treating a completed cash drag as an active drag. This could prevent storage pagination/layout until another ordinary item was dragged.
