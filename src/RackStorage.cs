@@ -41,8 +41,11 @@ internal sealed class RackStorage : IDisposable
         settings.LanguageChanged += Request;
     }
 
+    // IsDraggingCash describes the last drag's item type and can remain true
+    // after EndCashDrag clears draggedSlot. IsCurrentlyDragging tracks the
+    // actual dragged slot for both cash and ordinary items.
     public static bool Dragging => ItemUIManager.InstanceExists &&
-        (ItemUIManager.Instance.IsCurrentlyDragging || ItemUIManager.Instance.IsDraggingCash);
+        ItemUIManager.Instance.IsCurrentlyDragging;
 
     private static bool SaveOrLoadInProgress =>
         (LoadManager.InstanceExists && LoadManager.Instance.IsLoading) ||
@@ -338,6 +341,8 @@ internal sealed class RackStorage : IDisposable
         var rack = Track(entity);
         settings.Trace($"ESB_STORAGE_OPEN | name={entity.StorageEntityName} | supportedRack={rack != null} | slots={entity.ItemSlots.Count}");
         if (rack == null || rack.Failed) return;
+        if (ItemUIManager.InstanceExists && ItemUIManager.Instance.IsDraggingCash && !Dragging)
+            settings.Trace("ESB_STORAGE_IDLE_CASH_FLAG | no active drag; stale cash type does not block layout");
         if (!SaveOrLoadInProgress && !Dragging) Apply(rack);
         else Request();
         menu.Prepare(entity.ItemSlots.Count);
@@ -359,3 +364,4 @@ internal sealed class RackStorage : IDisposable
         racks.Clear();
     }
 }
+
