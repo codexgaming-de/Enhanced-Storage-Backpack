@@ -1,3 +1,22 @@
+# 0.2.0-beta.5 — cash-drag UI correction
+
+Equivalent singleplayer 0.1.8-test.1 passed the owner's test on 2026-10-30.
+Log Enhanced-Storage-Backpack-Debug(20261030-122107).log confirms the stale cash flag twice,
+with 40-slot layout binding after about 42 ms and 15 ms, page navigation to 8 final slots,
+and backpack opening. Latest(20261030-122110).log contains no errors.
+
+Multiplayer: correction applied to the shared RackStorage.Dragging predicate, retaining
+all host/client authority and synchronization gates. Community testing is explicitly deferred
+by the owner. Do not carry beta.4 native validation forward to this build.
+Compiler check uses net8 reference assemblies plus local game/loader references; this is
+not a distributable net6 build or a native multiplayer run. Packaging tests simulate builds.
+
+Community test: each peer transfers cash to a locker, closes it, opens a 128-slot rack
+without moving ordinary items, checks all pages and B, then tests transfers and normal
+save/restart/rejoin. Include both peers' Latest and ESB debug logs, and exact versions.
+
+---
+
 # 0.2.0-beta.4 — release candidate validation
 
 Evidence: project-owner reports and supplied host/client logs from sessions on
