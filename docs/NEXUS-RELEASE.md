@@ -1,3 +1,23 @@
+# 0.2.0-beta.5 — cash-drag UI correction (community-test beta)
+
+The stale cash drag guard has been corrected. The equivalent singleplayer fix passed
+the owner's test; native host/client validation of beta.5 is pending and will be
+performed by the community. All peers require beta.5 and SteamNetworkLib 1.6.0 IL2CPP.
+No save format or network message format changed. Older beta.4 results below are
+historical evidence only, not validation of this build.
+
+Build current package:
+```bash
+python3 scripts/package-release.py --beta --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"
+```
+Output: `dist/Enhanced-Storage-Backpack-0.2.0-beta.5.zip` and SHA-256 file.
+See [current changelog](CHANGELOG.md) and
+[validation scope](RELEASE-VALIDATION.md).
+
+---
+
+## Previous beta.4 documentation (historical; use beta.5 for the new update)
+
 # Nexus draft — 0.2.0-beta.4 multiplayer beta
 
 Status: unpublished release candidate. Owner-confirmed gameplay tests passed;
