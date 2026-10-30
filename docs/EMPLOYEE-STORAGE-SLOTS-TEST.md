@@ -40,3 +40,26 @@ Test:
 
 Remaining limits: no native runtime validation yet; active delivery/resizing
 interleavings and other mods replacing transit lists are not established.
+
+## Follow-up: 0.1.9-test.2 — saved extended slots
+
+test.1 restored employee access in the user's first test, but the restart exposed a separate storage load-path defect. The uploaded SaveGame_3 contains 59 mushroom substrates in slots 11–16 of large rack ba61b2ba-b755-404a-b226-3bcb9c52b280 (Storage Unit), assigned to botanist Kevin. The save itself still contains those items. The available game reference uses ItemSet.LoadTo directly, bypassing the existing LoadFromItemSet patch; LoadTo iterates only the existing slot count.
+
+test.2 patches the explicit list overload and expands only a supported storage's actual owned list before native restoration. It does not deserialize items itself or change the save format.
+
+Validation performed:
+- Full source compiler/API check against available IL2CPP reference assemblies passed (net8 reference compilation, not a native net6 game run).
+- Read-only save fixture check: 128 saved slots, 59 substrates at slots 11–16; original 8-slot loop reaches none, expanded 128-slot loop reaches all.
+- Native runtime and Harmony hook invocation still pending.
+
+User test:
+1. Close the game and build/install 0.1.9-test.2.
+2. Keep the supplied ZIP unchanged. Load the original saved state represented by it; if overwritten since, restore a separate test copy from that ZIP.
+3. Immediately inspect the large supply rack: slots 11–16 should contain 10/10/10/10/10/9 substrates before employee consumption. Pause employee work for exact quantity comparison.
+4. Verify ESB_RACK_ITEMSET_LOAD reports serializedSlots=128 and availableSlots=128 for large racks.
+5. Verify employee harvesting/delivery beyond vanilla slots still works.
+6. With employee consumption paused, record quantities, save normally, fully exit, reload and compare quantities and quality.
+7. Check filters and a storage with a lower configured capacity than its saved contents; occupied saved slots must not be discarded.
+8. Return Latest.log and Enhanced-Storage-Backpack-Debug.log. No release promotion until native results are confirmed.
+
+Multiplayer port is still pending.
