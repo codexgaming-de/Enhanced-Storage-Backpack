@@ -1,3 +1,10 @@
+# 0.1.8-test.1 — 2026-10-30 (unpublished singleplayer test)
+
+- Fix the drag guard treating a completed cash drag as an active drag. This could prevent storage pagination/layout until another ordinary item was dragged.
+- Keep actual cash and item drags protected using the native IsCurrentlyDragging state.
+- Add a targeted storage-open diagnostic for a stale cash-type flag.
+- No inventory serialization or save-format changes. Native reproduction/retest is still required; see UI-CASH-DRAG-TEST.md.
+
 # Enhanced Storage + Backpack
 
 ## 0.1.7 — Singleplayer backpack loading fix
@@ -28,3 +35,4 @@ save-slot isolation A → B → A, police searches, and operation on the main sa
 No multiplayer support. No performance benchmarks or simulated interrupted-write
 tests. The project owner confirmed the packaged DLL passed the final in-game test.
 The release package also includes PERMISSIONS.md; the tested DLL is unchanged.
+
