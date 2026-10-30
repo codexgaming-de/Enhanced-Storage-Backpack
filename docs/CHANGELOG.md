@@ -1,5 +1,14 @@
 # 0.1.9-test.1 — 2026-10-31 (singleplayer test)
 
+## 0.1.9-test.2 — Extended storage load-path test
+
+- Expand supported storage inventories before the native ItemSet.LoadTo(List<ItemSlot>) restoration path used by placeable storage loaders.
+- Preserve saved items and slot filters beyond vanilla capacity; defer any configured shrinking until restoration finishes.
+- Keep the employee input/output synchronization from test.1.
+- Add ESB_RACK_ITEMSET_LOAD diagnostics. Only the actual inventory list of supported placeable storage is eligible; station and employee inventories are excluded.
+- Validation: full source API/compiler check passed against available IL2CPP references. Supplied save contains 59 mushroom substrates in slots 11–16 of a 128-slot large rack; an 8-slot restore loop cannot reach them. Native IL2CPP restoration is pending user verification. No release or multiplayer validation claimed.
+
+
 - Synchronize supported storage employee input/output slot lists with the actual inventory after resizing or compaction.
 - Request synchronization after native placeable-storage initialization; preserve native list identity and existing slot objects, filters and locks.
 - Add ESB_RACK_TRANSIT_SYNC diagnostics. Native employee harvesting/delivery validation pending.
