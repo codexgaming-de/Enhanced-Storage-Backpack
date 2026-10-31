@@ -60,14 +60,14 @@ class PackageTests(unittest.TestCase):
             self.assertFalse(manifest['nativeMultiplayerTested'])
             self.assertFalse(manifest['exactPackagedDllTested'])
             self.assertEqual(manifest['nativeTestScope'], 'Native multiplayer validation pending')
-            self.assertEqual(manifest['version'], '0.2.0-beta.5')
+            self.assertEqual(manifest['version'], '0.2.0-beta.6')
             self.assertIsNone(z.testzip())
         self.assertTrue(Path(str(archive) + '.sha256').is_file())
 
     def test_future_beta_does_not_inherit_validation(self):
         for name in ('EnhancedStorageBackpack.csproj', 'src/MultiplayerProtocol.cs'):
             path = self.root / name
-            path.write_text(path.read_text().replace('0.2.0-beta.5', '0.2.0-beta.999'))
+            path.write_text(path.read_text().replace('0.2.0-beta.6', '0.2.0-beta.999'))
         self.run_package()
         with ZipFile(next((self.root / 'dist').glob('*.zip'))) as z:
             manifest = json.loads(z.read('manifest.json'))
