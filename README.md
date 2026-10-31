@@ -3,7 +3,8 @@
 Singleplayer-Mod für **Schedule I (IL2CPP)** von **CoDeX-Gaming**.
 Mit Codex/KI entwickelter Code; Anforderungen und Spieltests durch den Projektbetreiber.
 
-**Stand: Singleplayer 0.1.7; Release-Vorbereitung, noch nicht veröffentlicht.**
+**Stand: Singleplayer 0.1.9; Release-Vorbereitung, noch nicht veröffentlicht.**
+Mitarbeiterzugriff auf zusätzliche Lagerplätze und Wiederherstellung gespeicherter Items außerhalb der ursprünglichen Lagergröße korrigiert. Der entsprechende Testbuild 0.1.9-test.2 wurde vom Projektbetreiber erfolgreich getestet.
 Bestätigt sind Speichern/Laden über Hauptmenü und vollständigen Neustart,
 ungespeicherte Bewegungen ohne Duplikate, getrennte Spielstände A → B → A
 und Polizeidurchsuchungen. Zusätzlich auf dem Hauptspielstand getestet.
