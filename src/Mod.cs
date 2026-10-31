@@ -70,15 +70,22 @@ public sealed class Mod : MelonMod
             Patch(typeof(LoadManager), "StartGame", prefix: nameof(GameStarting));
             Patch(typeof(StorageEntity), "Start", postfix: nameof(StorageStarted));
             Patch(typeof(StorageEntityVisualizer), "Start", postfix: nameof(VisualizerStarted));
+            Patch(typeof(PlaceableStorageEntity), "Start", postfix: nameof(VisualizerStarted));
             Patch(typeof(PlaceableStorageEntity), "InitializeGridItem", postfix: nameof(Placed));
             Patch(typeof(StorageEntity), "OnDestroy", prefix: nameof(Destroyed));
             Patch(typeof(StorageEntity), "ContentsChanged", postfix: nameof(ContentsChanged));
             Patch(typeof(StorageEntity), "LoadFromItemSet", prefix: nameof(Loading));
+            // 0.4.7 placeable loaders restore through ItemSet.LoadTo, bypassing
+            // StorageEntity.LoadFromItemSet. Select the list overload explicitly.
+            var loadTo = AccessTools.Method(typeof(Il2CppScheduleOne.Persistence.Datas.ItemSet), "LoadTo",
+                new[] { typeof(Il2CppSystem.Collections.Generic.List<ItemSlot>) })
+                ?? throw new MissingMethodException("ItemSet.LoadTo(List<ItemSlot>)");
+            HarmonyInstance.Patch(loadTo, prefix: new HarmonyMethod(typeof(Mod), nameof(ItemSetLoading)));
             var open = AccessTools.Method(typeof(StorageMenu), "Open", new[] { typeof(StorageEntity), typeof(Il2CppSystem.Action) });
             HarmonyInstance.Patch(open, new HarmonyMethod(typeof(Mod), nameof(Opening)), new HarmonyMethod(typeof(Mod), nameof(Opened)));
             Patch(typeof(StorageMenu), "OnClose", postfix: nameof(Closed));
-            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-beta.5 | Experimentelle Multiplayer-Beta.", "ESB_READY | 0.2.0-beta.5 | Experimental multiplayer beta."));
-            settings.Trace("ESB_READY | 0.2.0-beta.5 | experimental; cash-drag UI fix; community host/client validation pending");
+            LoggerInstance.Msg(settings.Text("ESB_READY | 0.2.0-beta.6 | Experimentelle Multiplayer-Beta.", "ESB_READY | 0.2.0-beta.6 | Experimental multiplayer beta."));
+            settings.Trace("ESB_READY | 0.2.0-beta.6 | experimental; extended storage load and employee slots fixes; community host/client validation pending");
         }
         catch (Exception ex)
         {
@@ -357,6 +364,18 @@ public sealed class Mod : MelonMod
             throw;
         }
     }
+    private static void ItemSetLoading(Il2CppScheduleOne.Persistence.Datas.ItemSet __instance,
+        Il2CppSystem.Collections.Generic.List<ItemSlot> __0)
+    {
+        if (!Active || InstanceFinder.IsClientOnly) return;
+        try { instance!.storage!.BeforeItemSetLoad(__0, __instance.Items?.Length ?? 0); }
+        catch (Exception ex)
+        {
+            instance!.settings!.Error("ESB_STORAGE_ITEMSET_LOAD", ex);
+            throw;
+        }
+    }
+
     private static void Loading(StorageEntity __instance, Il2CppReferenceArray<ItemInstance> __0)
     {
         if (!Active) return;
