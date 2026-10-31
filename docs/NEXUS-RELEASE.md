@@ -1,3 +1,17 @@
+# 0.1.9 — 2026-10-31 (singleplayer)
+
+- Fixed a specific cause of items disappearing after loading a save: stored items beyond the original storage capacity could be skipped. Additional slots now exist before saved items and slot filters are restored.
+- Fixed employees treating expanded storage as full at its original capacity. Employee input/output lists now follow the actual storage slots.
+- Includes the storage pagination/layout fix after cash transfers from 0.1.8.
+- Owner-confirmed tests passed for item restoration, saving/full restart and employee use on 0.1.9-test.2. Version 0.1.9 changes release metadata only.
+- Items still present in saved data can load again. Items already absent from saved data are not recreated; not every possible cause of item loss is claimed fixed.
+- Singleplayer only. Multiplayer is a separate beta download.
+
+
+Package: `dist/Enhanced-Storage-Backpack-0.1.9.zip`. Packaging and exact packaged DLL smoke test remain pending on the owner’s installation. Nothing published here.
+
+## Historical release material (0.1.7)
+
 # Nexus-Veröffentlichung – Beschreibung für 0.1.7
 
 Noch nicht veröffentlicht. Normale Spieltests bestanden; Paketprüfung noch offen.
