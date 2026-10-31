@@ -1,11 +1,11 @@
-> **Current: 0.2.0-beta.5 — community-test beta.** Cash-drag UI correction ported from the owner-tested singleplayer fix. Host/client validation of this update is pending; earlier beta.4 results do not validate beta.5. All peers need beta.5 and SteamNetworkLib 1.6.0 IL2CPP.
+> **Current: 0.2.0-beta.6 — community-test beta.** Cash-drag UI correction ported from the owner-tested singleplayer fix. Host/client validation of this update is pending; earlier beta.4 results do not validate beta.6. All peers need beta.6 and SteamNetworkLib 1.6.0 IL2CPP.
 
-Enhanced Storage + Backpack 0.2.0-beta.5 — CoDeX-Gaming
+Enhanced Storage + Backpack 0.2.0-beta.6 — CoDeX-Gaming
 Experimental multiplayer beta / Experimentelle Multiplayer-Beta
 
 DEUTSCH
 Getestete Umgebung: Schedule I 0.4.7f12 IL2CPP, MelonLoader 0.7.3,
-SteamNetworkLib 1.6.0 IL2CPP. Host und alle Clients benötigen dieselbe beta.5.
+SteamNetworkLib 1.6.0 IL2CPP. Host und alle Clients benötigen dieselbe beta.6.
 Mono und gemischte ESB-Versionen werden nicht unterstützt.
 
 1. Spiel beenden und Spielstand sichern; Beta-Spielstand separat aufbewahren.
@@ -36,7 +36,7 @@ Ein Downgrade des veränderten Beta-Spielstands ist nicht validiert.
 
 ENGLISH
 Tested environment: Schedule I 0.4.7f12 IL2CPP, MelonLoader 0.7.3,
-SteamNetworkLib 1.6.0 IL2CPP. Host and every client require the same beta.5.
+SteamNetworkLib 1.6.0 IL2CPP. Host and every client require the same beta.6.
 Mono and mixed ESB versions are unsupported.
 
 1. Close the game and back up the save; keep the beta save separate.
