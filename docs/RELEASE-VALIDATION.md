@@ -1,3 +1,27 @@
+# 0.1.9 — 2026-10-31 (singleplayer)
+
+- Fixed a specific cause of items disappearing after loading a save: stored items beyond the original storage capacity could be skipped. Additional slots now exist before saved items and slot filters are restored.
+- Fixed employees treating expanded storage as full at its original capacity. Employee input/output lists now follow the actual storage slots.
+- Includes the storage pagination/layout fix after cash transfers from 0.1.8.
+- Owner-confirmed tests passed for item restoration, saving/full restart and employee use on 0.1.9-test.2. Version 0.1.9 changes release metadata only.
+- Items still present in saved data can load again. Items already absent from saved data are not recreated; not every possible cause of item loss is claimed fixed.
+- Singleplayer only. Multiplayer is a separate beta download.
+
+
+Evidence: owner reported all requested tests passed on 2026-10-31.
+Enhanced-Storage-Backpack-Debug(20261030-235732).log shows two 0.1.9-test.2
+sessions with ESB_RACK_ITEMSET_LOAD: serializedSlots=128, before=8,
+availableSlots=128 and regular world saves. Latest(20261030-235734).log
+contains no errors/exceptions; known Il2CppInterop signature warning remains.
+User confirmed items, quantities and employee behavior after reload.
+No claim that every employee/storage/mod combination has been tested.
+
+0.1.9 promotion changes version and release documentation only. Full-source
+reference compiler/API check passed; native net6 package build and exact ZIP DLL
+smoke test remain on the user's installation.
+
+## Historical validation
+
 # Validation — 0.1.7 preparation
 
 Tested gameplay baseline: 1abcfb5afdf3dac169790263629a11a400c49b83.
