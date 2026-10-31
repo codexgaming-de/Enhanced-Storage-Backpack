@@ -1,8 +1,8 @@
-> **Current: 0.2.0-beta.5 — community-test beta.** Cash-drag UI correction ported from the owner-tested singleplayer fix. Host/client validation of this update is pending; earlier beta.4 results do not validate beta.5. All peers need beta.5 and SteamNetworkLib 1.6.0 IL2CPP.
+> **Current: 0.2.0-beta.6 — community-test beta.** Cash-drag UI correction ported from the owner-tested singleplayer fix. Host/client validation of this update is pending; earlier beta.4 results do not validate beta.6. All peers need beta.6 and SteamNetworkLib 1.6.0 IL2CPP.
 
 # Community feedback / Community-Rückmeldung
 
-Version: 0.2.0-beta.5
+Version: 0.2.0-beta.6
 
 Please include / Bitte angeben:
 
