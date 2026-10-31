@@ -1,3 +1,15 @@
+# 0.1.9 — 2026-10-31 (singleplayer)
+
+- Fixed a specific cause of items disappearing after loading a save: stored items beyond the original storage capacity could be skipped. Additional slots now exist before saved items and slot filters are restored.
+- Fixed employees treating expanded storage as full at its original capacity. Employee input/output lists now follow the actual storage slots.
+- Includes the storage pagination/layout fix after cash transfers from 0.1.8.
+- Owner-confirmed tests passed for item restoration, saving/full restart and employee use on 0.1.9-test.2. Version 0.1.9 changes release metadata only.
+- Items still present in saved data can load again. Items already absent from saved data are not recreated; not every possible cause of item loss is claimed fixed.
+- Singleplayer only. Multiplayer is a separate beta download.
+
+
+## Historical development notes
+
 # 0.1.9-test.1 — 2026-10-31 (singleplayer test)
 
 ## 0.1.9-test.2 — Extended storage load-path test
