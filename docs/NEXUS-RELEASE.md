@@ -1,3 +1,17 @@
+# 0.2.0-beta.6 — 2026-10-31 (community-test beta)
+
+- Fixed a specific cause of items disappearing after loading a save: items in storage slots beyond the original capacity could be skipped during restoration. Storage inventories now expand before the native loader restores saved items and slot filters.
+- Keep employee input/output slot lists aligned with expanded storage, so employees can use additional slots instead of treating storage as full at its original capacity.
+- Retain the cash-drag storage UI correction from beta.5.
+- Equivalent singleplayer fixes passed the owner's tests, including restoration of 59 saved mushroom substrates, saving/full restart and employee use. Multiplayer host/client validation of beta.6 is pending community testing.
+- Host and every client must use beta.6 with SteamNetworkLib 1.6.0 IL2CPP.
+- No save-format changes. Items still present in saved data can load again; items already absent from saved data are not recreated. This does not claim to fix every possible cause of item loss.
+
+Build with `python3 scripts/package-release.py --beta --game-directory="/home/codex/Schreibtisch/Schedulue 1 Plugins/"`.
+Output: `dist/Enhanced-Storage-Backpack-0.2.0-beta.6.zip`. No package built or published here.
+
+## Historical release material
+
 # 0.2.0-beta.5 — cash-drag UI correction (community-test beta)
 
 The stale cash drag guard has been corrected. The equivalent singleplayer fix passed
