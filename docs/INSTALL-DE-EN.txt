@@ -1,8 +1,8 @@
-Enhanced Storage + Backpack 0.1.7 — CoDeX-Gaming
+Enhanced Storage + Backpack 0.1.9 — CoDeX-Gaming
 
 DEUTSCH
 Voraussetzungen: Schedule I IL2CPP, MelonLoader. Nur Singleplayer.
-Referenzumgebung: Spiel 0.4.6f13, MelonLoader 0.7.3; Einstellungen im Spiel
+Referenzumgebung: Spiel 0.4.7f12, MelonLoader 0.7.3; Einstellungen im Spiel
 mit Mod Manager & Phone App 2.2.4 (separat installieren).
 Andere Versionen sowie Mono/Multiplayer sind nicht bestätigt/unterstützt.
 
@@ -38,7 +38,7 @@ Reproduktionsschritte und dieses Log angeben. Vor dem Teilen persönliche Angabe
 
 ENGLISH
 Requires Schedule I IL2CPP and MelonLoader. Singleplayer only.
-Reference environment: game 0.4.6f13, MelonLoader 0.7.3; in-game configuration
+Reference environment: game 0.4.7f12, MelonLoader 0.7.3; in-game configuration
 with Mod Manager & Phone App 2.2.4 (install separately).
 Other versions are unverified. Mono and multiplayer are unsupported.
 
@@ -87,5 +87,5 @@ https://www.nexusmods.com/schedule1/mods/795
 NexusModID: 2734. Singleplayer und Multiplayer-Beta teilen eine Nexus-Seite;
 passenden Download waehlen / choose the correct singleplayer download.
 
-0.1.7 repairs backpack loading, not already damaged item data.
+0.1.9 repairs backpack loading, not already damaged item data.
 Reported storage item losses remain under investigation.
