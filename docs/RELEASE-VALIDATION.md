@@ -1,3 +1,35 @@
+# 0.2.0-beta.6 — 2026-10-31 (community-test beta)
+
+- Fixed a specific cause of items disappearing after loading a save: items in storage slots beyond the original capacity could be skipped during restoration. Storage inventories now expand before the native loader restores saved items and slot filters.
+- Keep employee input/output slot lists aligned with expanded storage, so employees can use additional slots instead of treating storage as full at its original capacity.
+- Retain the cash-drag storage UI correction from beta.5.
+- Equivalent singleplayer fixes passed the owner's tests, including restoration of 59 saved mushroom substrates, saving/full restart and employee use. Multiplayer host/client validation of beta.6 is pending community testing.
+- Host and every client must use beta.6 with SteamNetworkLib 1.6.0 IL2CPP.
+- No save-format changes. Items still present in saved data can load again; items already absent from saved data are not recreated. This does not claim to fix every possible cause of item loss.
+
+Implementation: ItemSet list-overload restoration hook is host-only and restricted
+to the actual owned inventory list of supported placeable storage. Employee list
+synchronization runs during host Apply. Client replica/synchronization gates remain.
+
+Singleplayer evidence: owner reported all requested tests passed on 2026-10-31
+(Europe/Berlin). Logs Enhanced-Storage-Backpack-Debug(20261030-235732).log and
+Latest(20261030-235734).log show two test.2 sessions with serializedSlots=128,
+before=8, availableSlots=128 and regular save calls. No errors/exceptions; known
+Il2CppInterop signature warning remains. This is not native multiplayer evidence.
+
+Community test: same beta.6 on both peers; load backed-up extended storage,
+compare items/quantities/quality/filters, test employee delivery/pickup beyond
+vanilla slots, save/full restart/rejoin and check again. Pause consumption for
+quantity comparisons. Also test capacity changes and the cash-drag UI correction.
+Return both peers' Latest.log and ESB debug log.
+
+Validation performed for beta.6: full-source API/compiler check with available
+IL2CPP/game references and net8 reference assemblies passed. All eight packaging
+unit tests passed (simulated builds). Neither result is a native multiplayer test
+or a distributable net6 release build.
+
+## Historical validation
+
 # 0.2.0-beta.5 — cash-drag UI correction
 
 Equivalent singleplayer 0.1.8-test.1 passed the owner's test on 2026-10-30.
